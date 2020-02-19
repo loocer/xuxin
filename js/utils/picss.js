@@ -8,6 +8,10 @@ export const icon = [{
   }, {
     name: 'fire-color',
     fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/firing.png'
+  },
+  {
+    name: 'mosterHouse',
+    fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/moster-house.png'
   }
 ]
 export const over = [{

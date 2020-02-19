@@ -5,11 +5,11 @@ import Enemy from './enemy'
 const screenWidth = window.innerWidth
 const screenHeight = window.innerHeight
 import {
-  boomIcon
+  GAME_IMG
 } from '../../utils/common'
 let databus = new DataBus()
-const PLAYER_WIDTH = 30
-const PLAYER_HEIGHT = 30
+const PLAYER_WIDTH = 60
+const PLAYER_HEIGHT = 60
 export default class Boom {
   constructor() {
     this.name='mosterHouse'
@@ -17,7 +17,7 @@ export default class Boom {
   init(x,y ) {
     // 玩家默认处于屏幕底部居中位置
     this.x = x
-    this.speedIcon = boomIcon()
+    this.speedIcon = GAME_IMG.get('houseIcon')
     this.y = y
     this.value = 1000
     this.createTime = 100

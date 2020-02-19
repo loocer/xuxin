@@ -30,8 +30,6 @@ export default class DataBus {
 
   reset() {
     this.pools && this.pools.pool.clear();
-    // this.transpX&&this.ctx.translate(this.transpX,0)
-    // this.transpY&&this.ctx.translate(0,this.transpY)
     this.moveX = 0//手柄操作位移
     this.moveY = 0
     this.playTempX = screenWidth / 2
@@ -53,9 +51,9 @@ export default class DataBus {
     this.bullets = new Set()
     this.enemys = new Set()
     this.mosterHouse = new Set()
+    this.gameTools = new Set()
     this.bleedBgs = []
     this.deedBady = []
-    this.gameTools = []
     this.touchHandler = null
     this.pageIndex = 0//1,刚进入游戏；2,结束游戏 3,再次开启游戏
     this.panelPosition = {

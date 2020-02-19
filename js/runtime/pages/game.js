@@ -2,6 +2,7 @@ import DataBus from '../../main/databus'
 import Player from '../../player/index'
 import * as common from '../../utils/common'
 import * as enemy from '../../npc/index'
+import * as gameTools from '../../gameTools/index'
 import * as hand from '../hand/index'
 import {
   bleed1,
@@ -132,6 +133,7 @@ export default class game {
     }
     databus.frame++
     enemy.create1()
+    gameTools.create1()
     this.player.x += databus.moveX
     this.player.y += databus.moveY
     this.player.rotateBody = databus.leftPositions.rotate
@@ -152,6 +154,12 @@ export default class game {
           item.update(ctx)
         }
       })
+    Array.from(databus.gameTools)
+      .forEach((item) => {
+        if (item.visible) {
+          item.update(ctx)
+        }
+      })  
     Array.from(databus.mosterHouse)
       .forEach((item) => {
         if (item.visible) {
@@ -324,6 +332,13 @@ export default class game {
         }
       })
     Array.from(databus.mosterHouse)
+      .forEach((item) => {
+        if (item.visible) {
+          item.drawToCanvas(ctx)
+        }
+      })
+      console.log(databus.gameTools)
+      Array.from(databus.gameTools)
       .forEach((item) => {
         if (item.visible) {
           item.drawToCanvas(ctx)

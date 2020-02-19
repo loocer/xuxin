@@ -122,6 +122,11 @@ export const speedIcon = () => {
   atlas.src = getImgByName('addspeed-icon').url
   return atlas
 }
+export const houseIcon = () => {
+  let atlas = new Image()
+  atlas.src = getImgByName('mosterHouse').url
+  return atlas
+}
 export const hand = () => {
   let atlas = new Image()
   atlas.src = getImgByName('hand').url
@@ -205,6 +210,7 @@ export const loadingImage = () => {
   GAME_IMG.set('bullets', bullet())
   GAME_IMG.set('hand', hand())
   GAME_IMG.set('over',over())
+  GAME_IMG.set('houseIcon',houseIcon())
 }
 
 const getImgByName = (name) => {

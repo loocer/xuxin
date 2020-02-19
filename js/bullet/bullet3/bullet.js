@@ -14,12 +14,11 @@ let databus = new DataBus()
 export default class Bullet extends Sprite {
   constructor() {
     const IMG = GAME_IMG.get('bullets')
-    
     super(IMG[1], BULLET_WIDTH, BULLET_HEIGHT)
     this.player = new Player()
   }
   init(x, y) {
-    this.name = 'bullet1'
+    this.name = 'bullet3'
     this.zx = x
     this.zy = y
     // this.img = GAME_IMG.get('bullets')[0]
@@ -27,8 +26,7 @@ export default class Bullet extends Sprite {
     this.y = y
     this.showLength = 0
     this.stopFlag = false
-    this.stopFlagTemp = false
-    databus.createSpeed = 10
+    databus.createSpeed = 4
     this.moveX = databus.shootX
     this.moveY = databus.shootY
     this.speed = 20
@@ -38,7 +36,7 @@ export default class Bullet extends Sprite {
       if (this.player.fireAcTime != 0) {
         this.player.fireAcTime = 0
       }else{
-        this.player.fireAcTime = 5
+        this.player.fireAcTime = 2
       }
     }
   }
@@ -49,11 +47,11 @@ export default class Bullet extends Sprite {
     let length = Math.sqrt((this.x - this.zx) * (this.x - this.zx) + (this.y - this.zy) * (this.y - this.zy))
     ctx.translate(this.x, this.y)
     ctx.rotate(this.rotate * Math.PI / 180)
-    if (this.stopFlagTemp) {
+    if (this.stopFlag) {
 
       ctx.drawImage(
         this.img,
-        0, this.showLength,
+        0, this.height/2+this.showLength,
         10, this.height,
         -this.width / 2,
         0,
@@ -63,6 +61,8 @@ export default class Bullet extends Sprite {
     } else {
       ctx.drawImage(
         this.img,
+        0, this.height/2,
+        10, this.height,
         -this.width / 2,
         0,
         this.width,
@@ -70,12 +70,13 @@ export default class Bullet extends Sprite {
       )
     }
     ctx.restore()
+   
   }
   // 每一帧更新子弹位置
   update() {
     if (!this.visible)
       return
-    if (this.stopFlagTemp) {
+    if (this.stopFlag) {
       this.showLength+=4
     } else {
       tools.getRoteImg({
@@ -89,19 +90,17 @@ export default class Bullet extends Sprite {
       this.y += this.moveY * this.speed
       this.x += this.moveX * this.speed
     }
+    // 超出屏幕外回收自身
     if (this.y < 0 ||
       this.y > groundHeight ||
       this.x < 0 ||
       this.x > groundWidth
     ) {
-      this.stopFlagTemp = true
+      this.stopFlag = true
     }
     if (this.showLength == 100) {
       this.visible = false
       databus.pools.recover(this.name, this)
     }
-    // databus.removeBullets(this)
-
-    // delete this
   }
 }

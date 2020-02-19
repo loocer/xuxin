@@ -1,7 +1,7 @@
 import Sprite from '../../base/sprite'
 import DataBus from '../../main/databus'
 import * as tools from '../../utils/tools'
-
+import Player from '../../player/index'
 import {
   groundWidth,
   groundHeight,
@@ -14,8 +14,9 @@ let databus = new DataBus()
 export default class Bullet extends Sprite {
   constructor() {
     const IMG = GAME_IMG.get('bullets')
-
+    
     super(IMG[1], BULLET_WIDTH, BULLET_HEIGHT)
+    this.player = new Player()
   }
   init(x, y,mx,my) {
     this.name = 'bullet2'
@@ -26,12 +27,19 @@ export default class Bullet extends Sprite {
     this.y = y
     this.showLength = 0
     this.stopFlag = false
-    // databus.createSpeed = 20
+    databus.createSpeed = 20
     this.moveX = mx
     this.moveY = my
     this.speed = databus.shootSpeed
     this.points = []
     this.visible = true
+    this.player.fireStyleFoo= ()=>{
+      if (this.player.fireAcTime != 0) {
+        this.player.fireAcTime = 0
+      }else{
+        this.player.fireAcTime = 5
+      }
+    }
   }
   drawToCanvas(ctx) {
     if (!this.visible)
