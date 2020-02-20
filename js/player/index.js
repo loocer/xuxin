@@ -1,11 +1,11 @@
-
 import DataBus from '../main/databus'
 import * as common from '../utils/common'
 import creatBox from '../bullet/index'
-// import {
-//   playerImag,
-//   playerFire
-// } from '../utils/common'
+import {
+  groundWidth,
+  groundHeight,
+  GAME_IMG
+} from '../utils/common'
 const screenWidth = window.innerWidth
 const screenHeight = window.innerHeight
 
@@ -23,6 +23,7 @@ export default class Player {
     this.width = PLAYER_WIDTH
     this.height = PLAYER_HEIGHT
     this.fireStyleFoo = null
+    this.firePic = GAME_IMG.get('bullets')[2]
     this.bullets = []
     this.init()
     // 初始化事件监听
@@ -37,7 +38,7 @@ export default class Player {
     this.fireStyleFoo = () => {
       if (this.fireAcTime != 0) {
         this.fireAcTime = 0
-      }else{
+      } else {
         this.fireAcTime = 5
       }
       // if (this.fireAcTime == 0) {
@@ -49,8 +50,8 @@ export default class Player {
     this.lagImg1 = common.playerImag(2)
     this.lagImg2 = common.playerImag(3)
     this.fireImag = common.playerFire()
-    this.lifeValue = 10
-    this.allLifeValue = 10
+    this.lifeValue = 10000
+    this.allLifeValue = 10000
     // this.x = 0
     // this.y = 0
     // 用于在手指移动的时候标识手指是否已经在飞机上了
@@ -58,7 +59,7 @@ export default class Player {
 
     this.bullets = []
   }
-  resetLife(){
+  resetLife() {
     databus.gameOver = false
     this.lifeValue = this.allLifeValue
   }
@@ -71,7 +72,7 @@ export default class Player {
     } else {
       bu = this.lagImg1
     }
-    if (databus.rightPositions.touched&&databus.frame % databus.createSpeed<2) {
+    if (databus.rightPositions.touched && databus.frame % databus.createSpeed < 2) {
       this.fireStyleFoo()
     }
     ctx.save()
@@ -97,6 +98,21 @@ export default class Player {
       this.height
     )
     ctx.restore()
+    if (this.fireAcTime != 0) {
+      let px = this.x + 15 * Math.cos(this.rotateLag * Math.PI / 180 + 180.95 )
+      let py = this.y + 15 * Math.sin(this.rotateLag * Math.PI / 180 + 180.95)
+      ctx.save()
+      ctx.translate(px, py)
+      ctx.rotate(this.rotateLag * Math.PI / 180 )
+      ctx.drawImage(
+        this.firePic,
+        -5,
+        -10,
+        10,
+        20
+      )
+      ctx.restore()
+    }
   }
   /**
    * 当手指触摸屏幕的时候
@@ -133,7 +149,7 @@ export default class Player {
     let mx = databus.shootX
     let my = databus.shootY
     if (mx == 0 && my == 0) {} else {
-      creatBox.get(databus.bulletClass.name)(this)
+      creatBox.get(databus.bulletClass[1])(this)
     }
   }
 }

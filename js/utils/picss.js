@@ -12,6 +12,9 @@ export const icon = [{
   {
     name: 'mosterHouse',
     fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/moster-house.png'
+  },{
+    name: 'bullets',
+    fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/bullets.png'
   }
 ]
 export const over = [{
@@ -20,6 +23,10 @@ export const over = [{
 }, {
   name: 'over2',
   fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bg/BG.png'
+},
+{
+  name: 'over3',
+  fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/fwe.png'
 }]
 export const hand = [{
   name: 'hand',
@@ -94,6 +101,10 @@ export const bullet = (() => {
     {
       name: 'bullet2',
       fileId: `cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bullets/tanst.png`,
+    },
+    {
+      name: 'bullet3',
+      fileId: `cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bullets/ggg.png`,
     }
   ]
   return list

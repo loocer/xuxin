@@ -122,13 +122,17 @@ export default class game {
         data: databus,
         command: 'addScore'
       })
-      databus.pageIndex = 3
       databus.isTransX = false
       databus.isTransY = false
       databus.transX = 0
       databus.transY = 0
       databus.moveX = 0
       databus.moveY = 0
+      if(databus.time==2){
+        databus.pageIndex = 4
+      }else{
+        databus.pageIndex = 3
+      }
       return
     }
     databus.frame++
@@ -337,7 +341,6 @@ export default class game {
           item.drawToCanvas(ctx)
         }
       })
-      console.log(databus.gameTools)
       Array.from(databus.gameTools)
       .forEach((item) => {
         if (item.visible) {

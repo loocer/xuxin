@@ -29,6 +29,7 @@ export default class DataBus {
   }
 
   reset() {
+    this.time = 1
     this.pools && this.pools.pool.clear();
     this.moveX = 0//手柄操作位移
     this.moveY = 0
@@ -45,9 +46,8 @@ export default class DataBus {
     this.shootSpeed = 20
     this.createSpeed = 20
     this.playerSpeed = 2
-    this.bulletClass =  {
-      name: 'bullet2',
-    }
+    this.bulletClass = ['A','bullet1']
+    
     this.bullets = new Set()
     this.enemys = new Set()
     this.mosterHouse = new Set()

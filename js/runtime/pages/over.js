@@ -1,10 +1,7 @@
 import DataBus from '../../main/databus'
 import Player from '../../player/index'
-import game from './game'
 let databus = new DataBus()
 import {
-  groundWidth,
-  groundHeight,
   screenHeight,
   screenWidth,
   GAME_IMG,
@@ -20,7 +17,7 @@ export default class Init {
 
     instance = this
     this.tempIamg = initPics()
-    this.over1 =  GAME_IMG.get('over')[0]
+    this.over1 =  GAME_IMG.get('over')[2]
     this.over2 =  GAME_IMG.get('over')[1]
     this.bg = this.tempIamg[0]
     this.game = new Game()
@@ -28,13 +25,7 @@ export default class Init {
     
     this.button = this.tempIamg[1]
   }
-  checkStart=(x, y)=> {
-    return !!(x >= this.start.startX
-      && y >= this.start.startY
-      && x <= this.start.endX
-      && y <= this.start.endY
-    )
-  }
+  
   resStart=(x, y)=> {
     return !!(x >= this.restar.startX
       && y >= this.restar.startY
@@ -64,12 +55,6 @@ export default class Init {
   touchHandler(e){
     let x = e.touches[0].clientX
     let y = e.touches[0].clientY
-    if (instance.checkStart(x, y)) {
-      databus.time = 2
-      databus.pageIndex = 2
-      wx.onTouchMove(databus.moveHandler)
-      instance.player.resetLife()
-    }
     if(instance.resStart(x,y)){
       wx.onTouchMove(databus.moveHandler)
       instance.player.resetLife()
@@ -94,9 +79,10 @@ export default class Init {
     databus.rightPositions.touched = false
   }
   render(ctx) {
-    let panelWidth = 400
-    let iniY = (screenHeight -400* (150/537))/ 2 
-    let iniX = (screenWidth -400) / 2
+    let panelWidth = 200
+    let panelHeight = 220 *(200/273)
+    let iniY = (screenHeight -220 *(200/273))/ 2 
+    let iniX = (screenWidth -panelWidth) / 2
     
     
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -104,31 +90,25 @@ export default class Init {
     ctx.save()
     ctx.translate(databus.transpX, databus.transpY)
     ctx.drawImage(this.over2,0, 0,screenWidth, screenHeight)
-    ctx.drawImage(this.over1,iniX, iniY,400, 400* (150/537))
+    ctx.drawImage(this.over1,iniX, iniY,panelWidth, 220 *(200/273))
     ctx.restore()
-    this.start = {
-      startX: screenWidth / 2,
-      startY: iniY,
-      endX: screenWidth / 2+200,
-      endY: iniY + 400* (150/537)/2,
-    }
     this.runking={
       startX: iniX,
-      startY:iniY + 400* (150/537)/2,
-      endX: screenWidth / 2,
-      endY: iniY + 400* (150/537)
+      startY: iniY +panelHeight/3*2,
+      endX: iniX +panelWidth ,
+      endY: iniY +panelHeight,
     }
     this.restar={
-      startX: screenWidth / 2,
-      startY: iniY + 400* (150/537)/2,
-      endX: screenWidth / 2+200,
-      endY: iniY + 400* (150/537)
+      startX: iniX,
+      startY: iniY +panelHeight/3,
+      endX: iniX +panelWidth ,
+      endY: iniY +panelHeight/3*2,
     }
     this.share={
       startX: iniX,
       startY: iniY,
-      endX: screenWidth / 2,
-      endY: iniY + 400* (150/537)/2,
+      endX: iniX +panelWidth ,
+      endY: iniY +panelHeight/3,
     }
   }
 }

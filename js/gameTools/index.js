@@ -7,7 +7,7 @@ import {
 import DataBus from '../main/databus'
 let databus = new DataBus()
 export const create1=()=>{
-  if(databus.frame==10){
+  if(databus.frame%300==0){
       let accelerate = databus.pools.getItemByClass('accelerate', Accelerate)
       accelerate.init(rnd(0,screenWidth),rnd(0,screenHeight))
       databus.gameTools.add(accelerate)

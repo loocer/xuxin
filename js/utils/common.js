@@ -64,15 +64,15 @@ export const playerFire = () => {
   return img
 }
 
-export const bullets = () => {
-  let list = []
-  for (let i = 1; i < 3; i++) {
-    let atlas = new Image()
-    atlas.src = getImgByName('bullet' + i).url
-    list.push(atlas)
-  }
-  return list
-}
+// export const bullets = () => {
+//   let list = []
+//   for (let i = 1; i < 4; i++) {
+//     let atlas = new Image()
+//     atlas.src = getImgByName('bullet' + i).url
+//     list.push(atlas)
+//   }
+//   return list
+// }
 export const boomsImage = () => {
   let list = []
   for (let bo of pics.booms) {
@@ -120,6 +120,11 @@ export const boomIcon = () => {
 export const speedIcon = () => {
   let atlas = new Image()
   atlas.src = getImgByName('addspeed-icon').url
+  return atlas
+}
+export const bulletsIcon = () => {
+  let atlas = new Image()
+  atlas.src = getImgByName('bullets').url
   return atlas
 }
 export const houseIcon = () => {
@@ -171,7 +176,7 @@ const bihu = () => {
 }
 const bullet = () => {
   let list = []
-  for (let i = 1; i < 3; i++) {
+  for (let i = 1; i < 4; i++) {
     let atlas = new Image()
     atlas.src = getImgByName('bullet' + i).url
     list.push(atlas)
@@ -180,7 +185,7 @@ const bullet = () => {
 }
 const over = ()=>{
   let list = []
-  for (let i = 1; i <3; i++) {
+  for (let i = 1; i <4; i++) {
     let atlas = new Image()
     atlas.src = getImgByName('over' + i).url
     list.push(atlas)

@@ -1,25 +1,29 @@
 import DataBus from '../main/databus'
 import Player from '../player/index'
-
+import {
+  bulletsIcon
+} from '../utils/common'
+import { rnd } from '../utils/tools'
 
 const screenWidth = window.innerWidth
 const screenHeight = window.innerHeight
-import {
-  speedIcon
-} from '../utils/common'
 
+let instance
 let databus = new DataBus()
-const PLAYER_WIDTH = 30
-const PLAYER_HEIGHT = 30
-export default class Boom {
+const PLAYER_WIDTH = 20
+const PLAYER_HEIGHT = 20
+const bullets = [['A','bullet1'],['B','bullet2'],['C','bullet3']]
+export default class Boom { 
   constructor(x, y) {
+    if ( instance )
+      return instance
+    instance = this
     this.player = new Player()
   }
   init( x, y) {
     // 玩家默认处于屏幕底部居中位置
-    // this.x = 100
     this.x = x
-    this.speedIcon = speedIcon()
+    this.speedIcon =   bulletsIcon()
     this.name='accelerate'
     this.y = y
     this.visible = true
@@ -42,19 +46,21 @@ export default class Boom {
         this.width,
         this.height
       )
+      // ctx.fillStyle = '#000';
+      // ctx.strokeStyle = '#000';
+      ctx.font = "8px bold Times New Roman"      
+      ctx.fillText(databus.bulletClass[0], this.height/3,-this.height/3);
       ctx.restore()
   }
   checkIsFingerOnAir() {
     let l = Math.sqrt(Math.pow((this.x - this.player.x), 2) + Math.pow((this.y - this.player.y), 2))
-    return l < Math.abs(this.width + this.player.width);
+    return l < Math.abs(this.width /2+ this.player.width/2);
   }
   update() {
     if (!this.visible)
       return 
     if (this.checkIsFingerOnAir()) {
-      databus.bulletClass =  {
-        name: 'bullet3',
-      }
+      databus.bulletClass =  bullets[rnd(0,bullets.length)],
       this.visible = false
       databus.pools.recover(this.name, this)
     }
