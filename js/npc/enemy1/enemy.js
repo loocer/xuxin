@@ -45,7 +45,6 @@ export default class Enemy extends Animation {
   playOvers() {
     let corpses = databus.pools.getItemByClass('corpses', Corpses)
     corpses.init(this.x, this.y)
-    console.log(2333333)
     databus.corpses.add(corpses)
   }
   getPosition() {

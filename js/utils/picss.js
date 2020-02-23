@@ -83,6 +83,17 @@ export const yellowBug = (() => {
   }
   return list
 })()
+
+export const learnBg = (() => {
+  let list = []
+  for (let i = 1; i < 4; i++) {
+    list.push({
+      name: 'learnBg' + i,
+      fileId: `cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bg/learn${i}.png`,
+    })
+  }
+  return list
+})()
 export const blackBug = (() => {
   let list = []
   for (let i = 1; i < 6; i++) {
@@ -112,4 +123,4 @@ export const bullet = (() => {
 export const netResourse = [{
   name: 'title',
   fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/tittle.png',
-}, ...booms, ...icon, ...yellowBug, ...over, ...antBug, ...bihuBug, ...blackBug, ...bullet, ...hand]
+}, ...booms, ...icon, ...yellowBug, ...over, ...antBug, ...bihuBug, ...blackBug, ...bullet, ...hand,...learnBg]

@@ -27,6 +27,7 @@ export default class game {
     this.atlas = bleed1[0]
     this.bodyPicS = biHuBody
     this.player = new Player(this)
+
   }
   checkStart = (x, y) => {
     return !!(x >= this.start.startX &&
@@ -79,7 +80,6 @@ export default class game {
   }
   shootUpdate() {
     if (databus.frame % databus.createSpeed === 0 && databus.rightPositions.touched) {
-      // if (databus.frame % databus.createSpeed == 0 && this.righthandshank.touched) {
       this.player.shoot()
     }
   }
@@ -94,13 +94,26 @@ export default class game {
             databus.score += enemy.score
             enemy.visible = false
             enemy.playOvers()
-            databus.pools.recover('enemy1', enemy)
+            databus.pools.recover(enemy.name, enemy)
           }
         }
       }
     })
     for (let itemob of databus.enemys) {
       let enemy = itemob
+      databus.gameTools.forEach((item) => {
+        if (item.name == 'boom' &&
+          enemy.visible &&
+          item.checkIsFingerOnEnemy(enemy) &&
+          item.visible
+        ) {
+          databus.score += enemy.score
+          enemy.visible = false
+          enemy.playOvers()
+          databus.pools.recover(enemy.name, enemy)
+        }
+      })
+
       if (this.player.isplesCollideWith(enemy)) {
         enemy.visible = false
         enemy.playOvers()
@@ -114,43 +127,70 @@ export default class game {
       }
     }
 
+
+  }
+  gameOver() {
+    wx.offTouchMove(databus.moveHandler)
+    databus.openDataContext.postMessage({
+      data: databus,
+      command: 'addScore'
+    })
+    if (databus.isShowLearn && databus.score > 200) {
+      try {
+        wx.setStorageSync('isShowLearn', false)
+      } catch (e) {}
+    }
+    databus.isTransX = false
+    databus.isTransY = false
+    databus.transX = 0
+    databus.transY = 0
+    databus.moveX = 0
+    databus.moveY = 0
+    if (databus.time == 2) {
+      databus.pageIndex = 4
+    } else {
+      databus.pageIndex = 3
+    }
+
   }
   update(ctx) {
     if (databus.gameOver) {
-      wx.offTouchMove(databus.moveHandler)
-      databus.openDataContext.postMessage({
-        data: databus,
-        command: 'addScore'
-      })
-      databus.isTransX = false
-      databus.isTransY = false
-      databus.transX = 0
-      databus.transY = 0
-      databus.moveX = 0
-      databus.moveY = 0
-      if(databus.time==2){
-        databus.pageIndex = 4
-      }else{
-        databus.pageIndex = 3
-      }
+      this.gameOver()
       return
     }
     databus.frame++
-    enemy.create1()
     gameTools.create1()
-    this.player.x += databus.moveX
-    this.player.y += databus.moveY
+    if (this.player.x + databus.moveX > 30 && this.player.x + databus.moveX < common.groundWidth) {
+      this.player.x += databus.moveX
+    }
+    if (this.player.y + databus.moveY > 30 && this.player.y + databus.moveY < common.groundHeight) {
+      this.player.y += databus.moveY
+    }
+
     this.player.rotateBody = databus.leftPositions.rotate
     this.player.rotateLag = databus.rightPositions.rotate
     this.eventUpdate()
     databus.playTempX = this.player.x
     databus.playTempY = this.player.y
     this.shootUpdate()
-    if (databus.bleedBgs.length > 100) {
-      databus.bleedBgs.shift()
+    if (!databus.rightPositions.touched) {
+      this.player.fireAcTime = 0
+    }
+    if (databus.frame % 100 == 0) {
+      Array.from(databus.bleedBgs)
+        .forEach((item) => {
+          if (item.time == 0) {
+            databus.bleedBgs.shift()
+          } else {
+            item.time--
+          }
+        })
     }
     if (databus.deedBady.length > 100) {
       databus.deedBady.shift()
+    }
+    if (databus.deedBady.length > 500) {
+      databus.deedBady = databus.deedBady.slice(databus.deedBady.length - 200, databus.deedBady.length)
     }
     Array.from(databus.bullets)
       .forEach((item) => {
@@ -163,19 +203,24 @@ export default class game {
         if (item.visible) {
           item.update(ctx)
         }
-      })  
+      })
+    databus.addEnemyFlag = true
     Array.from(databus.mosterHouse)
       .forEach((item) => {
         if (item.visible) {
+          databus.addEnemyFlag = false
           item.update(ctx)
         }
       })
+
     Array.from(databus.enemys)
       .forEach((item) => {
         if (item.visible) {
+
           item.update(this.player)
         }
       })
+    enemy.create1()
     Array.from(databus.corpses)
       .forEach((item) => {
         if (item.visible) {
@@ -251,7 +296,7 @@ export default class game {
 
   }
   renderLeftHandShank(ctx) {
-    let x = 100
+    let x = 40
     let y = common.screenHeight - common.HAND_WIDTH - 40
     ctx.drawImage(
       common.GAME_IMG.get('hand'),
@@ -275,20 +320,23 @@ export default class game {
   render(ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.translate(-databus.transX, -databus.transY)
+    ctx.translate(databus.etranspX, databus.etranspY)
     this.renderBg(ctx)
     Array.from(databus.bleedBgs)
       .forEach((item) => {
-        ctx.save()
-        ctx.translate(item[0], item[1])
-        ctx.rotate(item[2] * Math.PI / 180)
-        ctx.drawImage(
-          this.atlas,
-          0, 0, 100, 100,
-          -15,
-          -15,
-          30, 30
-        )
-        ctx.restore()
+        for (let i = 0; i < item.time; i++) {
+          ctx.save()
+          ctx.translate(item.tempList[0], item.tempList[1])
+          ctx.rotate(item.tempList[2] * Math.PI / 180)
+          ctx.drawImage(
+            this.atlas,
+            0, 0, 100, 100,
+            -15,
+            -15,
+            30, 30
+          )
+          ctx.restore()
+        }
       })
     Array.from(databus.deedBady)
       .forEach((item) => {
@@ -308,20 +356,6 @@ export default class game {
         )
         ctx.restore()
       })
-    // Array.from(databus.bleedBgs)
-    // .forEach((item) => {
-    //   ctx.save()
-    //   ctx.translate(item[0], item[1])
-    //   ctx.rotate(item[2] * Math.PI / 180)
-    //   ctx.drawImage(
-    //     this.atlas,
-    //     0, 0, 100, 100,
-    //     -15,
-    //     -15,
-    //     30, 30
-    //   )
-    //   ctx.restore()
-    // })  
     Array.from(databus.corpses)
       .forEach((item) => {
         if (item.visible) {
@@ -335,13 +369,8 @@ export default class game {
           item.drawToCanvas(ctx)
         }
       })
-    Array.from(databus.mosterHouse)
-      .forEach((item) => {
-        if (item.visible) {
-          item.drawToCanvas(ctx)
-        }
-      })
-      Array.from(databus.gameTools)
+
+    Array.from(databus.gameTools)
       .forEach((item) => {
         if (item.visible) {
           item.drawToCanvas(ctx)
@@ -354,6 +383,12 @@ export default class game {
         }
       })
     this.player.drawToCanvas(ctx)
+    Array.from(databus.mosterHouse)
+      .forEach((item) => {
+        if (item.visible) {
+          item.drawToCanvas(ctx)
+        }
+      })
     ctx.save()
     ctx.translate(databus.transpX, databus.transpY)
     this.renderGameScore(ctx)

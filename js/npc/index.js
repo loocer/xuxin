@@ -1,5 +1,6 @@
-import Enemy1 from './enemy1/index'
+
 import { rnd } from '../utils/tools'
+import createTool from './createTool'
 import {
   groundWidth,
   groundHeight
@@ -7,11 +8,11 @@ import {
 import DataBus from '../main/databus'
 let databus = new DataBus()
 export const create1 = ()=>{
-  if(databus.frame==100){
-    for(let i=0;i<20;i++){
-      let mosterHouse = databus.pools.getItemByClass('mosterHouse', Enemy1)
-      mosterHouse.init(rnd(0,groundWidth),rnd(0,groundHeight))
-      databus.mosterHouse.add(mosterHouse)
-    }
+  console.log(333)
+  if(databus.addEnemyFlag){
+    console.log(333)
+    createTool[databus.checkIndex]()
+    databus.checkIndex++
+    databus.addEnemyFlag= false
   }
 }

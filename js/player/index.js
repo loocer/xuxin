@@ -41,9 +41,6 @@ export default class Player {
       } else {
         this.fireAcTime = 5
       }
-      // if (this.fireAcTime == 0) {
-      //   this.fireAcTime = 5
-      // }
     }
     this.fireAcTime = 0
     this.bodyImg = common.playerImag(1)

@@ -82,27 +82,32 @@ export default class Corpses {
     if (this.frame * 2 >50) {
       this.visible = false
       dataBus.pools.recover('corpses', this)
-      let obj = [
+      let obj = {
+        time:5,
+        tempList:
+        [
         this.x,this.y,
         this.rote,
-      ]
+      ]}
       dataBus.bleedBgs.push(obj)
     }
   }
   renderBleed(ctx){
     let temp =this.frame
     let size = temp>30?30:temp
-    ctx.save()
-    ctx.translate(this.x, this.y)
-    ctx.rotate((this.rote) * Math.PI / 180)
-    ctx.drawImage(
-      this.atlas,
-      0, 0, 100, 100,
-      -size/2,
-      -size/2,
-      size, size
-    )
-    ctx.restore()
+    for(let i =0;i<5;i++){
+      ctx.save()
+      ctx.translate(this.x, this.y)
+      ctx.rotate((this.rote) * Math.PI / 180)
+      ctx.drawImage(
+        this.atlas,
+        0, 0, 100, 100,
+        -size/2,
+        -size/2,
+        size, size
+      )
+      ctx.restore()
+    }
   }
   drawToCanvas(ctx) {
     this.renderBleed(ctx)

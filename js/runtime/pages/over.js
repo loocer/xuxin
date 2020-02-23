@@ -81,7 +81,7 @@ export default class Init {
   render(ctx) {
     let panelWidth = 200
     let panelHeight = 220 *(200/273)
-    let iniY = (screenHeight -220 *(200/273))/ 2 
+    let iniY =  (screenHeight -150)/ 2 +50
     let iniX = (screenWidth -panelWidth) / 2
     
     

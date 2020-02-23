@@ -51,6 +51,7 @@ let showRanking=()=>{
 let addNewScore= (data)=>{
   getMyScore().then((score)=>{
     console.log(score, data.score)
+    
     if (data.score > score){
       var kvDataList = new Array();
       kvDataList.push({
@@ -119,8 +120,6 @@ function initRanklist() {
     index++
     temp++
   }
-  // context.fillStyle = 'rgba(0, 0, 0,1)';
-  // context.fillRect(tempx, 0, 400, 40);
 }
 
 // 绘制自己的排名
@@ -205,16 +204,6 @@ function getMyScore() {
         }else{
           resive(data.KVDataList[0].value)
         }
-        // let lastScore = data.KVDataList[0].value || 0;
-        // if (!data.KVDataList[1]) {
-        //   saveMaxScore(lastScore);
-        //   myScore = lastScore;
-        // } else if (lastScore > data.KVDataList[1].value) {
-        //   saveMaxScore(lastScore);
-        //   myScore = lastScore;
-        // } else {
-        //   myScore = data.KVDataList[1].value;
-        // }
       }
     });
   })
@@ -245,7 +234,9 @@ function getFriendsRanking() {
     }
   });
 }
+function drawLearn(){
 
+}
 function getGroupRanking(ticket) {
   wx.getGroupCloudStorage({
     shareTicket: ticket,
@@ -267,6 +258,9 @@ function getGroupRanking(ticket) {
 wx.onMessage(data => {
   if (data.command=='addScore'){
     addNewScore(data.data)
+  }
+  if (data.command=='learn'){
+    drawLearn()
   }
   if (data.command == 'showRanking') {
     isGetFlag=false

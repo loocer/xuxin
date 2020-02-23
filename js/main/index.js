@@ -42,7 +42,10 @@ export const run = () => {
     return {
       title: '子弹上膛，一梭子下去死一片，就是这么燃！',
       // imageUrlId: 'EaPjTeGFSY-aOIUlhIIWOw',
-      imageUrl: 'images/share.png',
+      imageUrl: canvas.toTempFilePathSync({
+          destWidth: 500,
+          destHeight: 400
+        })
     }
   })
   wx.getSystemInfo({
@@ -61,6 +64,28 @@ export const run = () => {
   canvas.width = width * window.devicePixelRatio;
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
+  databus.banner =  wx.createBannerAd({
+    adUnitId:'adunit-5d516669164fc3c6',
+    adIntervals:50,
+    style:{
+      left:(screenWidth - 400)/2,
+      top:10,
+      width:400,
+    }
+  })
+  databus.banner.onError((e)=>{
+    console.log(e)
+  })
+  wx.getStorage({
+    key: 'isShowLearn',
+    success (res) {
+      databus.isShowLearn = res.data
+    },
+    fail(res){
+      databus.isShowLearn = true
+      console.log(res)
+    }
+  })
   image.onload = function () {
     wx.cloud.init({
       env: 'test-x1dzi'

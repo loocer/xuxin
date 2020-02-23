@@ -192,6 +192,15 @@ const over = ()=>{
   }
   return list
 }
+const learnBg = ()=>{
+  let list = []
+  for (let i = 1; i <4; i++) {
+    let atlas = new Image()
+    atlas.src = getImgByName('learnBg' + i).url
+    list.push(atlas)
+  }
+  return list
+}
 const blackBug = () => {
   let list = []
   for (let i = 1; i < 6; i++) {
@@ -216,6 +225,7 @@ export const loadingImage = () => {
   GAME_IMG.set('hand', hand())
   GAME_IMG.set('over',over())
   GAME_IMG.set('houseIcon',houseIcon())
+  GAME_IMG.set('learnBg',learnBg())
 }
 
 const getImgByName = (name) => {

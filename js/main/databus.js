@@ -20,12 +20,19 @@ export default class DataBus {
       touchedx: 0,
       touchedy: 0
     }
-    this.transpX = 0//canvas累计平移距离
+    this.transpX = 0//canvas累计e平移距离
     this.transpY = 0
+
+    this.etranspX = 0//canvas震动波长
+    this.etranspY = 0
     this.ctx = null
     this.pageList = []
     this.allImages = []
     this.pools = new Pools()
+
+    //-------广告
+    this.banner = null
+    //-----------------
   }
 
   reset() {
@@ -46,7 +53,7 @@ export default class DataBus {
     this.shootSpeed = 20
     this.createSpeed = 20
     this.playerSpeed = 2
-    this.bulletClass = ['A','bullet1']
+    this.bulletClass = ['C','bullet3']
     
     this.bullets = new Set()
     this.enemys = new Set()
@@ -68,6 +75,8 @@ export default class DataBus {
     this.transX = 0//每帧屏幕滚动距离
     this.transY = 0//每帧屏幕滚动距离
     
+    this.addEnemyFlag = true
+    this.checkIndex = 0
   }
   rester(){
 

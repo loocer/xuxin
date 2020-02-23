@@ -9,13 +9,28 @@ import {
 } from '../../utils/common'
 let instance
 let leftP = (screenWidth - 386) / 2
+
 export default class Init {
   constructor() {
     if ( instance )
       return instance
-
+      this.videoAd = wx.createRewardedVideoAd({
+        adUnitId: 'adunit-dc5ba2a345c46dc9'
+      }).onError((e)=>{
+        console.log(e)
+      })
+      console.log(this.videoAd)
+      this.videoAd&&this.videoAd.show().catch(() => {
+        // 失败重试
+        videoAd.load()
+          .then(() => videoAd.show())
+          .catch(err => {
+            console.log('激励视频 广告显示失败')
+          })
+      })
     instance = this
     this.tempIamg = initPics()
+    
     this.bg = this.tempIamg[0]
     this.button = this.tempIamg[1]
   }
@@ -42,7 +57,12 @@ export default class Init {
     let x = e.touches[0].clientX
     let y = e.touches[0].clientY
     if (instance.checkStart(x, y)) {
-      databus.pageIndex = 2
+      
+      if(databus.isShowLearn){
+        databus.pageIndex = 5
+      }else{
+        databus.pageIndex = 2
+      }
     }
     if (instance.checkRunking(x, y)) {
       databus.pageIndex = 1
@@ -54,14 +74,14 @@ export default class Init {
   }
   render(ctx) {
     let panelWidth = 300
-    let iniY = (screenHeight - panelWidth * (648 / 858)) / 2 + databus.transY
+    let iniY = (screenHeight -150)/ 2 +20
     let iniX = screenWidth / 2 - 200 + databus.transX
     
     // ctx.drawImage(this.bg, 0, 0, 1600, 750, databus.transX, databus.transY,screenWidth , screenHeight )
     ctx.save()
     ctx.translate(databus.transpX, databus.transpY)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(this.button, 0, 0, 858, 648, screenWidth / 2 - panelWidth/2 + databus.transX, (screenHeight - panelWidth * (648 / 828)) / 2 + databus.transY, panelWidth, panelWidth * (628 / 848))
+    ctx.drawImage(this.button, 0, 0, 858, 648, screenWidth / 2 - panelWidth/2 + databus.transX,iniY, panelWidth, panelWidth * (628 / 848))
     ctx.restore()
     this.start = {
       startX: screenWidth / 2 - 150 + databus.transX,

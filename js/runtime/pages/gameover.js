@@ -1,5 +1,6 @@
 import DataBus from '../../main/databus'
 import Player from '../../player/index'
+import Boom from '../../gameTools/boom'
 import game from './game'
 let databus = new DataBus()
 import {
@@ -69,6 +70,9 @@ export default class Init {
       databus.pageIndex = 2
       wx.onTouchMove(databus.moveHandler)
       instance.player.resetLife()
+      let boom = databus.pools.getItemByClass('boom', Boom)
+      boom.init(instance.player.x, instance.player.y)
+      databus.gameTools.add(boom)
     }
     if(instance.resStart(x,y)){
       wx.onTouchMove(databus.moveHandler)
@@ -95,7 +99,7 @@ export default class Init {
   }
   render(ctx) {
     let panelWidth = 400
-    let iniY = (screenHeight -400* (150/537))/ 2 
+    let iniY = (screenHeight -150)/ 2 +50
     let iniX = (screenWidth -400) / 2
     
     
