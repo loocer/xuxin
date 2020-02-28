@@ -14,12 +14,12 @@ let databus = new DataBus()
 export default class Bullet extends Sprite {
   constructor() {
     const IMG = GAME_IMG.get('bullets')
-
-    super(IMG[1], BULLET_WIDTH, BULLET_HEIGHT)
+    
+    super(IMG[0], BULLET_WIDTH, BULLET_HEIGHT)
     this.player = new Player()
   }
   init(x, y) {
-    this.name = 'bullet1'
+    this.name = 'bullet4'
     this.zx = x
     this.zy = y
     // this.img = GAME_IMG.get('bullets')[0]
@@ -34,64 +34,21 @@ export default class Bullet extends Sprite {
     this.speed = 20
     this.points = []
     this.visible = true
-    this.player.fireStyleFoo = () => {
+    this.player.fireStyleFoo= ()=>{
       if (this.player.fireAcTime != 0) {
         this.player.fireAcTime = 0
-      } else {
+      }else{
         this.player.fireAcTime = 5
       }
     }
-    // this.mucsic()
   }
-  mucsic() {
-    this.audio = wx.createInnerAudioContext()
-    // this.audio.autoplay = true
-    this.audio.volume = 0
-    this.audio.src = 'audio/jujiqiang.mp3'
-    this.audio.onError((res) => {
-      console.log(res.errMsg)
-      console.log(res.errCode)
-    })
-    this.audio.play()
-    this.audio.onEnded(()=>{
-      this.audio.destroy()
-    })
-  }
-  drawToCanvas(ctx) {
-    if (!this.visible)
-      return
-    ctx.save()
-    let length = Math.sqrt((this.x - this.zx) * (this.x - this.zx) + (this.y - this.zy) * (this.y - this.zy))
-    ctx.translate(this.x, this.y)
-    ctx.rotate(this.rotate * Math.PI / 180)
-    if (this.stopFlagTemp) {
-
-      ctx.drawImage(
-        this.img,
-        0, this.showLength,
-        10, this.height,
-        -this.width / 2,
-        0,
-        this.width,
-        length
-      )
-    } else {
-      ctx.drawImage(
-        this.img,
-        -this.width / 2,
-        0,
-        this.width,
-        length
-      )
-    }
-    ctx.restore()
-  }
+  
   // 每一帧更新子弹位置
   update() {
     if (!this.visible)
       return
     if (this.stopFlagTemp) {
-      this.showLength += 4
+      this.showLength+=4
     } else {
       tools.getRoteImg({
           x1: this.x + this.moveX,

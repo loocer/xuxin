@@ -1,7 +1,9 @@
 import Animation from '../../base/animation'
 import DataBus from '../../main/databus'
 import Corpses from '../corpses.js'
-import Player from '../../player/index'
+import {
+  rnd
+} from '../../utils/tools'
 import {
   getRoteImg
 } from '../../utils/tools'
@@ -18,27 +20,31 @@ import {
 
 let databus = new DataBus()
 export default class Enemy extends Animation {
-  constructor(WIDTH =30, HEIGHT = 30) {
+  constructor(WIDTH = 40, HEIGHT = 40) {
     super("", WIDTH, HEIGHT)
   }
-  init(  x, y,li=1) {
+  init(x, y,li= rnd(2, 10)) {
     this.x = x
     this.y = y
-    this.name= 'enemy1'
+    this.name = 'enemy3'
     // this.srcImg = srcImg
-    this.imgs =  GAME_IMG.get('black_bugs')
+    this.imgs = GAME_IMG.get('bihu_bugs')
     // this.img.src = imgSrc
     this.del1s = bleed2
     this.time = 0
     this.finIndex = 0
     this.frame = 0
-    this.stopTime =0
+    this.endX = rnd(0, databus.groundWidth)
+    this.endY = rnd(0, databus.groundHeight)
+    this.stop = false
     this.findTime = 0 //停留休息时间
-    this.frameSpeed = 1
-    this.score = 1
+    this.frameSpeed = .5
+    
+    
     this.allLive = li
-    this.lifeValue =li
-    this.speed = 1
+    this.lifeValue = li
+    this.score = 5
+    this.speed = .8
     this.visible = true
     this.onlive = true
   }
@@ -49,32 +55,28 @@ export default class Enemy extends Animation {
     databus.corpses.add(corpses)
   }
   getPosition() {
-    let player = this.player
-    let px = player.x + player.width / 2
-    let py = player.y + player.height / 2
-    let lpx = Math.abs(this.x - player.x)
-    let lpy = Math.abs(this.y - player.y)
+    let lpx = Math.abs(this.x - this.endX)
+    let lpy = Math.abs(this.y - this.endY)
     let tempx = 0
     let tempy = 0
     if (lpx > lpy) {
-      tempx = player.x > this.x ? this.x + this.speed : this.x - this.speed
-      tempy = player.y > this.y ? this.y + lpy / lpx : this.y - lpy / lpx
+      tempx = this.endX > this.x ? this.x + this.speed : this.x - this.speed
+      tempy = this.endY > this.y ? this.y + lpy / lpx : this.y - lpy / lpx
     } else {
-      tempy = player.y > this.y ? this.y + this.speed : this.y - this.speed
-      tempx = player.x > this.x ? this.x + lpx / lpy : this.x - lpx / lpy
+      tempy = this.endY > this.y ? this.y + this.speed : this.y - this.speed
+      tempx = this.endX > this.x ? this.x + lpx / lpy : this.x - lpx / lpy
     }
     this.x = tempx
     this.y = tempy
     getRoteImg({
-      x1: this.x,
-      x2: player.x,
-      y1: this.y,
-      y2: player.y
-    },
+        x1: this.x,
+        x2: this.endX,
+        y1: this.y,
+        y2: this.endY
+      },
       this
     )
   }
-
   drawLive(ctx) {
     let start = this.x - this.width / 6
     let end = this.x + this.width / 6
@@ -97,7 +99,7 @@ export default class Enemy extends Animation {
   drawToCanvas(ctx) {
     if (!this.visible)
       return
-      // this.drawLive(ctx)
+    this.drawLive(ctx)
     let index = ~~this.frameSpeed
     ctx.save()
     ctx.translate(this.x, this.y)
@@ -110,27 +112,16 @@ export default class Enemy extends Animation {
     ctx.restore()
   }
   getFrameTimeFlag() {
-    if (!this.player) {
-      return true
-    }
-    return (Math.abs(this.x - this.player.x) +
-      Math.abs(this.y - this.player.y)) > 10
+    return (Math.abs(this.x - this.endX) +
+      Math.abs(this.y - this.endY)) > 50
 
   }
-  findTool(player) {
-      this.player = {
-        x: player.x,
-        y: player.y,
-        width: player.width,
-        height: player.height
-      }
-  }
   isCollideWith(sp) {
-    let spX = sp.x 
-    let spY = sp.y 
+    let spX = sp.x
+    let spY = sp.y
     let tX = this.x
     let tY = this.y
-    if ( !this.visible || !sp.visible )
+    if (!this.visible || !sp.visible)
       return false
     return (
       Math.sqrt((spX - tX) * (spX - tX) +
@@ -145,32 +136,27 @@ export default class Enemy extends Animation {
   update(player) {
     if (!this.visible)
       return
-    if (this.time == 0) {
-      this.player = {
-        x: player.x,
-        y: player.y,
-        width: player.width,
-        height: player.height
+
+    if (!this.stop && !this.getFrameTimeFlag()) {
+      this.stop = true
+      // console.log(33333)
+      setTimeout(() => {
+        this.endX = rnd(databus.transpX, databus.transpX+databus.screenWidth)
+        this.endY = rnd(databus.transpY, databus.transpX+databus.screenHeight)
+        this.stop = false
+      }, 10000)
+    }
+    if (this.getFrameTimeFlag()) {
+
+      this.frame++
+      if (this.frame % 1 == 0) {
+        this.frameSpeed += .5
+        if (this.frameSpeed > this.imgs.length - 1) {
+          this.frameSpeed = 0
+        }
       }
-    }
-    this.time++
-    if (this.time % 300 < this.stopTime) {
-      return
-    }
-    this.findTool(player)
-  
-    if (!this.getFrameTimeFlag()) {
-      return
+      this.getPosition()
     }
 
-
-    this.frame++
-    if (this.frame % 1 == 0) {
-      this.frameSpeed++
-      if (this.frameSpeed > this.imgs.length - 1) {
-        this.frameSpeed = 0
-      }
-    }
-    this.getPosition()
   }
 }

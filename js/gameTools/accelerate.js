@@ -13,21 +13,20 @@ let databus = new DataBus()
 const PLAYER_WIDTH = 20
 const PLAYER_HEIGHT = 20
 const bullets = [['A','bullet1'],['B','bullet2'],['C','bullet3']]
-const changeBulletClass =function(){
-  let rndTemp = rnd(0,bullets.length-1)
-  console.log(rndTemp)
-  let temp = bullets[rndTemp]
-  if(temp[0]== databus.bulletClass[0]){
-    changeBulletClass()
-  }else{
-    return temp
-  }
+let temp=databus.bulletClass
+const fullt =function(){
+ temp = rnd(0,3)
+ if(temp==databus.bulletClass){
+  fullt()
+ }
+ return temp
 }
 export default class Boom { 
   constructor(x, y) {
     if ( instance )
       return instance
     instance = this
+    this.bulletIndex = 0
     this.player = new Player()
   }
   init( x, y) {
@@ -40,7 +39,7 @@ export default class Boom {
     this.isBoom = false
     this.boomTime = 1
     
-    this.bulletClass = bullets[rnd(0,bullets.length-1)]
+    this.bulletIndex = fullt()
     this.maxBoomTime = 1e3//最大爆炸范围
     this.width = PLAYER_WIDTH
     this.height = PLAYER_HEIGHT
@@ -61,7 +60,7 @@ export default class Boom {
       // ctx.fillStyle = '#000';
       // ctx.strokeStyle = '#000';
       ctx.font = "8px bold Times New Roman"      
-      ctx.fillText(this.bulletClass[0], this.height/3,-this.height/3);
+      ctx.fillText(bullets[this.bulletIndex][0], this.height/3,-this.height/3);
       ctx.restore()
   }
   checkIsFingerOnAir() {
@@ -72,7 +71,17 @@ export default class Boom {
     if (!this.visible)
       return 
     if (this.checkIsFingerOnAir()) {
-      databus.bulletClass= this.bulletClass
+      this.player.fireAcTime = 0
+      databus.bulletClass= this.bulletIndex
+      // if(this.bulletIndex==0){
+      //   databus.audio.play(() => {
+      //     console.log('开始播放')
+      //   })
+      // }else{
+      //   databus.audio.pause(() => {
+      //     console.log('开始播放')
+      //   })
+      // }
       this.visible = false
       databus.pools.recover(this.name, this)
     }

@@ -29,6 +29,7 @@ export const work = (that) => {
       databus.banner.hide()
     }
     if(tempIndex==0){
+     
       wx.getStorage({
         key: 'isShowLearn',
         success (res) {

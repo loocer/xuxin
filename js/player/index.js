@@ -1,10 +1,10 @@
 import DataBus from '../main/databus'
 import * as common from '../utils/common'
 import creatBox from '../bullet/index'
+import Boom from '../gameTools/boom'
 import {
-  groundWidth,
-  groundHeight,
-  GAME_IMG
+  GAME_IMG,
+  playerBg
 } from '../utils/common'
 const screenWidth = window.innerWidth
 const screenHeight = window.innerHeight
@@ -13,6 +13,11 @@ const PLAYER_WIDTH = 20
 const PLAYER_HEIGHT = 20
 
 let databus = new DataBus()
+const bullets = [
+  ['A', 'bullet1'],
+  ['B', 'bullet2'],
+  ['C', 'bullet3']
+]
 let instance
 export default class Player {
   constructor(main) {
@@ -43,12 +48,13 @@ export default class Player {
       }
     }
     this.fireAcTime = 0
+    this.bg = playerBg()
     this.bodyImg = common.playerImag(1)
     this.lagImg1 = common.playerImag(2)
     this.lagImg2 = common.playerImag(3)
     this.fireImag = common.playerFire()
-    this.lifeValue = 10000
-    this.allLifeValue = 10000
+    this.lifeValue = 20
+    this.allLifeValue = 20
     // this.x = 0
     // this.y = 0
     // 用于在手指移动的时候标识手指是否已经在飞机上了
@@ -60,9 +66,48 @@ export default class Player {
     databus.gameOver = false
     this.lifeValue = this.allLifeValue
   }
+  drawLive(ctx) {
+    ctx.save()
+    ctx.lineWidth = 2; //设置线宽状态
+    ctx.translate(this.x, this.y)
+    ctx.beginPath();
+    ctx.strokeStyle = '#fff'; //设置线的颜色状态
+    ctx.arc(0,0, 12, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.restore()
+    if(this.lifeValue>0){
+      ctx.save()
+      ctx.lineWidth = 2; //设置线宽状态
+      ctx.translate(this.x, this.y)
+      ctx.beginPath();
+      ctx.strokeStyle = '#3B99A6'; //设置线的颜色状态
+      ctx.arc(0,0, 12, 0, 2 * Math.PI* (this.lifeValue / this.allLifeValue));
+      ctx.stroke();
+      ctx.restore()
+    }
+    
+    // let start = this.x - this.width /2
+    // let end = this.x + this.width /2
+    // let length = (end - start) * (this.lifeValue / this.allLifeValue)
+    // let standY = this.y + this.height/2+5
+
+    // ctx.beginPath();
+    // ctx.moveTo(start, standY); //设置起点状态
+    // ctx.lineTo(end, standY); //设置末端状态
+    // ctx.lineWidth = 2; //设置线宽状态
+    // ctx.strokeStyle = '#fff'; //设置线的颜色状态
+    // ctx.stroke();
+    // ctx.beginPath();
+    // ctx.moveTo(start, standY); //设置起点状态
+    // ctx.lineTo(start + length, standY); //设置末端状态
+    // ctx.lineWidth = 1.5; //设置线宽状态
+    // ctx.strokeStyle = 'red'; //设置线的颜色状态
+    // ctx.stroke();
+  }
   drawToCanvas(ctx) {
     if (!this.visible)
       return
+    this.drawLive(ctx)
     let bu = null
     if (databus.leftPositions.touched) {
       bu = databus.frame % 10 > 5 ? this.lagImg1 : this.lagImg2
@@ -75,6 +120,13 @@ export default class Player {
     ctx.save()
     ctx.translate(this.x, this.y)
     ctx.rotate(this.rotateBody * Math.PI / 180)
+    // ctx.drawImage(
+    //   this.bg,
+    //   -15,
+    //   -15,
+    //  30,
+    //   30
+    // )
     ctx.drawImage(
       bu,
       -this.width / 2,
@@ -82,6 +134,7 @@ export default class Player {
       this.width,
       this.height
     )
+
     ctx.restore()
 
     ctx.save()
@@ -94,13 +147,14 @@ export default class Player {
       this.width,
       this.height
     )
+
     ctx.restore()
     if (this.fireAcTime != 0) {
-      let px = this.x + 15 * Math.cos(this.rotateLag * Math.PI / 180 + 180.95 )
+      let px = this.x + 15 * Math.cos(this.rotateLag * Math.PI / 180 + 180.95)
       let py = this.y + 15 * Math.sin(this.rotateLag * Math.PI / 180 + 180.95)
       ctx.save()
       ctx.translate(px, py)
-      ctx.rotate(this.rotateLag * Math.PI / 180 )
+      ctx.rotate(this.rotateLag * Math.PI / 180)
       ctx.drawImage(
         this.firePic,
         -5,
@@ -137,7 +191,15 @@ export default class Player {
         (spY - this.y) * (spY - this.y)) < (sp.width / 3 + this.width / 3)
     )
   }
-
+  goOnLive() {
+    databus.time = 2
+    databus.pageIndex = 2
+    wx.onTouchMove(databus.moveHandler)
+    this.resetLife()
+    let boom = databus.pools.getItemByClass('boom', Boom)
+    boom.init(this.x, this.y)
+    databus.gameTools.add(boom)
+  }
   /**
    * 玩家射击操作
    * 射击时机由外部决定
@@ -146,7 +208,7 @@ export default class Player {
     let mx = databus.shootX
     let my = databus.shootY
     if (mx == 0 && my == 0) {} else {
-      creatBox.get(databus.bulletClass[1])(this)
+      creatBox.get(bullets[databus.bulletClass][1])(this)
     }
   }
 }

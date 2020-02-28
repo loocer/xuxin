@@ -1,18 +1,8 @@
-import Enemy1 from './enemy1/index'
-import { rnd } from '../utils/tools'
-import {
-  groundWidth,
-  groundHeight,
-  screenWidth,
-  screenHeight
-} from '../utils/common'
-import DataBus from '../main/databus'
-let databus = new DataBus()
-const create1 = ()=>{
-    for(let i=0;i<20;i++){
-      let mosterHouse = databus.pools.getItemByClass('mosterHouse', Enemy1)
-      mosterHouse.init(rnd(0,groundWidth),rnd(0,groundHeight))
-      databus.mosterHouse.add(mosterHouse)
-    }
-}
-export default [create1]
+import {c1} from './createTool/c1'
+import {c2} from './createTool/c2'
+import {c3} from './createTool/c3'
+import {c4} from './createTool/c4'
+import {c5} from './createTool/c5'
+import {c6} from './createTool/c6'
+import {c7} from './createTool/c7'
+export default [c1, c2, c3, c4,c5,c6,c7]

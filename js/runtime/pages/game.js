@@ -12,7 +12,7 @@ import {
 } from '../../utils/common.js'
 let databus = new DataBus()
 let instance
-let leftP = (common.screenWidth - 386) / 2
+let leftP = (databus.screenWidth) / 4
 let tempBg = new Image()
 tempBg.src = ''
 export default class game {
@@ -48,16 +48,16 @@ export default class game {
   }
   eventUpdate() {
     if (
-      databus.leftPositions.touched && (databus.player.x + databus.moveX) > common.screenWidth / 2 &&
-      (databus.player.x + databus.moveX) < common.groundWidth - common.screenWidth / 2
+      databus.leftPositions.touched && (databus.player.x + databus.moveX) > databus.screenWidth / 2 &&
+      (databus.player.x + databus.moveX) < databus.groundWidth - databus.screenWidth / 2
     ) {
       databus.isTransX = true
     } else {
       databus.isTransX = false
     }
     if (
-      databus.leftPositions.touched && (databus.player.y + databus.moveY) > common.screenHeight / 2 &&
-      (databus.player.y + databus.moveY) < common.groundHeight - common.screenHeight / 2
+      databus.leftPositions.touched && (databus.player.y + databus.moveY) > databus.screenHeight / 2 &&
+      (databus.player.y + databus.moveY) < databus.groundHeight - databus.screenHeight / 2
     ) {
       databus.isTransY = true
     } else {
@@ -80,17 +80,21 @@ export default class game {
   }
   shootUpdate() {
     if (databus.frame % databus.createSpeed === 0 && databus.rightPositions.touched) {
+      this.player.fireAcTime = 0
       this.player.shoot()
     }
   }
   collisionDetection() {
-    let that = this
     databus.bullets.forEach((bullet) => {
-      let temp = []
       for (let enemy of databus.enemys) {
         if (!enemy.isPlaying && enemy.isCollideWith(bullet)) {
           bullet.stopFlag = true
-          if (--enemy.lifeValue == 0) {
+          if (bullet.name == 'bullet1') {
+            enemy.lifeValue = 0
+          } else {
+            enemy.lifeValue--
+          }
+          if (enemy.lifeValue == 0) {
             databus.score += enemy.score
             enemy.visible = false
             enemy.playOvers()
@@ -119,8 +123,9 @@ export default class game {
         enemy.playOvers()
         databus.score += enemy.score
         databus.pools.recover('enemy1', enemy)
-          --this.player.lifeValue
-        if (this.player.lifeValue == 0) {
+          this.player.lifeValue-=enemy.score
+        if (this.player.lifeValue < 0) {
+          this.player.lifeValue = 0
           databus.gameOver = true
         }
         break
@@ -147,23 +152,27 @@ export default class game {
     databus.moveX = 0
     databus.moveY = 0
     if (databus.time == 2) {
-      databus.pageIndex = 4
+      // wx.onTouchMove(databus.moveHandler)
+      // this.player.resetLife()
+      // databus.reset()
+      databus.pageIndex = 3
     } else {
       databus.pageIndex = 3
     }
 
   }
   update(ctx) {
+    console.log(434)
     if (databus.gameOver) {
       this.gameOver()
       return
     }
     databus.frame++
     gameTools.create1()
-    if (this.player.x + databus.moveX > 30 && this.player.x + databus.moveX < common.groundWidth) {
+    if (this.player.x + databus.moveX > 50 && this.player.x + databus.moveX < databus.groundWidth-50) {
       this.player.x += databus.moveX
     }
-    if (this.player.y + databus.moveY > 30 && this.player.y + databus.moveY < common.groundHeight) {
+    if (this.player.y + databus.moveY > 50 && this.player.y + databus.moveY < databus.groundHeight-50) {
       this.player.y += databus.moveY
     }
 
@@ -204,22 +213,51 @@ export default class game {
           item.update(ctx)
         }
       })
-    databus.addEnemyFlag = true
+    // databus.addEnemyFlag = true
     Array.from(databus.mosterHouse)
       .forEach((item) => {
         if (item.visible) {
-          databus.addEnemyFlag = false
+          // databus.addEnemyFlag = false
           item.update(ctx)
         }
       })
-
+    if (databus.frame % 200 == 0) {
+      databus.addEnemyFlag = true
+    }
+    let flagShow = false
     Array.from(databus.enemys)
       .forEach((item) => {
         if (item.visible) {
-
+          databus.addEnemyFlag = false
+          flagShow = true
           item.update(this.player)
         }
       })
+    if (!flagShow) {
+      // if(databus.checkIndex>1){
+      //   databus.groundWidth = 1000
+      //   databus.groundHeight = 800
+      // }else{
+      //   databus.groundWidth = databus.screenWidth
+      //   databus.groundHeight = databus.screenHeight
+      // }
+      // if(databus.checkIndex == 2){
+      //   wx.showToast({
+      //     title: '你是高手，直接来到第3关！',
+      //     icon: 'none',
+      //     duration: 1000
+      //   })
+        
+      // }else{
+        wx.showToast({
+          title: '敌军即将登场，准备战斗！',
+          icon: 'none',
+          duration: 1000
+        })
+      // }
+      
+    }
+
     enemy.create1()
     Array.from(databus.corpses)
       .forEach((item) => {
@@ -234,70 +272,78 @@ export default class game {
       common.groundBg,
       0,
       0,
-      common.groundWidth,
-      common.groundHeight,
+      databus.groundWidth,
+      databus.groundHeight,
       0,
       0,
-      common.groundWidth,
-      common.groundHeight
+      databus.groundWidth,
+      databus.groundHeight
     )
   }
   renderGameScore(ctx) {
     let trny = 0
     let trx = 0
-    let leftP = (common.screenWidth - 386) / 2
-    ctx.fillStyle = "#82E4F2"
+
+    let leftP = (databus.screenWidth - 134) / 2
+    ctx.fillStyle = "#fff"
     ctx.font = "20px Arial"
-    ctx.drawImage(common.scoreBg, leftP - trx - 162, -trny)
+    ctx.drawImage(common.scoreBg, leftP- 70 ,0)
+    ctx.drawImage(common.scoreBg, leftP+70 ,0)
     ctx.fillText(
-      databus.score,
-      leftP - trx - 150,
+      '分数:'+databus.score,
+      leftP- 60,
+      25 - trny
+    )
+    ctx.fillText(
+      '第'+databus.checkIndex+'关',
+      leftP+110,
       25 - trny
     )
   }
   renderPlayerBleed(ctx) {
-    let trny = 0
-    let trx = 0
-    this.player.lifeValue = this.player.lifeValue > this.player.allLifeValue ? this.player.allLifeValue : this.player.lifeValue
-    // let length = -trx + (screenWidth - 300) / 2
-    /*---------------------背景框-------------------------*/
-    ctx.drawImage(common.scoreBg, leftP - trx - 162, -trny)
-    ctx.drawImage(common.bloodBg, leftP - trx - 18, -trny)
-    /*---------------------外框-------------------------》*/
+    // let panelWidth = databus.screenWidth*.3
+    // let trny = 0
+    // let trx = 0
+    // this.player.lifeValue = this.player.lifeValue > this.player.allLifeValue ? this.player.allLifeValue : this.player.lifeValue
+    // // let length = -databus(screenWidth - 300) / 2
+    // /*---------------------背景框-------------------------*/
+    // // ctx.drawImage(common.scoreBg,0,0,420,36, leftP, 0,leftP+panelWidth,30)
+    // ctx.drawImage(common.bloodBg,0,0,420,36, leftP, 0,panelWidth,30)
+    // /*---------------------外框-------------------------》*/
 
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#82E4F2";
-    ctx.beginPath();
-    ctx.arc(leftP - trx, -trny + 20, 8, Math.PI / 2, Math.PI / 2 * 3, false);
+    // ctx.lineWidth = 1;
+    // ctx.strokeStyle = "#82E4F2";
+    // ctx.beginPath();
+    // ctx.arc(leftP - trx, -trny + 20, 8, Math.PI / 2, Math.PI / 2 * 3, false);
 
-    ctx.moveTo(leftP - trx, -trny + 12);
-    ctx.lineTo(common.screenWidth - leftP - trx, -trny + 12);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(leftP - trx, -trny + 28);
-    ctx.lineTo(common.screenWidth - leftP - trx, -trny + 28);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(common.screenWidth - leftP - trx, -trny + 20, 8, Math.PI / 2 * 3, Math.PI / 2, false);
-    ctx.stroke();
+    // ctx.moveTo(leftP - trx, -trny + 12);
+    // ctx.lineTo(databus.screenWidth - leftP - trx, -trny + 12);
+    // ctx.stroke();
+    // ctx.beginPath();
+    // ctx.moveTo(leftP - trx, -trny + 28);
+    // ctx.lineTo(databus.screenWidth - leftP - trx, -trny + 28);
+    // ctx.stroke();
+    // ctx.beginPath();
+    // ctx.arc(databus.screenWidth - leftP - trx, -trny + 20, 8, Math.PI / 2 * 3, Math.PI / 2, false);
+    // ctx.stroke();
 
-    /*---------------------外框-------------------------《*/
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#82E4F2";
-    ctx.beginPath();
-    ctx.arc(leftP - trx, -trny + 20, 6, Math.PI / 2, Math.PI / 2 * 3, false);
-    ctx.fill();
-    ctx.beginPath();
-
-    ctx.fillRect(leftP - trx, -trny + 14, 300 * (this.player.lifeValue / this.player.allLifeValue), 12);
-    ctx.strokeStyle = "#82E4F2";
-    // ctx.lineJoin = "round";
-    ctx.stroke();
+    // /*---------------------外框-------------------------《*/
+    // ctx.lineWidth = 1;
+    // ctx.strokeStyle = "#82E4F2";
+    // ctx.beginPath();
+    // ctx.arc(leftP - trx, -trny + 20, 6, Math.PI / 2, Math.PI / 2 * 3, false);
+    // ctx.fill();
+    // ctx.beginPath();
+    // let length = databus.screenWidth - leftP - trx - leftP - trx
+    // ctx.fillRect(leftP - trx, -trny + 14, length * (this.player.lifeValue / this.player.allLifeValue), 12);
+    // ctx.strokeStyle = "#82E4F2";
+    // // ctx.lineJoin = "round";
+    // ctx.stroke();
 
   }
   renderLeftHandShank(ctx) {
     let x = 40
-    let y = common.screenHeight - common.HAND_WIDTH - 40
+    let y = databus.screenHeight - common.HAND_WIDTH - 40
     ctx.drawImage(
       common.GAME_IMG.get('hand'),
       0, 0, 248, 248,
@@ -307,8 +353,8 @@ export default class game {
     )
   }
   renderRightHandShank(ctx) {
-    let x = common.screenWidth - common.HAND_WIDTH - 40
-    let y = common.screenHeight - common.HAND_HEIGHT - 40
+    let x = databus.screenWidth - common.HAND_WIDTH - 40
+    let y = databus.screenHeight - common.HAND_HEIGHT - 40
     ctx.drawImage(
       common.GAME_IMG.get('hand'),
       0, 0, 248, 248,

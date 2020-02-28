@@ -26,7 +26,7 @@ export default class Bullet extends Sprite {
     this.y = y
     this.showLength = 0
     this.stopFlag = false
-    databus.createSpeed = 4
+    databus.createSpeed = 5
     this.moveX = databus.shootX
     this.moveY = databus.shootY
     this.speed = 20
@@ -39,6 +39,21 @@ export default class Bullet extends Sprite {
         this.player.fireAcTime = 2
       }
     }
+    // this.mucsic()
+  }
+  mucsic() {
+    this.audio = wx.createInnerAudioContext()
+    // this.audio.autoplay = true
+    this.audio.volume = 0
+    this.audio.src = 'audio/8102_2020-02-27-19-33-51.mp3'
+    this.audio.onError((res) => {
+      console.log(res.errMsg)
+      console.log(res.errCode)
+    })
+    this.audio.play()
+    this.audio.onEnded(()=>{
+      this.audio.destroy()
+    })
   }
   drawToCanvas(ctx) {
     if (!this.visible)

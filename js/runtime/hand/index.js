@@ -6,8 +6,6 @@ const databus = new DataBus()
 // let player = new Player()
 let that = null
 const leftHandCheck = (x, y) => {
-  let lx = 100
-  let ly = common.screenHeight - common.HAND_WIDTH - 40
   let thisx = databus.leftPositions.x
   let thisy = databus.leftPositions.y
   const deviation = 0
@@ -17,8 +15,8 @@ const leftHandCheck = (x, y) => {
     y <= thisy + common.HAND_HEIGHT + deviation)
 }
 const rightHandCheck = (x, y) => {
-  let rx = common.screenWidth - common.HAND_WIDTH - 40
-  let ry = common.screenHeight - common.HAND_HEIGHT - 40
+  let rx = databus.screenWidth - common.HAND_WIDTH - 40
+  let ry = databus.screenHeight - common.HAND_HEIGHT - 40
   let thisx = rx
   let thisy = ry
   const deviation = 0
@@ -31,9 +29,9 @@ const rightHandCheck = (x, y) => {
 const leftFormatMovePosition = (x, y) => {
   let pobj = {}
   pobj.x1 = x //点击
-  pobj.x2 = 100 + 60
+  pobj.x2 =100
   pobj.y1 = y
-  pobj.y2 = common.screenHeight - common.HAND_WIDTH + 20
+  pobj.y2 = databus.screenHeight - common.HAND_WIDTH + 20
   tools.getRoteImg(pobj, databus.leftPositions)
   let r = databus.playerSpeed / Math.sqrt((pobj.x1 - pobj.x2) * (pobj.x1 - pobj.x2) + (pobj.y1 - pobj.y2) * (pobj.y1 - pobj.y2))
   databus.moveX = (pobj.x1 - pobj.x2) * r
@@ -72,8 +70,8 @@ const foo = (x, y) => {
   getAPostion(b,x,y)
 }
 const rightFormatMovePosition = (x, y) => {
-  let rx = common.screenWidth - common.HAND_WIDTH - 40
-  let ry = common.screenHeight - common.HAND_HEIGHT - 40
+  let rx = databus.screenWidth - common.HAND_WIDTH - 40
+  let ry = databus.screenHeight - common.HAND_HEIGHT - 40
   let centerX = ~~(rx + common.HAND_WIDTH / 2)
   let centerY = ~~(ry + common.HAND_HEIGHT / 2)
   let pobj = {}
@@ -123,7 +121,7 @@ export const handEvent = () => {
           leftFormatMovePosition(x, y)
         }
 
-        let l = Math.pow(160 - x, 2) + Math.pow(common.screenHeight - common.HAND_WIDTH + 20 - y, 2)
+        let l = Math.pow(160 - x, 2) + Math.pow(databus.screenHeight - common.HAND_WIDTH + 20 - y, 2)
         if (l < 3600) {
           // this.isInsite = true
         } else {

@@ -1,12 +1,9 @@
 import DataBus from '../main/databus'
-
+import {normal, slow} from '../utils/tools'
 import Player from '../player/index'
-const screenWidth = window.innerWidth
-const screenHeight = window.innerHeight
 import {
-  boom1,
-  boomsImage,
-  boomIcon
+  speedIcon,
+  slowSpeed
 } from '../utils/common'
 import {
   rnd
@@ -14,56 +11,39 @@ import {
 let databus = new DataBus()
 const PLAYER_WIDTH = 20
 const PLAYER_HEIGHT = 20
-const esqk = [
-  [5, 5],
-  [-5, -5],
-  [5, 5],
-  [-5, -5],
-  [5,5],
-  [-5, -5],
-  [2, 2],
-  [-2, -2],
-  [0, 0],
-]
+
 let instance
-export default class Boom {
+export default class Slow {
   constructor(x, y) {
     if ( instance )
       return instance
     instance = this
+    this.visible = false
 
   }
   init(x, y) {
     this.x = x
     this.y = y
-    this.name = 'boom'
+    this.name = 'slow'
     this.visible = true
     this.isBoom = false
-    this.boomIcon = boomIcon()
-    this.boom1 = boomsImage()
+    this.boomIcon = speedIcon()
+    this.boom1 = slowSpeed()
     this.boomTime = 1
-    this.esqkTime = 0
-    this.maxBoomTime = 200 //最大爆炸范围
+    this.isEsqk = false
+    this.isRset = false
+    this.maxBoomTime = 800 //最大爆炸范围
     this.width = PLAYER_WIDTH
     this.height = PLAYER_HEIGHT
     this.player = new Player()
-    // this.audio = wx.createInnerAudioContext()
-    // // this.audio.autoplay = true
-    // this.audio.volume = 0
-    // this.audio.src = 'audio/12233_2020-02-27-19-54-06.mp3'
-    // this.audio.onError((res) => {
-    //   console.log(res.errMsg)
-    //   console.log(res.errCode)
-    // })
-    // this.audio.onEnded(()=>{
-    //   this.audio.destroy()
-    // })
   }
-
   drawToCanvas(ctx) {
-    if (!this.isBoom) { //will booming
+    if (!this.visible)
+      return
+    if (!this.isEsqk) { //will booming
       ctx.save()
       ctx.translate(this.x, this.y)
+      ctx.rotate(180 * Math.PI / 180)
       ctx.drawImage(
         this.boomIcon, -this.width / 2, -this.height / 2,
         this.width,
@@ -71,37 +51,19 @@ export default class Boom {
       )
       ctx.restore()
     } else { ////be booming
-      if (this.esqkTime <= esqk.length) {
-        // let temp = esqk[this.esqkTime - 1]
-        // databus.etranspX = temp[0]
-        // databus.etranspY = temp[1]
-        
-      }
+      
       ctx.save()
       ctx.translate(this.x, this.y)
       // for (let i in this.boom1) {
       let r = (this.boomTime * 2)
 
-      if (this.boomTime < 100) {
-        for (let i = 0; i < 20; i++) {
+      if (this.boomTime < 1000) {
           ctx.rotate(rnd(0, 360) * Math.PI / 180)
           ctx.drawImage(
-            this.boom1[rnd(0, 4)], -r / 2, -r / 2,
+            this.boom1, -r / 2, -r / 2,
             r,
             r
           )
-          // }
-        }
-      } else {
-        for (let i = 0; i < (200 - this.boomTime)/5 ; i++) {
-          ctx.rotate(rnd(0, 360) * Math.PI / 180)
-          ctx.drawImage(
-            this.boom1[rnd(2,4)], -r / 2, -r / 2,
-            r,
-            r
-          )
-          // }
-        }
       }
 
       this.width = this.boomTime * 2
@@ -125,18 +87,37 @@ export default class Boom {
   update() {
     if (!this.visible)
       return
-    if (!this.isBoom&&!this.checkIsFingerOnAir()) {
+    if (!this.checkIsFingerOnAir()) {
       this.isBoom = true
-      // this.audio.play()
+      this.isEsqk = true
     }
     if (this.isBoom) {
-      this.esqkTime++
-      this.boomTime += 10
+      this.boomTime += 30
+    }
+    if (this.boomTime > this.maxBoomTime/2) {
+      slow()
+      setTimeout(()=>{
+        this.isRset = true
+      },10000)
+    }
+    if(this.isRset){
+      this.x = this.player.x
+      this.y = this.player.y
+      this.boomTime -=80
+      if( this.boomTime< 500){
+        normal()
+      }
+      if (this.boomTime <0) {
+        this.isEsqk = false
+        this.visible = false
+        databus.pools.recover(this.name, this)
+      }
     }
     if (this.boomTime > this.maxBoomTime) {
       this.isBoom = false
-      this.visible = false
-      databus.pools.recover(this.name, this)
+      // this.visible = false
+      // databus.pools.recover(this.name, this)
     }
+    
   }
 }

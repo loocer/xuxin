@@ -14,20 +14,7 @@ export default class Init {
   constructor() {
     if ( instance )
       return instance
-      this.videoAd = wx.createRewardedVideoAd({
-        adUnitId: 'adunit-dc5ba2a345c46dc9'
-      }).onError((e)=>{
-        console.log(e)
-      })
-      console.log(this.videoAd)
-      this.videoAd&&this.videoAd.show().catch(() => {
-        // 失败重试
-        videoAd.load()
-          .then(() => videoAd.show())
-          .catch(err => {
-            console.log('激励视频 广告显示失败')
-          })
-      })
+      
     instance = this
     this.tempIamg = initPics()
     
@@ -60,8 +47,15 @@ export default class Init {
       
       if(databus.isShowLearn){
         databus.pageIndex = 5
+        
       }else{
         databus.pageIndex = 2
+        // databus.checkIndex = 2
+        // wx.showToast({
+        //   title: '你是高手，直接来到第3关！',
+        //   icon: 'none',
+        //   duration: 1000
+        // })
       }
     }
     if (instance.checkRunking(x, y)) {

@@ -1,13 +1,14 @@
 // export const 
 export const screenWidth = window.innerWidth
 export const screenHeight = window.innerHeight
-export const groundWidth = 1000
-export const groundHeight = 800
+
 export const HAND_WIDTH = 120
 export const HAND_HEIGHT = 120
 import DataBus from '../main/databus'
 import * as pics from './picss.js'
 let databus = new DataBus()
+export let groundWidth = databus.groundWidth
+export let groundHeight = databus.groundHeight
 export const GAME_IMG = new Map();
 
 export const rightPositions = {
@@ -19,7 +20,7 @@ export const rightPositions = {
   rotate: 0
 }
 export const leftPositions = {
-  x: 100,
+  x: 40,
   y: screenHeight - HAND_WIDTH - 40,
   touched: false,
   touchedx: 0,
@@ -50,29 +51,21 @@ export const duobi = (() => {
   }
   return imags
 })()
-
-
-
-export const playerImag = (i) => {
-  let img = new Image()
-  img.src = 'images/player/p' + i + '.png'
-  return img
-}
 export const playerFire = () => {
   let img = new Image()
   img.src = getImgByName('fire-color').url
   return img
 }
-
-// export const bullets = () => {
-//   let list = []
-//   for (let i = 1; i < 4; i++) {
-//     let atlas = new Image()
-//     atlas.src = getImgByName('bullet' + i).url
-//     list.push(atlas)
-//   }
-//   return list
-// }
+export const playerImag = (i) => {
+  let img = new Image()
+  img.src = 'images/player/p' + i + '.png'
+  return img
+}
+export const slowSpeed = () => {
+  let img = new Image()
+  img.src = getImgByName('slowSpeed').url
+  return img
+}
 export const boomsImage = () => {
   let list = []
   for (let bo of pics.booms) {
@@ -117,19 +110,25 @@ export const boomIcon = () => {
   atlas.src = getImgByName('boom-icon').url
   return atlas
 }
-export const speedIcon = () => {
-  let atlas = new Image()
-  atlas.src = getImgByName('addspeed-icon').url
-  return atlas
-}
+
 export const bulletsIcon = () => {
   let atlas = new Image()
   atlas.src = getImgByName('bullets').url
   return atlas
 }
+export const playerBg = () => {
+  let atlas = new Image()
+  atlas.src = 'images/accelerate.png'
+  return atlas
+}
 export const houseIcon = () => {
   let atlas = new Image()
   atlas.src = getImgByName('mosterHouse').url
+  return atlas
+}
+export const speedIcon = () => {
+  let atlas = new Image()
+  atlas.src = getImgByName('addspeed-icon').url
   return atlas
 }
 export const hand = () => {
@@ -226,6 +225,7 @@ export const loadingImage = () => {
   GAME_IMG.set('over',over())
   GAME_IMG.set('houseIcon',houseIcon())
   GAME_IMG.set('learnBg',learnBg())
+  GAME_IMG.set('speedIcon',speedIcon())
 }
 
 const getImgByName = (name) => {

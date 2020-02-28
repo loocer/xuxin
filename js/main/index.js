@@ -4,6 +4,9 @@ import '../libs/symbol'
 import Main from './main'
 import DataBus from './databus'
 import {
+  normal
+} from '../utils/tools'
+import {
   netResourse
 } from '../utils/picss.js'
 import {
@@ -14,17 +17,16 @@ import {
   groundHeight,
   screenWidth,
   loadingImage,
-  screenHeight
 } from '../utils/common'
 let databus = new DataBus()
 export const run = () => {
-  
+
   const image = wx.createImage()
   image.src = 'images/bg/loader.png'
 
 
   // const canvas = wx.createCanvas();
-    const ctx = canvas.getContext('2d')
+  const ctx = canvas.getContext('2d',{antialias:true})
   const wground = groundWidth
   const hground = groundHeight
 
@@ -42,21 +44,10 @@ export const run = () => {
     return {
       title: '子弹上膛，一梭子下去死一片，就是这么燃！',
       // imageUrlId: 'EaPjTeGFSY-aOIUlhIIWOw',
-      imageUrl: canvas.toTempFilePathSync({
-          destWidth: 500,
-          destHeight: 400
-        })
+      imageUrl: 'images/share.png',
     }
   })
-  wx.getSystemInfo({
-    success(res) {
-      if (res.system.substring(0, 3) == 'ios') {
-        wx.setPreferredFramesPerSecond(30)
-      } else {
-        wx.setPreferredFramesPerSecond(30)
-      }
-    }
-  })
+  normal()
 
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
@@ -64,38 +55,52 @@ export const run = () => {
   canvas.width = width * window.devicePixelRatio;
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-  databus.banner =  wx.createBannerAd({
-    adUnitId:'adunit-5d516669164fc3c6',
-    adIntervals:50,
-    style:{
-      left:(screenWidth - 400)/2,
-      top:10,
-      width:400,
+  databus.banner = wx.createBannerAd({
+    adUnitId: 'adunit-5d516669164fc3c6',
+    adIntervals: 50,
+    style: {
+      left: (screenWidth - 400) / 2,
+      top: 10,
+      width: 400,
     }
   })
-  databus.banner.onError((e)=>{
+  databus.banner.onError((e) => {
     console.log(e)
   })
+  databus.videoAd = wx.createRewardedVideoAd({
+    adUnitId: 'adunit-dc5ba2a345c46dc9'
+  })
+  databus.videoAd.onError((e) => {
+    console.log(e)
+  })
+  wx.setInnerAudioOption({
+    mixWithOther:true
+  })
+  // databus.audio =  new Audio()
+  // databus.audio.src = '../../audio/jiqiang.mp3'
+  // databus.audio.play()
+  
+  // databus.audio.loop = true
   wx.getStorage({
     key: 'isShowLearn',
-    success (res) {
+    success(res) {
       databus.isShowLearn = res.data
     },
-    fail(res){
+    fail(res) {
       databus.isShowLearn = true
       console.log(res)
     }
   })
-  image.onload = function () {
-    wx.cloud.init({
-      env: 'test-x1dzi'
-    })
-    let list = []
-    let index = 0
-    console.log(netResourse)
+  let downloadTaskList = []
+  let list = []
+  let index = 0
+
+  function downLoadPic() {
+    list = []
+    downloadTaskList = []
+    index = 0
     for (let obb of netResourse) {
-      console.log(obb)
-      wx.cloud.downloadFile({
+      let task = wx.cloud.downloadFile({
         fileID: obb.fileId, // 文件 ID
         success: res => {
           index++
@@ -110,8 +115,30 @@ export const run = () => {
           }
 
         },
-        fail: console.error
+        fail: () => {}
       })
+      downloadTaskList.push(task)
     }
+  }
+  image.onload = function () {
+    wx.cloud.init({
+      env: 'test-x1dzi'
+    })
+    downLoadPic()
+    setTimeout(() => {
+      if (netResourse.length != list.length) {
+        wx.showToast({
+          title: '网络无连接，加载失败，正在重新加载！',
+          icon: 'none',
+          duration: 2000
+        })
+        for (let obj of downloadTaskList) {
+          obj.abort()
+        }
+        run()
+      }
+    }, 20000)
+
+
   }
 }

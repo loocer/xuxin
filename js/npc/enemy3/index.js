@@ -14,14 +14,14 @@ export default class Boom {
   constructor() {
     this.name = 'mosterHouse'
   }
-  init({x, y,c=100,l=10,li=2}) {
+  init({x, y,c=100,l=10,li=10}) {
     this.x = x
     this.speedIcon = GAME_IMG.get('houseIcon')
     this.y = y
     this.allAalue = l
     this.value = l
-    this.li = li
     this.createTime = c
+    this.li = li
     this.visible = true
     this.width = PLAYER_WIDTH
     this.height = PLAYER_HEIGHT
@@ -55,7 +55,7 @@ export default class Boom {
     if (!this.visible)
       return
     if (databus.frame % this.createTime == 0) {
-      let enemy = databus.pools.getItemByClass('enemy1', Enemy)
+      let enemy = databus.pools.getItemByClass('enemy3', Enemy)
       enemy.init(this.x, this.y,this.li)
       databus.enemys.add(enemy)
       this.value--

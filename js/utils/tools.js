@@ -13,3 +13,25 @@ export function getRoteImg(pobj, acObj) {
 export function rnd(start, end) {
   return Math.floor(Math.random() * (end - start) + start)
 }
+export const normal = ()=>{
+  wx.getSystemInfo({
+    success(res) {
+      if (res.system.substring(0, 3) == 'ios') {
+        wx.setPreferredFramesPerSecond(30)
+      } else {
+        wx.setPreferredFramesPerSecond(30)
+      }
+    }
+  })
+}
+export const slow =()=>{
+  wx.getSystemInfo({
+    success(res) {
+      if (res.system.substring(0, 3) == 'ios') {
+        wx.setPreferredFramesPerSecond(50)
+      } else {
+        wx.setPreferredFramesPerSecond(10)
+      }
+    }
+  })
+}

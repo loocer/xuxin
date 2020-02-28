@@ -12,22 +12,27 @@ export const icon = [{
   {
     name: 'mosterHouse',
     fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/moster-house.png'
-  },{
+  }, {
     name: 'bullets',
     fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/icon/bullets.png'
   }
 ]
-export const over = [{
-  name: 'over1',
-  fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/over1.png'
-}, {
-  name: 'over2',
-  fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bg/BG.png'
-},
-{
-  name: 'over3',
-  fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/fwe.png'
+export const cool = [{
+  name: 'slowSpeed',
+  fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/cool/speed.png'
 }]
+export const over = [{
+    name: 'over1',
+    fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/over1.png'
+  }, {
+    name: 'over2',
+    fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/bg/BG.png'
+  },
+  {
+    name: 'over3',
+    fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/over-b.png'
+  }
+]
 export const hand = [{
   name: 'hand',
   fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/hand.png'
@@ -123,4 +128,4 @@ export const bullet = (() => {
 export const netResourse = [{
   name: 'title',
   fileId: 'cloud://imge8-5z6gt.696d-imge8-5z6gt-1300789023/button/tittle.png',
-}, ...booms, ...icon, ...yellowBug, ...over, ...antBug, ...bihuBug, ...blackBug, ...bullet, ...hand,...learnBg]
+}, ...booms, ...icon, ...yellowBug, ...over, ...antBug, ...bihuBug, ...blackBug, ...bullet, ...hand, ...learnBg, ...cool]

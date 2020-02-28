@@ -2,7 +2,7 @@
 import Pools from '../base/pools'
 let instance
 const screenWidth = window.innerWidth 
-const screenHeight = window.innerHeight 
+const screenHeight = window.innerHeight
 /**
  * 全局状态管理器
  */
@@ -13,6 +13,10 @@ export default class DataBus {
     instance = this
     this.playTempX = screenWidth / 2
     this.playTempY = screenHeight / 2
+    this.groundWidth = 1000
+    this.groundHeight = 800
+    this.screenWidth = window.innerWidth 
+    this.screenHeight = window.innerHeight
     this.leftPositions = {
     }
     this.rightPositions = {
@@ -32,10 +36,15 @@ export default class DataBus {
 
     //-------广告
     this.banner = null
+    this.videoAd = null
+    this.isFinsh = false
     //-----------------
+    this.downLoadTime=0 //第几ge加载资源
   }
 
   reset() {
+    this.groundWidth = 1000
+    this.groundHeight = 800
     this.time = 1
     this.pools && this.pools.pool.clear();
     this.moveX = 0//手柄操作位移
@@ -53,7 +62,7 @@ export default class DataBus {
     this.shootSpeed = 20
     this.createSpeed = 20
     this.playerSpeed = 2
-    this.bulletClass = ['C','bullet3']
+    this.bulletClass = 2
     
     this.bullets = new Set()
     this.enemys = new Set()
@@ -77,6 +86,7 @@ export default class DataBus {
     
     this.addEnemyFlag = true
     this.checkIndex = 0
+    
   }
   rester(){
 
