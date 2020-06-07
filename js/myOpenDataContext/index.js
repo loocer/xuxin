@@ -298,7 +298,7 @@ wx.onTouchMove(e => {
   let touch = e.touches[0].clientY;
   
   startY = !startY ? touch: startY
-  moveY = startY - touch + moveY
+  moveY = (startY - touch)*2 + moveY
   startY = touch
   // console.log('++++++++', moveY, touch, startY)
   initRanklist()
