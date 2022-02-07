@@ -41,7 +41,9 @@ class Room {
    receive(msg) { //{userId:0,heros:[],coordinate:{x,y,z}}
       let player = this.players.get(msg.userId)
       for (let hero of msg.heros) {
-         player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+         if(player.robots.has(hero.id)){
+            player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+         }
       }
    }
    pushMsg(io) {

@@ -354,7 +354,7 @@ function onDo() {
 }
 export const socketMain = () => {
 
-	utl.socket = io('ws://192.168.11.37:3000');
+	utl.socket = io('ws://192.168.0.105:3000');
 	utl.socket.on('123456', (s) => {
 		for (let player of s.list) {
 			for (let rot of player.rots) {

@@ -30,7 +30,8 @@ export default class newtach{
             utl.camera.transform.position = new Laya.Vector3(-x, 30, 500-y)
           }else 
           {
-            
+
+
               let p = this.startPoint
             let p2 = this.trsV2ToV3(p)
             if(
@@ -40,16 +41,20 @@ export default class newtach{
             p2.z<500){
               let x = ~~p2.x
               let y = ~~p2.z
-              let msg ={
-                userId:'zzw',
-                heros:[
-                  {
-                    id:'cube',
+
+              let heros = []
+            for(let hero of utl.entityMap.keys()){
+              heros.push({
+                    id:hero,
                     coordinate:{
                       x:-x,y
                     }
-                  }
-                ]
+                  
+              })
+            }
+              let msg ={
+                userId:'zzw',
+                heros
               }
               utl.socket.emit('123456', msg);
             }
