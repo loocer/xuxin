@@ -89,11 +89,11 @@ export default class GameUI extends Laya.Scene {
         Laya.timer.loop(5,this,this.onUpdate);
         
 
-        let map2 = utl.models.get('cube')
-        map2.getChildByName('on').active = false
-        console.log(map2)
-        this.newScene.addChild(map2);
-        utl.entityMap.set('cube',map2)
+        // let map2 = utl.models.get('cube')
+        // map2.getChildByName('on').active = false
+        // console.log(map2)
+        // this.newScene.addChild(map2);
+        // utl.entityMap.set('cube',map2)
        
         let camera = utl.models.get('camera')
         // // camera.active=false
@@ -109,7 +109,6 @@ export default class GameUI extends Laya.Scene {
 
 
         let box = utl.models.get('box')
-        console.log(map2)
         utl.box = box
         this.newScene.addChild(box);
        

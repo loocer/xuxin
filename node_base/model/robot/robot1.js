@@ -1,11 +1,11 @@
 // import GameMap  from '../box'
 // import boxs  from '../../tools/rooms'
-let GameMap = require('../box')
+let  Box = require('../box')
 class Robot1{
     constructor(playerId){
-       this.id ='cube';
+       this.id =(new Date()).valueOf();
        this.playerId = playerId
-       this.map = new GameMap();
+       this.map = new Box();
        this.start = [0,0]
     //    this.end = [99,22]
        this.end = null
@@ -16,14 +16,14 @@ class Robot1{
     }
     setEnd(p){
         this.end = p
-        let box = this.map.box
+        let box = this.map
         let { start, end } = this
         box.start = box.graph.grid[start[0]][start[1]]
         box.end = box.graph.grid[end[0]][end[1]]
         box.query()
     }
     getPushMsg(){
-        let box = this.map.box
+        let box = this.map
         return {
             id:this.id,
             start:box.result[0],
@@ -31,15 +31,12 @@ class Robot1{
         }
     }
     changeMove(p){
-        this.end = p
-        let box = this.map.box
-        let { end } = this
-        console.log(end)
-        box.end = box.graph.grid[end[0]][end[1]]
+        let box = this.map
+        box.end = box.graph.grid[p[0]][p[1]]
         box.query()
     }
     update(){
-        let box = this.map.box
+        let box = this.map
         if(box.result.length>1){
             box.update()
         }

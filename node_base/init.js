@@ -1,45 +1,20 @@
-let Room = require('./model/room.js')
-let boxs =require('./tools/rooms')
-class Main{
-   constructor(){
-     this.rooms = []
-     this.io = io
-     this.work()
-   }
-   createRoom(){
-      let room = new Room(this.io)
-      room.addPlayer()
-      this.rooms.push(room)
-   }
-   work(){
-      setInterval(()=>{
-         this.update()
-      },100)
-      setInterval(()=>{
-        this.pushMsg()
-     },300)
-   }
-   pushMsg(){
-       for(let room of this.rooms){
-            room.pushMsg(this.io)
-       }
-   }
-   update(){
-    for (let en of  boxs.values()) {
-         en.update()
-      }
-   }
+let contant = require('./tools/contant.js')
+let boxs = require('./tools/rooms')
+let Astar = require('./tools/astar.js');
+module.exports = () => {
+    let list = []
+    let positionBox = []
+    for (let i = 0; i < 500; i++) {
+        let list1 = []
+        for (let o = 0; o < 500; o++) {
+            list1.push(1)
+            positionBox.push({
+                x: o,
+                y: i
+            })
+        }
+        list.push(list1)
+    }
+    contant.graph = new Astar.Graph(list);
+    contant.positionBox = positionBox
 }
-// module.exports=main
-
-
-// const gameGo = {
-//     createRoom:(io)=>{
-//         let main = new Main(io);
-//         main.createRoom()
-//     },
-//     receive:()=>{
-
-//     }
-// }
-module.exports=gameGo
