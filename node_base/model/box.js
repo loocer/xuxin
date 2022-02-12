@@ -45,15 +45,20 @@ class Box{
   }
   changeState(p0){
     let p1 = this.result[0]
-    this.start = p1
-    this.drawPositions = {
-      // start:positionBox[p0[0],p0[1]],
-      // end:positionBox[p1[0],p1[1]]
-      start:p0,
-      end:p1
-    }
-    this.graph[p0[0],p0[1]] = 0
-    this.graph[p1[0],p1[1]] = 1
+    this.start = p0
+    this.end = p1
+    // this.drawPositions = {
+    //   // start:positionBox[p0[0],p0[1]],
+    //   // end:positionBox[p1[0],p1[1]]
+    //   start:p0,
+    //   end:p1
+    // }
+    // let g1 = this.graph[p0[0],p0[1]]
+    // let g2 = this.graph[p1[0],p1[1]]
+    // this.graph[p0[0],p0[1]] = 0
+    // this.graph[p1[0],p1[1]] = 1
+    p0.weight = 1
+    p1.weight = 0
   }
   update(){
     if(this.result.length>1){

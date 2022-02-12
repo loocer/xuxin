@@ -386,7 +386,6 @@ export const socketMain = () => {
 		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.start.x, 3, cube.start.y)
 		// }
 
-		console.log(s)
 	});
 	utl.socket.on('event', function(data) {});
 	utl.socket.on('disconnect', function() {});

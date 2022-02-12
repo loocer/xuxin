@@ -26,8 +26,8 @@ class Robot1{
         let box = this.map
         return {
             id:this.id,
-            start:box.result[0],
-            end:box.result[1]
+            start:box.start,
+            end:box.end
         }
     }
     changeMove(p){
