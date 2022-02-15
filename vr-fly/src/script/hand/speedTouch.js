@@ -47,7 +47,6 @@
      let msg = {
        userId: 'zzw',
        actionName:'addHero',
-       heros:rots
      }
      utl.socket.emit('123456', msg);
 

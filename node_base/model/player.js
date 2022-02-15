@@ -1,5 +1,6 @@
 // import Robot  from './robot/robot1'
 let Robot = require('./robot/robot1')
+let {findIntPition} = require('../tools/tools')
 class Player {
    constructor(room) {
       this.id = 'zzw';
@@ -26,6 +27,14 @@ class Player {
       }
      
       //    robot1.setEnd( [55,57])
+   }
+   addHero(){
+      let id = this.id
+      let {graph} = this.room
+      let item = findIntPition(graph,{x:0,y:0})
+      let robot1 = new Robot(id,this.room.graph,[item[0], item[1]])
+      // robot1.map.graph = this.room.graph
+      this.robots.set(robot1.id, robot1)
    }
    getPushMsg() {
       let rots = []

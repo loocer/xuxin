@@ -4,7 +4,7 @@
     var utl = {
         id:Date.parse(new  Date())+'',
         entityMap:new Map(),
-
+        playerId:'zzw',
 
 
 
@@ -148,6 +148,12 @@
        }
        addpBack(){
          console.log(454545);
+         let msg = {
+           userId: 'zzw',
+           actionName:'addHero',
+         };
+         utl.socket.emit('123456', msg);
+
        }
        eventCheck(){
          let {evList} = this;
@@ -206,6 +212,7 @@
                }
                let msg = {
                  userId: 'zzw',
+                 actionName:'moveGroup',
                  heros:rots
                };
                utl.socket.emit('123456', msg);
