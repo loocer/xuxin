@@ -131,12 +131,12 @@ export default class GameUI extends Laya.Scene {
         this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
         utl.mapSp = this.sp
         this.addMouseEvent()
-        // let leftHandself = this.loadingElse.get('left')
-        // let leftHandselfImg = new  Laya.Image(leftHandself);
-        // leftHandselfImg.height = 150
-        // leftHandselfImg.width =150
-        // leftHandselfImg.pos(Laya.stage.width  -700, Laya.stage.height - 200);
-        // Laya.stage.addChild(leftHandselfImg);
+        let adds = this.loadingElse.get('adds')
+        let addsImg = new  Laya.Image(adds);
+        addsImg.height = 150
+        addsImg.width =150
+        addsImg.pos(200, Laya.stage.height - 200);
+        Laya.stage.addChild(addsImg);
 
 
         // let rightHandself = this.loadingElse.get('right')

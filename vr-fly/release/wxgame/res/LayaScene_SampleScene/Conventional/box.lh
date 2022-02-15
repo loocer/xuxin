@@ -2,15 +2,15 @@
 	"version":"LAYAHIERARCHY:02",
 	"data":{
 		"type":"MeshSprite3D",
-		"instanceID":4,
+		"instanceID":5,
 		"props":{
-			"name":"plane",
+			"name":"box",
 			"active":true,
 			"isStatic":false,
 			"layer":0,
 			"position":[
 				-250,
-				1,
+				1.5,
 				250
 			],
 			"rotation":[
@@ -20,9 +20,9 @@
 				-1
 			],
 			"scale":[
-				600,
+				500,
 				1,
-				600
+				500
 			],
 			"meshPath":"Library/unity default resources-Cube.lm",
 			"enableRender":true,
@@ -30,7 +30,8 @@
 			"castShadow":true,
 			"materials":[
 				{
-					"path":"Assets/New Material 1.lmat"
+					"type":"Laya.BlinnPhongMaterial",
+					"path":"Assets/New Material 3.lmat"
 				}
 			]
 		},

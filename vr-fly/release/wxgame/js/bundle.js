@@ -1,8 +1,13 @@
 (function () {
     'use strict';
-
+    var io = require('../io.js')
     var utl = {
         id:Date.parse(new  Date())+'',
+        entityMap:new Map(),
+
+
+
+
         boxs:new Map(),
         sendMessage:[],
         sendTime:0,
@@ -98,66 +103,202 @@
         }
     };
 
-    class newtach{
-        constructor(){
-               this.status = 0;
-               this.x =0;
-               this.y = 0;
-               this.move = null;
-               this.startPoint = null;
-              this.sp = new Laya.Sprite();
-                Laya.stage.addChild(this.sp);
-            }
-            reset(){
+    let rots = [];
+     class newtach {
+       constructor() {
+         this.status = 0;
+         this.x = 0;
+         this.y = 0;
+         this.move = null;
+         this.startPoint = null;
+         this.endPoint = null;
+         this.sp = new Laya.Sprite();
+         this.point = new Laya.Vector2();
+         this.startP = null;
+         Laya.stage.addChild(this.sp);
+       }
+       reset() {
+         if (!this.startPoint) {
+           return
+         }
+         if (!this.endPoint) {
+           return
+         }
+         if (this.startPoint.x - this.endPoint.x < 10 &&
+           this.startPoint.y - this.endPoint.y < 10 &&
+           this.endPoint.x < 400 &&
+           this.endPoint.y < 400
+         ) {
+           let p = this.startPoint;
+           let x = p.x / 400 * 500;
+           let y = p.y / 400 * 500;
+           utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y);
+         } else {
+           let p = this.startPoint;
+           let p2 = this.trsV2ToV3(p);
+           if (
+             p2.x < 0 &&
+             p2.z > 0 &&
+             p2.x > -500 &&
+             p2.z < 500) {
+             if (
+               Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+               Math.abs(this.startPoint.y - this.endPoint.y) < 10
+             ) {
+               let x = ~~p2.x;
+               let y = ~~p2.z;
 
-            }
-            drawSelect(p){
-              if(this.status == 0){
-                this.startPoint = p;
-                this.status = 1;
-                return
-              }
-              if(this.status == 1){
-                console.log(22222,this.status);
-                let p1 = this.startPoint;
-                this.sp.graphics.clear();
-                this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0,p.x - p1.x, p.y - p1.y, 0, p.y - p1.y,0, 0], "#ff0000", 5);
-              }
-              
-            }
-            leftFormatMovePosition(out,tnum) {
-              let xx = 0;
-              let zz =0;
-              if(out){
-                xx = out.x.toFixed(1); 
-                zz = out.y.toFixed(1); 
-              }else{
-                 xx = 0;
-                zz =0;
-              }
-              if(tnum==0){
-                this.sp.graphics.clear();
-                this.status = 0;
-                  this.reset();
-                  return
-              }
-              if(this.status == tnum){
-                let x = (this.x -  xx).toFixed(1)/10;
-                let z = -(this.z -  zz).toFixed(1)/10;
-                this.move = [x,z];
-              }else{
-                this.x = xx;
-                this.z = zz;
-                this.move = [0,0];
-              }
-              if(tnum==2){
-                  utl.camera.transform.translate(new Laya.Vector3(this.move[0],this.move[1],0),true);
-              }
-              this.status = tnum;
-              this.x = xx;
-              this.z = zz;
-            }
-    }
+               // let heros = []
+               // for (let hero of utl.entityMap.keys()) {
+               //   heros.push({
+               //     id: hero,
+               //     coordinate: {
+               //       x: -x,
+               //       y
+               //     }
+               //   })
+               // }
+               for(let r of rots){
+                  r.coordinate = {
+                     x: -x,
+                     y
+                   };
+               }
+               let msg = {
+                 userId: 'zzw',
+                 heros:rots
+               };
+               utl.socket.emit('123456', msg);
+             }
+           }
+
+         }
+         this.startPoint = null;
+         this.endPoint = null;
+       }
+       drawSelect(p) {
+         if (this.status == 0) {
+           this.startPoint = p;
+           this.status = 1;
+           this.startP = this.trsV2ToV3(p);
+           return
+         }
+         if (this.status == 1) {
+           this.endPoint = p;
+           let p1 = this.startPoint;
+           if (
+             Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+             Math.abs(this.startPoint.y - this.endPoint.y) < 10
+           ) {
+
+           } else {
+             this.sp.graphics.clear();
+             this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
+             this.selectAll(p);
+           }
+
+         }
+
+       }
+       trsV2ToV3(p) {
+
+         // let point =  touch.position
+         this._ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));
+         let outs = [];
+         //产生射线
+         utl.camera.viewportPointToRay(p, this._ray);
+         //拿到射线碰撞的物体
+         utl.newScene.physicsSimulation.rayCastAll(this._ray, outs);
+         //如果碰撞到物体
+         if (outs.length !== 0) {
+
+           for (let i = 0; i < outs.length; i++) {
+             if (outs[i].collider.owner.name == "plane") {
+               return new Laya.Vector3(outs[0].point.x, outs[0].point.y, outs[0].point.z)
+             }
+           }
+           //在射线击中的位置添加一个立方体
+
+         }
+       }
+       selectAll(p22) {
+
+         let p1 = this.startP;
+         let p2 = this.trsV2ToV3(p22);
+         if (!p1) {
+           return
+         }
+         let absx1x = p1.x;
+         let absx2x = p2.x;
+         let absx1z = p1.z;
+         let absx2z = p2.z;
+         let msx = absx1x > absx2x ? absx1x : absx2x;
+         let msz = absx1z > absx2z ? absx1z : absx2z;
+         let mix = absx1x < absx2x ? absx1x : absx2x;
+         let miz = absx1z < absx2z ? absx1z : absx2z;
+         rots = [];
+         for (let key of utl.entityMap.keys()) {
+          let en = utl.entityMap.get(key);
+           let pos = en.transform.position;
+           let fx = pos.x;
+           let fz = pos.z;
+           if (fx < msx &&
+             fx > mix &&
+             fz < msz &&
+             fz > miz) {
+             rots.push({id: key});
+             en.getChildByName('on').active = true;
+             en.getChildByName('off').active = false;
+           } else {
+             en.getChildByName('on').active = false;
+             en.getChildByName('off').active = true;
+           }
+
+         }
+       }
+       leftFormatMovePosition(out, tnum) {
+         let xx = 0;
+         let zz = 0;
+         if (out) {
+           xx = out.x.toFixed(1);
+           zz = out.y.toFixed(1);
+         } else {
+           xx = 0;
+           zz = 0;
+         }
+         if (tnum == 0) {
+           this.sp.graphics.clear();
+           this.status = 0;
+           this.reset();
+
+
+           return
+         }
+         if (this.status == tnum) {
+           let x = (this.x - xx).toFixed(1) / 10;
+           let z = -(this.z - zz).toFixed(1) / 10;
+           this.move = [x, z];
+         } else {
+           this.x = xx;
+           this.z = zz;
+           this.move = [0, 0];
+         }
+         if (tnum == 2) {
+           this.sp.graphics.clear();
+           utl.camera.transform.translate(new Laya.Vector3(this.move[0], this.move[1], 0), true);
+           if (utl.camera.transform.position.x > 0 ||
+             utl.camera.transform.position.x < -500 ||
+             utl.camera.transform.position.z < 0 ||
+             utl.camera.transform.position.z > 500
+           ) {
+             utl.camera.transform.translate(new Laya.Vector3(-this.move[0], -this.move[1], 0), true);
+           }
+         }
+         this.status = tnum;
+         this.x = xx;
+         this.z = zz;
+       }
+     }
 
     class newTwo{
         constructor(){
@@ -990,97 +1131,106 @@
 
     let address = 'http://172.16.25.101:3000';
     let HttpRequest = Laya.HttpRequest;
-    let Event       = Laya.Event;
+    let Event = Laya.Event;
     let result = {};
     let temfe = {
-    	x:1
+    	x: 1
     };
     let websocket = null;
-    const login = ()=>
-    {	
+    const login = () => {
     	let obj = {};
     	let hr = new HttpRequest();
     	let id = utl.userId;
     	// let id = 435
-    	function onHttpRequestProgress(e){
+    	function onHttpRequestProgress(e) {
     		console.log(e);
     	}
-    	function onHttpRequestComplete(e){
+
+    	function onHttpRequestComplete(e) {
     		result.userInfo = JSON.parse(hr.data).data;
-    		console.log(66666,result);
+    		console.log(66666, result);
     		intoRoom();
     	}
-    	function onHttpRequestError(e){
+
+    	function onHttpRequestError(e) {
     		console.log(e);
     	}
-    	
+
     	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
     	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
     	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address+'/login', 'name=fef&id='+id, 'post', 'text');
-    	
+    	hr.send(address + '/login', 'name=fef&id=' + id, 'post', 'text');
+
     };
-    const getServiceAddress = ()=>
-    {
+    const getServiceAddress = () => {
     	let hr = new HttpRequest();
-    	function onHttpRequestProgress(e){
+
+    	function onHttpRequestProgress(e) {
     		console.log(123);
     	}
-    	function onHttpRequestComplete(e){
+
+    	function onHttpRequestComplete(e) {
     		result.serviceAddress = JSON.parse(hr.data).data;
     		login();
-    		console.log(3458888,result);
+    		console.log(3458888, result);
     	}
-    	function onHttpRequestError(e){
-    		console.log(534543,e);
+
+    	function onHttpRequestError(e) {
+    		console.log(534543, e);
     	}
     	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
     	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
     	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address+'/get-socketAddress', '', 'get', 'text');
-    	
+    	hr.send(address + '/get-socketAddress', '', 'get', 'text');
+
     };
-    const intoRoom = ()=>
-    {
+    const intoRoom = () => {
     	let headers = [
     		"Content-Type", "application/x-www-form-urlencoded",
     		'token', result.userInfo.token,
-    		'user_id',result.userInfo.id
+    		'user_id', result.userInfo.id
     	];
     	let hr = new HttpRequest();
-    	function onHttpRequestProgress(e){
+
+    	function onHttpRequestProgress(e) {
     		console.log(123);
     	}
-    	function onHttpRequestComplete(e){
+
+    	function onHttpRequestComplete(e) {
     		socketMain();
-    		console.log(888888888,hr);
+    		console.log(888888888, hr);
     	}
-    	function onHttpRequestError(e){
-    		console.log(534543,e);
+
+    	function onHttpRequestError(e) {
+    		console.log(534543, e);
     	}
     	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
     	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
     	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address+'/into-room?roomNo=123', null, 'get', 'text',headers);
-    	
+    	hr.send(address + '/into-room?roomNo=123', null, 'get', 'text', headers);
+
     };
-    function send(){
+
+    function send() {
     	// if(utl.messgeTime+1==utl.sendTime){
-    		let str = JSON.stringify(utl.sendMessage);
+    	let str = JSON.stringify(utl.sendMessage);
     	websocket.send(str);
     	// }
     	// console.log(66666,utl)
-    	
+
     }
-    function sendWe(){
-    	if(utl.messgeTime+1==utl.sendTime){
+
+    function sendWe() {
+    	if (utl.messgeTime + 1 == utl.sendTime) {
     		let str = JSON.stringify(utl.sendMessage);
-    		wx.sendSocketMessage({data:str});
+    		wx.sendSocketMessage({
+    			data: str
+    		});
     	}
     }
 
-    function df(){
-    	let  player = playerMap.get(utl.id);
+    function df() {
+    	let player = playerMap.get(utl.id);
     	player.twList.shift();
     	player.flag = true;
     	// tweens.shift()
@@ -1091,81 +1241,82 @@
     	// },2000)
     	console.log(33333333);
     	// utl.cube.transform.position = new Laya.Vector3(temp.tar.x,0,temp.tar.z)
-    	
+
     }
     // let tweens = []
     let playerMap = new Map();
 
-    function main(){
-    	if(utl.fireOnOff){
+    function main() {
+    	if (utl.fireOnOff) {
     		return
     	}
     	for (var [key, value] of playerMap.entries()) {
     		// if(!value.timeFlag){
     		// 	continue
     		// }
-    		if(value.flag&&value.twList.length>0){
+    		if (value.flag && value.twList.length > 0) {
     			value.flag = false;
     			drawPlayer(value);
     		}
     	}
     }
-    function drawPlayer(value){
-    	if(value.twList.length==0){
+
+    function drawPlayer(value) {
+    	if (value.twList.length == 0) {
     		return
     	}
 
-    	
+
     	let obj = value.twList[0];
     	let tweenObj = {
-    		val:obj,
+    		val: obj,
     		value,
-    		x:0,
+    		x: 0,
     	};
-    	
+
     	let {
-            id,
-            type,
-            position,
-            shipEuler,
-            speed,
-            roteBody,
-            rotationEuler
+    		id,
+    		type,
+    		position,
+    		shipEuler,
+    		speed,
+    		roteBody,
+    		rotationEuler
     	} = obj;
     	let box = utl.boxs.get(id);
 
-    	if(!box){
+    	if (!box) {
     		box = utl.models.get('pler').clone();
     		utl.newScene.addChild(box);
     		let ship = box.getChildByName('shipmain');
     		let camera = ship.getChildByName('c1');
-    		if(id==utl.id){
+    		if (id == utl.id) {
     			// utl.realBox = box
     			// utl.bullet = box.getChildByName('shipmain').getChildByName('ship').getChildByName('ac')
     			// camera.clearColor = new Laya.Vector4(0, 0, 0, 1);
-    			camera.active=true;
-    		}else{
-    			box.getChildByName('camermain').active=false;
-    			camera.active=false;
+    			camera.active = true;
+    		} else {
+    			box.getChildByName('camermain').active = false;
+    			camera.active = false;
     		}
-            
-    		utl.boxs.set(id,box);
 
-    		
+    		utl.boxs.set(id, box);
+
+
     		//创建新人物
     	}
     	let player = playerMap.get(id);
     	let ship = box.getChildByName('shipmain');
-                
-        let shipcard = ship.getChildByName('ship');
 
-        box.transform.position = new Laya.Vector3(position.x,position.y,position.z);
-    	box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z);
+    	let shipcard = ship.getChildByName('ship');
 
-    	      
-    	shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z);
+    	box.transform.position = new Laya.Vector3(position.x, position.y, position.z);
+    	box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
 
-    	if(type=='FIRE'){
+
+    	shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
+
+    	if (type == 'FIRE') {
     		let bullet = utl.models.get('bullet').clone();
     		let sc = bullet.addComponent(Bullet);
     		sc.startSpeed = speed;
@@ -1173,56 +1324,59 @@
 
     		let shipcar = bullet.getChildByName('Cube');
 
-            bullet.transform.position = new Laya.Vector3(position.x,position.y,position.z);
-    		bullet.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z);
-    		shipcar.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z);
+    		bullet.transform.position = new Laya.Vector3(position.x, position.y, position.z);
+    		bullet.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
+    		shipcar.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
 
     	}
 
     	// box.transform.rotate(new Laya.Vector3(0,0,roteBody.sy* Math.PI / 180,),true);
-     //    box.transform.rotate(new Laya.Vector3(0,roteBody.sx* Math.PI / 180,0),true);
-        
-     //    if(player.lastObj){
-     //    	shipcard.transform.rotate(new Laya.Vector3(0, player.lastObj.x* Math.PI / 180,0),true);
-     //    	shipcard.transform.rotate(new Laya.Vector3(player.lastObj.y* Math.PI / 180,0,0),true);
-     //    }
-        
+    	//    box.transform.rotate(new Laya.Vector3(0,roteBody.sx* Math.PI / 180,0),true);
 
-     //    shipcard.transform.rotate(new Laya.Vector3(-roteBody.y* Math.PI / 180,0,0),true);
-     //    shipcard.transform.rotate(new Laya.Vector3(0,-roteBody.x* Math.PI / 180,0),true);
-     //    player.lastObj = roteBody
+    	//    if(player.lastObj){
+    	//    	shipcard.transform.rotate(new Laya.Vector3(0, player.lastObj.x* Math.PI / 180,0),true);
+    	//    	shipcard.transform.rotate(new Laya.Vector3(player.lastObj.y* Math.PI / 180,0,0),true);
+    	//    }
+
+
+    	//    shipcard.transform.rotate(new Laya.Vector3(-roteBody.y* Math.PI / 180,0,0),true);
+    	//    shipcard.transform.rotate(new Laya.Vector3(0,-roteBody.x* Math.PI / 180,0),true);
+    	//    player.lastObj = roteBody
     	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
     	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
     	// let ship = box.getChildByName('shipmain')
-                
-     //    let shipcard = ship.getChildByName('ship')
-     //    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
+
+    	//    let shipcard = ship.getChildByName('ship')
+    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
 
     	Laya.Tween.to(
-    			tweenObj,
-    			{x:10,
-    			update:new Laya.Handler(this,updateMove,[tweenObj])},
-    			20,
-    			Laya.Ease.linearNone,
-    			Laya.Handler.create(this,tweend,[tweenObj]),
-    			0);
+    		tweenObj, {
+    			x: 10,
+    			update: new Laya.Handler(this, updateMove, [tweenObj])
+    		},
+    		20,
+    		Laya.Ease.linearNone,
+    		Laya.Handler.create(this, tweend, [tweenObj]),
+    		0);
     }
-    function updateMove(value){
+
+    function updateMove(value) {
     	let obj = value.val;
-    	if(obj.speed>0){
-    		
+    	if (obj.speed > 0) {
+
     		let box = utl.boxs.get(obj.id);
-    		box.transform.translate(new Laya.Vector3(0,-obj.speed/10,0),true);
+    		box.transform.translate(new Laya.Vector3(0, -obj.speed / 10, 0), true);
     	}
-    	
+
     }
-    function tweend(obj){
+
+    function tweend(obj) {
     	let {
-            id,
-            position,
-            shipEuler,
-            roteBody,
-            rotationEuler
+    		id,
+    		position,
+    		shipEuler,
+    		roteBody,
+    		rotationEuler
     	} = obj.val;
     	let player = playerMap.get(id);
 
@@ -1230,53 +1384,63 @@
     	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
     	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
     	// let ship = box.getChildByName('shipmain')
-                
-     //    let shipcard = ship.getChildByName('ship')
-     //    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
-    	
+
+    	//    let shipcard = ship.getChildByName('ship')
+    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
+
     	player.twList.shift();
-    	if(player.twList.length!=0){
+    	if (player.twList.length != 0) {
     		drawPlayer(player);
     	}
-    	
+
     	// tweens.shift()
     	// twnFlag = true
     	// main()
     }
-    function changeMove(obj){
-    	
-    	utl.cube.transform.position = new Laya.Vector3(obj.tar.x,0,obj.tar.z);
+
+    function changeMove(obj) {
+
+    	utl.cube.transform.position = new Laya.Vector3(obj.tar.x, 0, obj.tar.z);
     	// temp = obj.rote
     }
-    function addInitTween(obj){
+
+    function addInitTween(obj) {
     	// obj.sendTime = obj.sendTime
     	let id = obj.id;
     	let tweens = [obj];
-    	let flag= true;
+    	let flag = true;
     	let messgeTime = 0;
-    	let mapObj = {twList:tweens,pObj:obj,flag,timeFlag:true,messgeTime,lastObj:null};
-    	playerMap.set(id,mapObj);
+    	let mapObj = {
+    		twList: tweens,
+    		pObj: obj,
+    		flag,
+    		timeFlag: true,
+    		messgeTime,
+    		lastObj: null
+    	};
+    	playerMap.set(id, mapObj);
     	return mapObj
     }
     var temp = null;
-    function fixMessge(list){
-    	if(list.length==0){
+
+    function fixMessge(list) {
+    	if (list.length == 0) {
     		return
     	}
-    	for(let player of list){
+    	for (let player of list) {
     		// if(player.id==utl.id){
     		// 	continue;
     		// }
-    		if(!playerMap.get(player.id)){
+    		if (!playerMap.get(player.id)) {
     			let obj = addInitTween(player);
     			drawPlayer(obj);
-    		}else{
+    		} else {
     			let pm = playerMap.get(player.id);
-    			if(pm.pObj.sendTime < player.sendTime){
+    			if (pm.pObj.sendTime < player.sendTime) {
     				pm.pObj = player;
     				pm.pObj.sendTime = player.sendTime;
     				pm.twList.push(player);
-    				if(pm.twList.length==1){
+    				if (pm.twList.length == 1) {
     					drawPlayer(pm);
     				}
     				// if(!pm.timeFlag){
@@ -1289,134 +1453,152 @@
     				// }
     			}
     		}
-    		
-    		
+
+
     	}
-    	
+
     }
-    function onDo(){
-    	if(utl.fireOnOff){
+
+    function onDo() {
+    	if (utl.fireOnOff) {
     		let shipcar = utl.boxs.get('123');
-    		shipcar.transform.translate(new Laya.Vector3(.1,0,0),true);
+    		shipcar.transform.translate(new Laya.Vector3(.1, 0, 0), true);
     		// if(utl.sendTime==utl.messgeTime){
-    			// let ship = utl.box.getChildByName('shipmain')
-    	        // let shipcar = utl.box.getChildByName('shipmain').getChildByName('ship')
-    	        // let shipcar = utl.box
-            let sPosition = shipcar.transform.position;
-            let rotationEuler = shipcar.transform.rotationEuler;
+    		// let ship = utl.box.getChildByName('shipmain')
+    		// let shipcar = utl.box.getChildByName('shipmain').getChildByName('ship')
+    		// let shipcar = utl.box
+    		let sPosition = shipcar.transform.position;
+    		let rotationEuler = shipcar.transform.rotationEuler;
     		utl.sendTime++;
-    		utl.messgeTime = utl.sendTime;
+    			utl.messgeTime = utl.sendTime;
     		utl.sendMessage = [{
-              id:utl.id,
-              position:sPosition,
-              sendTime:utl.sendTime,
-              type:'move',
-              rotationEuler
-            }];
+    			id: utl.id,
+    			position: sPosition,
+    			sendTime: utl.sendTime,
+    			type: 'move',
+    			rotationEuler
+    		}];
 
     	}
     }
-    const socketMain = ()=>
-    {
+    const socketMain = () => {
 
-    	//------------------------------weixin
-    	// let  wsServer = 'ws://218.89.77.67:9502';
-    	// let wsServer = 'ws://218.89.77.67:9503'
-    	let wsServer = 'wss://flower.zixunfu.com/wss';
-    	
-        //调用websocket对象建立连接：
-        //参数：ws/wss(加密)：//ip:port （字符串）
-         websocket = new WebSocket(wsServer);
+    	// utl.socket = io('ws://192.168.11.37:3000');
+    	utl.socket = io('ws://192.168.0.105:3000');
+    	utl.socket.on('123456', (s) => {
+    		utl.mapSp.graphics.clear();
+    		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+    		for (let player of s.list) {
+    			for (let rot of player.rots) {
 
-        //onopen监听连接打开
-        websocket.onopen = function (evt) {
-            //websocket.readyState 属性：
-            
-            // CONNECTING  0   The connection is not yet open.
-            // OPEN    1   The connection is open and ready to communicate.
-            // CLOSING 2   The connection is in the process of closing.
-            // CLOSED  3   The connection is closed or couldn't be opened.
-            
-           console.log('连上了');
-            utl.websocket = websocket;
-           // Laya.timer.loop(10,this,send);
-           // Laya.timer.loop(500,this,bettwen);
-           // websocket.send('8989898989');
-            
-        };
-         websocket.onmessage = function (evt) {
-            // msg.innerHTML += evt.data +'<br>';
-            // console.log(evt)
+    				if (utl.entityMap.has(rot.id)) {
+    					if (rot.end) {
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
+    						let x = ~~(rot.end.x / 500 * 400);
+    						let y = ~~(rot.end.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    					} else {
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
+    						let x = ~~(rot.start.x / 500 * 400);
+    						let y = ~~(rot.start.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    					}
 
-    		let obj = JSON.parse(evt.data);
-    		fixMessge(obj);
-        };
-        // Laya.timer.loop(30,this,main);
-        //------------------------------web-------------------
+    				} else {
+    					let map2 = utl.models.get('cube').clone();
+    					map2.getChildByName('on').active = false;
+    					utl.newScene.addChild(map2);
+    					utl.entityMap.set(rot.id, map2);
+    					if (rot.end) {
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
+    						let x = ~~(rot.end.x / 500 * 400);
+    						let y = ~~(rot.end.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    					} else {
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
+    						let x = ~~(rot.start.x / 500 * 400);
+    						let y = ~~(rot.start.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    					}
+    				}
+    			}
+    		}
+    		// let cube = s.list[0].rots[0]
+    		// utl.entityMap.get(cube.id).transform.position.x = -cube.end.x
+    		// utl.entityMap.get(cube.id).transform.position.z = cube.end.y
+    		// if (cube.end) {
+    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.end.x, 3, cube.end.y)
+    		// } else {
+    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.start.x, 3, cube.start.y)
+    		// }
+
+    	});
+    	utl.socket.on('event', function(data) {});
+    	utl.socket.on('disconnect', function() {});
+    	//------------------------------web-------------------
     };
-    const creteBox = (sp,erd)=>{
-    	let box = utl.newScene.addChild(sp); 
-        box.takeSpeed = erd.takeSpeed;
+    const creteBox = (sp, erd) => {
+    	let box = utl.newScene.addChild(sp);
+    	box.takeSpeed = erd.takeSpeed;
     	box.speed = {
-        	z:0,
-        	x:0,
-        	y:0
-        };
-    	if(erd.rotation){
-    		box.transform.rotation =  new Laya.Vector3(erd.rotation.x,erd.rotation.y,erd.rotation.z);
+    		z: 0,
+    		x: 0,
+    		y: 0
+    	};
+    	if (erd.rotation) {
+    		box.transform.rotation = new Laya.Vector3(erd.rotation.x, erd.rotation.y, erd.rotation.z);
     	}
-    	if(erd.position){
-    		box.transform.position = new Laya.Vector3(erd.position.x,erd.position.y,erd.position.z);
+    	if (erd.position) {
+    		box.transform.position = new Laya.Vector3(erd.position.x, erd.position.y, erd.position.z);
     	}
 
     	// utl.newScene.addChild(box)
-    	utl.players.set(erd.id,box);
+    	utl.players.set(erd.id, box);
     };
-    const setBox = (players)=>{
+    const setBox = (players) => {
     	let ps = new Map(players);
     	utl.netPlayers = ps;
     	let bs = utl.players;
-    	if(utl.newScene){
-    		for(let k  of ps.keys()){
+    	if (utl.newScene) {
+    		for (let k of ps.keys()) {
     			let now = bs.get(k);
     			let erd = ps.get(k);
-    			
-    			if(now){
+
+    			if (now) {
     				now.takeSpeed = erd.takeSpeed;
     				return
-    				if(erd.position&&now.tempPosition){
+    				if (erd.position && now.tempPosition) {
     					let erdx = {
-    						x:~~(erd.position.x*100),
-    						y:~~(erd.position.y*100),
-    						z:~~(erd.position.z*100)
+    						x: ~~(erd.position.x * 100),
+    						y: ~~(erd.position.y * 100),
+    						z: ~~(erd.position.z * 100)
     					};
     					now.tempPositions.push(erdx);
 
     				}
-    				if(erd.rotation&&now.tempRotation){
+    				if (erd.rotation && now.tempRotation) {
     					let erdx = {
-    						x:~~(erd.rotation.x*100),
-    						y:~~(erd.rotation.y*100),
-    						z:~~(erd.rotation.z*100)
+    						x: ~~(erd.rotation.x * 100),
+    						y: ~~(erd.rotation.y * 100),
+    						z: ~~(erd.rotation.z * 100)
     					};
     					now.tempRotations.push(erdx);
     				}
-                	
-    			}else{
-    				if(erd.id==utl.userId){
-    					Laya.Sprite3D.load("res/t2/LayaScene_fff/Conventional/f.lh", Laya.Handler.create(null, (sp)=> {
-    			       		creteBox(sp,erd);
-    			    	}));
-    				}
-    				else{
+
+    			} else {
+    				if (erd.id == utl.userId) {
+    					Laya.Sprite3D.load("res/t2/LayaScene_fff/Conventional/f.lh", Laya.Handler.create(null, (sp) => {
+    						creteBox(sp, erd);
+    					}));
+    				} else {
     					let box4 = utl.box4.clone();
-    			     	creteBox(box4,erd);
+    					creteBox(box4, erd);
     				}
-    			    
+
     			}
     		}
     	}
-    	
+
     };
 
     /**
@@ -1488,23 +1670,23 @@
             this.drawUi();
             temp$1 = this;
 
-            this.newScene.addChild(utl.models.get('light'));  
+            // this.newScene.addChild(utl.models.get('light'));  
             var directionLight = this.newScene.addChild(new Laya.DirectionLight());
-            directionLight.color = new Laya.Vector3(0.6, 0.6, 0.6);
-            directionLight.transform.worldMatrix.setForward(new Laya.Vector3(1, -1, 0));
+            directionLight.color = new Laya.Vector3(0.3, 0.3, 0.1);
+            directionLight.transform.worldMatrix.setForward(new Laya.Vector3(-1, -1, -1));
 
-            // socketMain()
+            socketMain();
            
 
            
             Laya.timer.loop(5,this,this.onUpdate);
             
 
-            let map2 = utl.models.get('cube');
-            console.log(map2);
-            this.newScene.addChild(map2);
-
-
+            // let map2 = utl.models.get('cube')
+            // map2.getChildByName('on').active = false
+            // console.log(map2)
+            // this.newScene.addChild(map2);
+            // utl.entityMap.set('cube',map2)
            
             let camera = utl.models.get('camera');
             // // camera.active=false
@@ -1518,42 +1700,30 @@
             let  terrain= utl.models.get('plane');
             this.newScene.addChild(terrain);
 
+
+            let box = utl.models.get('box');
+            utl.box = box;
+            this.newScene.addChild(box);
            
         }
         addMouseEvent(){
             
             //鼠标事件监听
-            Laya.stage.on(Laya.Event.MOUSE_DOWN,this, this.onMouseDown);
+            this.sp.on(Laya.Event.CLICK,this, this.onMouseDown);
         }
         onMouseDown() {
-            let point = new Laya.Vector2();
-            point.x = Laya.MouseManager.instance.mouseX;
-            point.y = Laya.MouseManager.instance.mouseY;
-            //产生射线
-             utl.camera.viewportPointToRay(point,this._ray);
-            //拿到射线碰撞的物体
-            this.newScene.physicsSimulation.rayCastAll(this._ray,this.outs);
-            console.log(333333);       
-            //如果碰撞到物体
-            if (this.outs.length !== 0)
-            {
-
-                for (let i = 0; i <  this.outs.length; i++){
-                    if(this.outs[i].collider.owner.name=="plane"){
-
-                    }
-                }
-                    //在射线击中的位置添加一个立方体
-                    console.log( this.outs);          
-            }
+            // let point = new Laya.Vector2();
+            // point.x = Laya.MouseManager.instance.mouseX;
+            // point.y = Laya.MouseManager.instance.mouseY;
+           console.log(6666666666);
 
         }
         drawUi(){
-            let sp = new Laya.Sprite();
-            Laya.stage.addChild(sp);
-            sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
-
-          
+            this.sp = new Laya.Sprite();
+            Laya.stage.addChild(this.sp);
+            this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+            utl.mapSp = this.sp;
+            this.addMouseEvent();
             // let leftHandself = this.loadingElse.get('left')
             // let leftHandselfImg = new  Laya.Image(leftHandself);
             // leftHandselfImg.height = 150
@@ -1789,6 +1959,12 @@
             let touch = this.newScene.input.getTouch(0);
             let touch1 = this.newScene.input.getTouch(1);
 
+            // if(touchCount==1){
+            //     if(touch.position.x<400&&touch.position.y<400){
+            //         console.log(touch.position)
+            //         return 
+            //     }
+            // }
             if(touchCount==0){
              
                 touchs[0][1].event.leftFormatMovePosition(null,0); 
@@ -2187,6 +2363,7 @@
             ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
             ['terrain','res/LayaScene_SampleScene/Conventional/Terrain.lh'],
              ['plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
+             ['box','res/LayaScene_SampleScene/Conventional/box.lh'],
     	],
     ];
 
@@ -3081,7 +3258,7 @@
     GameConfig.screenMode = "none";
     GameConfig.alignV = "top";
     GameConfig.alignH = "left";
-    GameConfig.startScene = "test/level.scene";
+    GameConfig.startScene = "test/load.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
     GameConfig.stat = false;

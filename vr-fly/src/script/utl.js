@@ -1,7 +1,7 @@
 export default  {
     id:Date.parse(new  Date())+'',
     entityMap:new Map(),
-
+    playerId:'zzw',
 
 
 
@@ -66,14 +66,14 @@ export default  {
     updates:[],
     firs:[],
     loadingElse:[
-        ['cotrll','https://xuxin.love/img/fly/controll.png'],
-        ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
-        ['fire','https://xuxin.love/img/fly/fires.png'],
-        ['left','https://xuxin.love/img/fly/left.png'],
-        ['right','https://xuxin.love/img/fly/right.png'],
-        ['speed','https://xuxin.love/img/fly/speed.png'],
-        ['lessSpeed','https://xuxin.love/img/fly/lessSpeed.png'],
-        ['addSpeed','https://xuxin.love/img/fly/addSpeed.png']
+         ['adds','res/adds.png'],
+        // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
+        // ['fire','https://xuxin.love/img/fly/fires.png'],
+        // ['left','https://xuxin.love/img/fly/left.png'],
+        // ['right','https://xuxin.love/img/fly/right.png'],
+        // ['speed','https://xuxin.love/img/fly/speed.png'],
+        // ['lessSpeed','https://xuxin.love/img/fly/lessSpeed.png'],
+        // ['addSpeed','https://xuxin.love/img/fly/addSpeed.png']
     ],
     loadingSprite3D:[
         ['light','res/LayaScene_SampleScene/Directional Light.lh'],

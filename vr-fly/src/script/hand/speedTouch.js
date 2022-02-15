@@ -1,5 +1,6 @@
  import utl from "../utl.js"
  let rots = []
+
  export default class newtach {
    constructor() {
      this.status = 0
@@ -11,25 +12,71 @@
      this.sp = new Laya.Sprite();
      this.point = new Laya.Vector2();
      this.startP = null
+     this.evList = this.eventInt()
      Laya.stage.addChild(this.sp);
    }
-   reset() {
-     if (!this.startPoint) {
-       return
+   eventInt(){
+     let that = this
+      let eventList = [{
+         checkPotion:{
+           x:200,
+           y:Laya.stage.height - 200,
+           width:150,
+           height:150
+         },
+         callBack:()=>{
+           return that.addpBack()
+         }
+      },
+      {
+         checkPotion:{
+           x:0,
+           y:0,
+           width:400,
+           height:400
+         },
+         callBack:()=>{
+           return that.changeCamerBack()
+         }
+      }
+      ]
+      return eventList
+   }
+   addpBack(){
+     console.log(454545)
+     let msg = {
+       userId: 'zzw',
+       actionName:'addHero',
+       heros:rots
      }
-     if (!this.endPoint) {
-       return
-     }
-     if (this.startPoint.x - this.endPoint.x < 10 &&
+     utl.socket.emit('123456', msg);
+
+   }
+   eventCheck(){
+     let {evList} = this
+     for(let item of evList){
+       let checkPotion = item.checkPotion
+       if (this.startPoint.x - this.endPoint.x < 10 &&
        this.startPoint.y - this.endPoint.y < 10 &&
-       this.endPoint.x < 400 &&
-       this.endPoint.y < 400
-     ) {
+       this.endPoint.x < checkPotion.x+checkPotion.width &&
+       this.endPoint.x > checkPotion.x &&
+       this.endPoint.y < checkPotion.y+checkPotion.height&&
+       this.endPoint.y > checkPotion.y
+       ){
+         item.callBack()
+         return
+       }
+     }
+     this.changePointBack()
+   }
+
+   changeCamerBack(){
        let p = this.startPoint
        let x = p.x / 400 * 500
        let y = p.y / 400 * 500
        utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
-     } else {
+   }
+   changePointBack(){
        let p = this.startPoint
        let p2 = this.trsV2ToV3(p)
        if (
@@ -62,11 +109,74 @@
            }
            let msg = {
              userId: 'zzw',
+             actionName:'moveGroup',
              heros:rots
            }
            utl.socket.emit('123456', msg);
          }
        }
+   }
+   reset() {
+      if (!this.startPoint) {
+        return
+      }
+      if (!this.endPoint) {
+        return
+      }
+      if (
+           Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+           Math.abs(this.startPoint.y - this.endPoint.y) < 10
+      ){
+        this.eventCheck()
+      // }
+
+     // if (this.startPoint.x - this.endPoint.x < 10 &&
+     //   this.startPoint.y - this.endPoint.y < 10 &&
+     //   this.endPoint.x < 400 &&
+     //   this.endPoint.y < 400
+     // ) {
+     //   let p = this.startPoint
+     //   let x = p.x / 400 * 500
+     //   let y = p.y / 400 * 500
+     //   utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
+     // } else {
+     //   let p = this.startPoint
+     //   let p2 = this.trsV2ToV3(p)
+     //   if (
+     //     p2.x < 0 &&
+     //     p2.z > 0 &&
+     //     p2.x > -500 &&
+     //     p2.z < 500) {
+     //     if (
+     //       Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+     //       Math.abs(this.startPoint.y - this.endPoint.y) < 10
+     //     ) {
+     //       let x = ~~p2.x
+     //       let y = ~~p2.z
+
+     //       // let heros = []
+     //       // for (let hero of utl.entityMap.keys()) {
+     //       //   heros.push({
+     //       //     id: hero,
+     //       //     coordinate: {
+     //       //       x: -x,
+     //       //       y
+     //       //     }
+     //       //   })
+     //       // }
+     //       for(let r of rots){
+     //          r.coordinate = {
+     //             x: -x,
+     //             y
+     //           }
+     //       }
+     //       let msg = {
+     //         userId: 'zzw',
+     //         heros:rots
+     //       }
+     //       utl.socket.emit('123456', msg);
+     //     }
+     //   }
 
      }
      this.startPoint = null

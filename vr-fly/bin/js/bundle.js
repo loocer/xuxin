@@ -69,14 +69,14 @@
         updates:[],
         firs:[],
         loadingElse:[
-            ['cotrll','https://xuxin.love/img/fly/controll.png'],
-            ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
-            ['fire','https://xuxin.love/img/fly/fires.png'],
-            ['left','https://xuxin.love/img/fly/left.png'],
-            ['right','https://xuxin.love/img/fly/right.png'],
-            ['speed','https://xuxin.love/img/fly/speed.png'],
-            ['lessSpeed','https://xuxin.love/img/fly/lessSpeed.png'],
-            ['addSpeed','https://xuxin.love/img/fly/addSpeed.png']
+             ['adds','res/adds.png'],
+            // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
+            // ['fire','https://xuxin.love/img/fly/fires.png'],
+            // ['left','https://xuxin.love/img/fly/left.png'],
+            // ['right','https://xuxin.love/img/fly/right.png'],
+            // ['speed','https://xuxin.love/img/fly/speed.png'],
+            // ['lessSpeed','https://xuxin.love/img/fly/lessSpeed.png'],
+            // ['addSpeed','https://xuxin.love/img/fly/addSpeed.png']
         ],
         loadingSprite3D:[
             ['light','res/LayaScene_SampleScene/Directional Light.lh'],
@@ -104,6 +104,7 @@
     };
 
     let rots = [];
+
      class newtach {
        constructor() {
          this.status = 0;
@@ -115,25 +116,64 @@
          this.sp = new Laya.Sprite();
          this.point = new Laya.Vector2();
          this.startP = null;
+         this.evList = this.eventInt();
          Laya.stage.addChild(this.sp);
        }
-       reset() {
-         if (!this.startPoint) {
-           return
-         }
-         if (!this.endPoint) {
-           return
-         }
-         if (this.startPoint.x - this.endPoint.x < 10 &&
+       eventInt(){
+         let that = this;
+          let eventList = [{
+             checkPotion:{
+               x:200,
+               y:Laya.stage.height - 200,
+               width:150,
+               height:150
+             },
+             callBack:()=>{
+               return that.addpBack()
+             }
+          },
+          {
+             checkPotion:{
+               x:0,
+               y:0,
+               width:400,
+               height:400
+             },
+             callBack:()=>{
+               return that.changeCamerBack()
+             }
+          }
+          ];
+          return eventList
+       }
+       addpBack(){
+         console.log(454545);
+       }
+       eventCheck(){
+         let {evList} = this;
+         for(let item of evList){
+           let checkPotion = item.checkPotion;
+           if (this.startPoint.x - this.endPoint.x < 10 &&
            this.startPoint.y - this.endPoint.y < 10 &&
-           this.endPoint.x < 400 &&
-           this.endPoint.y < 400
-         ) {
+           this.endPoint.x < checkPotion.x+checkPotion.width &&
+           this.endPoint.x > checkPotion.x &&
+           this.endPoint.y < checkPotion.y+checkPotion.height&&
+           this.endPoint.y > checkPotion.y
+           ){
+             item.callBack();
+             return
+           }
+         }
+         this.changePointBack();
+       }
+
+       changeCamerBack(){
            let p = this.startPoint;
            let x = p.x / 400 * 500;
            let y = p.y / 400 * 500;
            utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y);
-         } else {
+       }
+       changePointBack(){
            let p = this.startPoint;
            let p2 = this.trsV2ToV3(p);
            if (
@@ -171,6 +211,68 @@
                utl.socket.emit('123456', msg);
              }
            }
+       }
+       reset() {
+          if (!this.startPoint) {
+            return
+          }
+          if (!this.endPoint) {
+            return
+          }
+          if (
+               Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+               Math.abs(this.startPoint.y - this.endPoint.y) < 10
+          ){
+            this.eventCheck();
+          // }
+
+         // if (this.startPoint.x - this.endPoint.x < 10 &&
+         //   this.startPoint.y - this.endPoint.y < 10 &&
+         //   this.endPoint.x < 400 &&
+         //   this.endPoint.y < 400
+         // ) {
+         //   let p = this.startPoint
+         //   let x = p.x / 400 * 500
+         //   let y = p.y / 400 * 500
+         //   utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
+         // } else {
+         //   let p = this.startPoint
+         //   let p2 = this.trsV2ToV3(p)
+         //   if (
+         //     p2.x < 0 &&
+         //     p2.z > 0 &&
+         //     p2.x > -500 &&
+         //     p2.z < 500) {
+         //     if (
+         //       Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+         //       Math.abs(this.startPoint.y - this.endPoint.y) < 10
+         //     ) {
+         //       let x = ~~p2.x
+         //       let y = ~~p2.z
+
+         //       // let heros = []
+         //       // for (let hero of utl.entityMap.keys()) {
+         //       //   heros.push({
+         //       //     id: hero,
+         //       //     coordinate: {
+         //       //       x: -x,
+         //       //       y
+         //       //     }
+         //       //   })
+         //       // }
+         //       for(let r of rots){
+         //          r.coordinate = {
+         //             x: -x,
+         //             y
+         //           }
+         //       }
+         //       let msg = {
+         //         userId: 'zzw',
+         //         heros:rots
+         //       }
+         //       utl.socket.emit('123456', msg);
+         //     }
+         //   }
 
          }
          this.startPoint = null;
@@ -1483,7 +1585,8 @@
     }
     const socketMain = () => {
 
-    	utl.socket = io('ws://192.168.11.37:3000');
+    	// utl.socket = io('ws://192.168.11.37:3000');
+    	utl.socket = io('ws://192.168.0.105:3000');
     	utl.socket.on('123456', (s) => {
     		utl.mapSp.graphics.clear();
     		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
@@ -1495,12 +1598,12 @@
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
     						let x = ~~(rot.end.x / 500 * 400);
     						let y = ~~(rot.end.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y, 10, "#00ffff");
+    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
     					} else {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y,10, "#00ffff");
+    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
     					}
 
     				} else {
@@ -1512,12 +1615,12 @@
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
     						let x = ~~(rot.end.x / 500 * 400);
     						let y = ~~(rot.end.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y, 10, "#00ffff");
+    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
     					} else {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y, 10, "#00ffff");
+    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
     					}
     				}
     			}
@@ -1723,12 +1826,12 @@
             this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
             utl.mapSp = this.sp;
             this.addMouseEvent();
-            // let leftHandself = this.loadingElse.get('left')
-            // let leftHandselfImg = new  Laya.Image(leftHandself);
-            // leftHandselfImg.height = 150
-            // leftHandselfImg.width =150
-            // leftHandselfImg.pos(Laya.stage.width  -700, Laya.stage.height - 200);
-            // Laya.stage.addChild(leftHandselfImg);
+            let adds = this.loadingElse.get('adds');
+            let addsImg = new  Laya.Image(adds);
+            addsImg.height = 150;
+            addsImg.width =150;
+            addsImg.pos(200, Laya.stage.height - 200);
+            Laya.stage.addChild(addsImg);
 
 
             // let rightHandself = this.loadingElse.get('right')
@@ -2357,12 +2460,12 @@
 
     const loadFile =  [
     	[
-    		  ['light','res/LayaScene_SampleScene/Conventional/Light.lh'],
+    		['light','res/LayaScene_SampleScene/Conventional/Light.lh'],
             ['cube','res/LayaScene_SampleScene/Conventional/Cube.lh'],
             ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
-            ['terrain','res/LayaScene_SampleScene/Conventional/Terrain.lh'],
-             ['plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
-             ['box','res/LayaScene_SampleScene/Conventional/box.lh'],
+            // ['terrain','res/LayaScene_SampleScene/Conventional/Terrain.lh'],
+            ['plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
+            ['box','res/LayaScene_SampleScene/Conventional/box.lh'],
     	],
     ];
 
@@ -3257,7 +3360,7 @@
     GameConfig.screenMode = "none";
     GameConfig.alignV = "top";
     GameConfig.alignH = "left";
-    GameConfig.startScene = "test/load.scene";
+    GameConfig.startScene = "test/level.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
     GameConfig.stat = false;

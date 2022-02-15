@@ -39,6 +39,22 @@ class Room {
       }
    }
    receive(msg) { //{userId:0,heros:[],coordinate:{x,y,z}}
+      if(msg.actionName=='moveGroup'){
+         this.moveGroup(msg)
+      }
+      if(msg.actionName=='addHero'){
+         this.addHero(msg)
+      }
+   }
+   addHero(msg){
+      let player = this.players.get(msg.userId)
+      for (let hero of msg.heros) {
+         if(player.robots.has(hero.id)){
+            player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+         }
+      }
+   }
+   moveGroup(msg){
       let player = this.players.get(msg.userId)
       for (let hero of msg.heros) {
          if(player.robots.has(hero.id)){

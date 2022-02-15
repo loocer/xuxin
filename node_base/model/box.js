@@ -15,12 +15,12 @@ let graph = null
 //   [{x:0,y:0},{x:1,y:0}]
 // ]
 class Box{
-  constructor(){
+  constructor(graph){
     this.position = {x:0,y:0}
     this.start = null
     this.end = null
     this.result = []
-    this.graph = null
+    this.graph = graph
     this.drawPositions = []
     this.standingTime = 0
     this.isMove=false
