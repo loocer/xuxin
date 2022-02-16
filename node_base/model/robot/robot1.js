@@ -16,6 +16,7 @@ class Robot1{
         let box = this.map
         let { start } = this
         box.start = box.graph.grid[start[0]][start[1]]
+        box.graph.grid[start[0]][start[1]].weight = 0
     }
     setEnd(p){
         this.end = p

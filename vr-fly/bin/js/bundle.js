@@ -4,7 +4,7 @@
     var utl = {
         id:Date.parse(new  Date())+'',
         entityMap:new Map(),
-
+        playerId:'zzw',
 
 
 
@@ -69,7 +69,7 @@
         updates:[],
         firs:[],
         loadingElse:[
-             ['adds','res/adds.png'],
+             ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
             // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
             // ['fire','https://xuxin.love/img/fly/fires.png'],
             // ['left','https://xuxin.love/img/fly/left.png'],
@@ -148,6 +148,13 @@
        }
        addpBack(){
          console.log(454545);
+         let msg = {
+           userId: 'zzw',
+           actionName:'addHero',
+           heros:rots
+         };
+         utl.socket.emit('123456', msg);
+
        }
        eventCheck(){
          let {evList} = this;
@@ -206,6 +213,7 @@
                }
                let msg = {
                  userId: 'zzw',
+                 actionName:'moveGroup',
                  heros:rots
                };
                utl.socket.emit('123456', msg);
@@ -1585,8 +1593,8 @@
     }
     const socketMain = () => {
 
-    	// utl.socket = io('ws://192.168.11.37:3000');
-    	utl.socket = io('ws://192.168.0.105:3000');
+    	utl.socket = io('ws://39.103.132.21:3000');
+    	// utl.socket = io('ws://192.168.0.105:3000');
     	utl.socket.on('123456', (s) => {
     		utl.mapSp.graphics.clear();
     		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
@@ -1594,34 +1602,34 @@
     			for (let rot of player.rots) {
 
     				if (utl.entityMap.has(rot.id)) {
-    					if (rot.end) {
-    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
-    						let x = ~~(rot.end.x / 500 * 400);
-    						let y = ~~(rot.end.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-    					} else {
+    					// if (rot.end) {
+    					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
+    					// 	let x = ~~(rot.end.x / 500 * 400)
+    					// 	let y = ~~(rot.end.y / 500 * 400)
+    					// 	utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    					// } else {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-    					}
+    					// }
 
     				} else {
     					let map2 = utl.models.get('cube').clone();
     					map2.getChildByName('on').active = false;
     					utl.newScene.addChild(map2);
     					utl.entityMap.set(rot.id, map2);
-    					if (rot.end) {
-    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
-    						let x = ~~(rot.end.x / 500 * 400);
-    						let y = ~~(rot.end.y / 500 * 400);
-    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
-    					} else {
+    					// if (rot.end) {
+    					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
+    					// 	let x = ~~(rot.end.x / 500 * 400)
+    					// 	let y = ~~(rot.end.y / 500 * 400)
+    					// 	utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    					// } else {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
-    					}
+    					// }
     				}
     			}
     		}
@@ -2460,12 +2468,12 @@
 
     const loadFile =  [
     	[
-    		['light','res/LayaScene_SampleScene/Conventional/Light.lh'],
-            ['cube','res/LayaScene_SampleScene/Conventional/Cube.lh'],
-            ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
-            // ['terrain','res/LayaScene_SampleScene/Conventional/Terrain.lh'],
-            ['plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
-            ['box','res/LayaScene_SampleScene/Conventional/box.lh'],
+    		['light','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Light.lh'],
+            ['cube','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Cube.lh'],
+            ['camera','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Camera.lh'],
+            // ['terrain','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Terrain.lh'],
+            ['plane','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Plane.lh'],
+            ['box','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/box.lh'],
     	],
     ];
 
