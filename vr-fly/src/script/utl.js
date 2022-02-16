@@ -66,7 +66,7 @@ export default  {
     updates:[],
     firs:[],
     loadingElse:[
-         ['adds','res/adds.png'],
+         ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
         // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
         // ['fire','https://xuxin.love/img/fly/fires.png'],
         // ['left','https://xuxin.love/img/fly/left.png'],
