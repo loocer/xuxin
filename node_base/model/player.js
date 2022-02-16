@@ -20,7 +20,7 @@ class Player {
       // robot1.map.graph = this.room.graph
       // this.robots.set(robot1.id, robot1)
       // robot1.setEnd([40, 3])
-      for(let i=0;i<100;i++){
+      for(let i=0;i<2;i++){
          let robot1 = new Robot(id,this.room.graph,[2*i, 3])
          // robot1.map.graph = this.room.graph
          this.robots.set(robot1.id, robot1)
