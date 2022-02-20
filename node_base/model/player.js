@@ -39,6 +39,9 @@ class Player {
    getPushMsg() {
       let rots = []
       for (let rot of this.robots.values()) {
+         // let {start,end} = rot.map
+         // this.room.graph.grid[start.x][start.y].weight = 0
+         // this.room.graph.grid[end.x][end.y].weight = 1
          rots.push(rot.getPushMsg())
       }
       return {

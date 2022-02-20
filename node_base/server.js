@@ -1,5 +1,18 @@
 let socketManner = require('./socketManner')
 let Main = require('./main')
+const https = require('https');
+const fs = require('fs');
+const app = require('express')();
+const privateKey = fs.readFileSync('./6360482_xuxin.love.key');
+const certificate = fs.readFileSync('./6360482_xuxin.love.pem');
+const credentials = {
+  key: privateKey,
+  cert: certificate
+};
+
+// 创建 HTTP 与 HTTPS 服务器
+// const httpServer = http.createServer(app.callback());
+const httpsServer = https.createServer(credentials, app);
 // var express=require('express');
 // var app =express();
 // const http = require('http').Server(app);
@@ -38,14 +51,14 @@ let Main = require('./main')
 // // http.listen(port, () => {
 // //   console.log(`Socket.IO server running at http://localhost:${port}/`);
 // // });
-const app = require('express')();
+
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(httpsServer);
 const port = process.env.PORT || 3000;
 
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/index.html');
-// });
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
+});
 let main = new Main(io);
     main.createRoom()
 socketManner(io)
@@ -55,6 +68,9 @@ socketManner(io)
 //   });
 // });
 
-http.listen(port, () => {
-  console.log(`Socket.IO server running at http://localhost:${port}/`);
+// http.listen(port, () => {
+//   console.log(`Socket.IO server running at http://localhost:${port}/`);
+// });
+httpsServer.listen(port, function () {
+  console.log('HTTPS Server is running on: https://localhost:%s');
 });

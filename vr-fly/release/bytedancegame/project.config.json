@@ -1,11 +1,14 @@
 {
-	"setting": {
-		"urlCheck": false,
-		"es6": false,
-		"postcss": true,
-		"minified": true,
-		"newFeature": true
-	},
-	"appid": "tt3ca64a1ba39d92c3",
-	"projectname": "layaByteDanceTest"
+    "setting": {
+        "urlCheck": false,
+        "es6": false,
+        "newFeature": false,
+        "postcss": false,
+        "mockUpdate": false,
+        "minified": false,
+        "localPlugins": true
+    },
+    "appid": "testAppId",
+    "projectname": "layaByteDanceTest",
+    "projectType": "game"
 }

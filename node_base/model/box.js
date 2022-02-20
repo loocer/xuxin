@@ -15,12 +15,15 @@ let graph = null
 //   [{x:0,y:0},{x:1,y:0}]
 // ]
 class Box{
-  constructor(graph){
+  constructor(graph,start){
     this.position = {x:0,y:0}
-    this.start = null
-    this.end = null
+    this.start = graph.grid[start[0]][start[1]]
+    this.end = graph.grid[start[0]][start[1]]
     this.result = []
     this.graph = graph
+    this.move1 = graph.grid[start[0]][start[1]]
+    this.move2 = graph.grid[start[0]][start[1]]
+    graph.grid[start[0]][start[1]].weight = 0
     this.drawPositions = []
     this.standingTime = 0
     this.isMove=false
@@ -41,12 +44,20 @@ class Box{
     return nextPoint.weight
   }
   stop(){
+    if(this.result.length>0){
+      let p1 = this.result[0]
+      this.graph.grid[p1.x][p1.y].weight = 1
+    }
+    
     this.result = []
   }
-  changeState(p0){
+  changeState(){
+    let p0 = this.result.shift()
     let p1 = this.result[0]
     this.start = p0
-    this.end = p1
+    this.move1 = {x:p0.x,y:p0.y}
+    this.move2 = {x:p1.x,y:p1.y}
+    
     // this.drawPositions = {
     //   // start:positionBox[p0[0],p0[1]],
     //   // end:positionBox[p1[0],p1[1]]
@@ -57,14 +68,15 @@ class Box{
     // let g2 = this.graph[p1[0],p1[1]]
     // this.graph[p0[0],p0[1]] = 0
     // this.graph[p1[0],p1[1]] = 1
-    p0.weight = 1
-    p1.weight = 0
   }
   update(){
+    if(this.result.length==0){
+      return
+      }
     if(this.result.length>1){
       if(this.check()){
         this.standingTime = 0
-        this.changeState(this.result.shift())
+        this.changeState()
       }else{
         if(this.standingTime==10){
           this.query()
@@ -72,6 +84,17 @@ class Box{
         this.standingTime++
       }
     }
+    if(this.result.length==1){
+      let p = this.result[0]
+      this.move1 = {x:p.x,y:p.y}
+      this.move2 = {x:p.x,y:p.y}
+      this.graph.grid[p.x][p.y].weight = 0
+    }else{
+      let  {move1,move2} = this
+      this.graph.grid[move1.x][move1.y].weight = 1
+      this.graph.grid[move2.x][move2.y].weight = 0
+    }
+    
   }
 }
 

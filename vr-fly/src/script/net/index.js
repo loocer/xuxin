@@ -353,9 +353,19 @@ function onDo() {
 	}
 }
 export const socketMain = () => {
+	// const socket = new WebSocket('ws://xuxin.love:3000');
+	// // wx.connectSocket({
+	// //   url: 'ws://xuxin.love:3000'
+	// // })
+	// // wx.onSocketOpen(function(res) {
+	// //  wx.onSocketMessage((e)=>{
+	// //  	console.log(e)
+	// //  })
 
+	// // })
+	// return
 	// utl.socket = io('ws://192.168.11.37:3000');
-	utl.socket = io('ws://192.168.0.105:3000');
+	utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456', (s) => {
 		utl.mapSp.graphics.clear()
 		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
