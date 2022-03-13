@@ -53,7 +53,7 @@ const httpsServer = https.createServer(credentials, app);
 // // });
 
 const http = require('http').Server(app);
-const io = require('socket.io')(httpsServer);
+const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
@@ -68,9 +68,9 @@ socketManner(io)
 //   });
 // });
 
-// http.listen(port, () => {
-//   console.log(`Socket.IO server running at http://localhost:${port}/`);
-// });
-httpsServer.listen(port, function () {
-  console.log('HTTPS Server is running on: https://localhost:%s');
+http.listen(port, () => {
+  console.log(`Socket.IO server running at http://localhost:${port}/`);
 });
+// httpsServer.listen(port, function () {
+//   console.log('HTTPS Server is running on: https://localhost:%s');
+// });

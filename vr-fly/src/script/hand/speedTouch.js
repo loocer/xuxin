@@ -1,4 +1,5 @@
  import utl from "../utl.js"
+ import { Astar} from "../net/astar.js"
  let rots = []
 
  export default class newtach {
@@ -100,20 +101,54 @@
            //     }
            //   })
            // }
-           for(let r of rots){
-              r.coordinate = {
-                 x: -x,
-                 y
-               }
+            let result = []
+           for(let r of rots){ 
+             let rp = utl.entityMap.get(r.id)
+             let potion = rp.transform.position
+             let start = utl.graph.grid[-potion.x][potion.y]
+             let end = utl.graph.grid[-x][y]
+             result = Astar.astar.search(utl.graph, start, end);
+             console.log(result)
+             let ps = []
+             for(let objd of result){
+               ps.push({
+                 x:objd.x,
+                 y:objd.y
+               })
+             }
+              r.result = ps
            }
-           let msg = {
-             userId: 'zzw',
-             actionName:'moveGroup',
-             heros:rots
+           let listoo = []
+           for(let fuck of result){
+              let pobj = utl.showbox.clone()
+              pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y)
+              utl.newScene.addChild(pobj)
+              listoo.push(pobj)
            }
-           utl.socket.emit('123456', msg);
+           setTimeout(()=>{
+             for(let ogh of listoo){
+               ogh.removeSelf();
+             }
+           },3000)
+           this.sendMsg(rots)
+           // let msg = {
+           //   userId: 'zzw',
+           //   actionName:'moveGroup',
+           //   heros:rots
+           // }
+           // utl.socket.emit('123456', msg);
          }
        }
+   }
+
+   sendMsg(rots){
+     
+     let msg = {
+       userId: 'zzw',
+       actionName:'moveGroup',
+       heros:rots
+     }
+     utl.socket.emit('123456', msg);
    }
    reset() {
       if (!this.startPoint) {

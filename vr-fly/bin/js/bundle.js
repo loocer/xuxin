@@ -103,6 +103,414 @@
         }
     };
 
+    // javascript-astar 0.4.1
+    // http://github.com/bgrins/javascript-astar
+    // Freely distributable under the MIT License.
+    // Implements the astar search algorithm in javascript using a Binary Heap.
+    // Includes Binary Heap (with modifications) from Marijn Haverbeke.
+    // http://eloquentjavascript.net/appendix2.html
+    // (function(definition) {
+    //   /* global module, define */
+    //   if (typeof module === 'object' && typeof module.exports === 'object') {
+    //     module.exports = definition();
+    //   } else if (typeof define === 'function' && define.amd) {
+    //     define([], definition);
+    //   } else {
+    //     var exports = definition();
+    //     window.astar = exports.astar;
+    //     window.Graph = exports.Graph;
+    //   }
+    // })(function() {
+
+    function pathTo(node) {
+      var curr = node;
+      var path = [];
+      while (curr.parent) {
+        path.unshift(curr);
+        curr = curr.parent;
+      }
+      return path;
+    }
+
+    function getHeap() {
+      return new BinaryHeap(function(node) {
+        return node.f;
+      });
+    }
+
+    var astar = {
+      /**
+      * Perform an A* Search on a graph given a start and end node.
+      * @param {Graph} graph
+      * @param {GridNode} start
+      * @param {GridNode} end
+      * @param {Object} [options]
+      * @param {bool} [options.closest] Specifies whether to return the
+                 path to the closest node if the target is unreachable.
+      * @param {Function} [options.heuristic] Heuristic function (see
+      *          astar.heuristics).
+      */
+      search: function(graph, start, end, options) {
+        graph.cleanDirty();
+        options = options || {};
+        var heuristic = options.heuristic || astar.heuristics.manhattan;
+        var closest = options.closest || false;
+
+        var openHeap = getHeap();
+        var closestNode = start; // set the start node to be the closest if required
+
+        start.h = heuristic(start, end);
+        graph.markDirty(start);
+
+        openHeap.push(start);
+
+        while (openHeap.size() > 0) {
+
+          // Grab the lowest f(x) to process next.  Heap keeps this sorted for us.
+          var currentNode = openHeap.pop();
+
+          // End case -- result has been found, return the traced path.
+          if (currentNode === end) {
+            return pathTo(currentNode);
+          }
+
+          // Normal case -- move currentNode from open to closed, process each of its neighbors.
+          currentNode.closed = true;
+
+          // Find all neighbors for the current node.
+          var neighbors = graph.neighbors(currentNode);
+
+          for (var i = 0, il = neighbors.length; i < il; ++i) {
+            var neighbor = neighbors[i];
+
+            if (neighbor.closed || neighbor.isWall()) {
+              // Not a valid node to process, skip to next neighbor.
+              continue;
+            }
+
+            // The g score is the shortest distance from start to current node.
+            // We need to check if the path we have arrived at this neighbor is the shortest one we have seen yet.
+            var gScore = currentNode.g + neighbor.getCost(currentNode);
+            var beenVisited = neighbor.visited;
+
+            if (!beenVisited || gScore < neighbor.g) {
+
+              // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
+              neighbor.visited = true;
+              neighbor.parent = currentNode;
+              neighbor.h = neighbor.h || heuristic(neighbor, end);
+              neighbor.g = gScore;
+              neighbor.f = neighbor.g + neighbor.h;
+              graph.markDirty(neighbor);
+              if (closest) {
+                // If the neighbour is closer than the current closestNode or if it's equally close but has
+                // a cheaper path than the current closest node then it becomes the closest node
+                if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
+                  closestNode = neighbor;
+                }
+              }
+
+              if (!beenVisited) {
+                // Pushing to heap will put it in proper place based on the 'f' value.
+                openHeap.push(neighbor);
+              } else {
+                // Already seen the node, but since it has been rescored we need to reorder it in the heap
+                openHeap.rescoreElement(neighbor);
+              }
+            }
+          }
+        }
+
+        if (closest) {
+          return pathTo(closestNode);
+        }
+
+        // No result was found - empty array signifies failure to find path.
+        return [];
+      },
+      // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+      heuristics: {
+        manhattan: function(pos0, pos1) {
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return d1 + d2;
+        },
+        diagonal: function(pos0, pos1) {
+          var D = 1;
+          var D2 = Math.sqrt(2);
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return (D * (d1 + d2)) + ((D2 - (2 * D)) * Math.min(d1, d2));
+        }
+      },
+      cleanNode: function(node) {
+        node.f = 0;
+        node.g = 0;
+        node.h = 0;
+        node.visited = false;
+        node.closed = false;
+        node.parent = null;
+      }
+    };
+
+    /**
+     * A graph memory structure
+     * @param {Array} gridIn 2D array of input weights
+     * @param {Object} [options]
+     * @param {bool} [options.diagonal] Specifies whether diagonal moves are allowed
+     */
+    function Graph(gridIn, options) {
+      options = options || {};
+      this.nodes = [];
+      this.diagonal = !!options.diagonal;
+      this.grid = [];
+      for (var x = 0; x < gridIn.length; x++) {
+        this.grid[x] = [];
+
+        for (var y = 0, row = gridIn[x]; y < row.length; y++) {
+          var node = new GridNode(x, y, row[y]);
+          this.grid[x][y] = node;
+          this.nodes.push(node);
+        }
+      }
+      this.init();
+    }
+
+    Graph.prototype.init = function() {
+      this.dirtyNodes = [];
+      for (var i = 0; i < this.nodes.length; i++) {
+        astar.cleanNode(this.nodes[i]);
+      }
+    };
+
+    Graph.prototype.cleanDirty = function() {
+      for (var i = 0; i < this.dirtyNodes.length; i++) {
+        astar.cleanNode(this.dirtyNodes[i]);
+      }
+      this.dirtyNodes = [];
+    };
+
+    Graph.prototype.markDirty = function(node) {
+      this.dirtyNodes.push(node);
+    };
+
+    Graph.prototype.neighbors = function(node) {
+      var ret = [];
+      var x = node.x;
+      var y = node.y;
+      var grid = this.grid;
+
+      // West
+      if (grid[x - 1] && grid[x - 1][y]) {
+        ret.push(grid[x - 1][y]);
+      }
+
+      // East
+      if (grid[x + 1] && grid[x + 1][y]) {
+        ret.push(grid[x + 1][y]);
+      }
+
+      // South
+      if (grid[x] && grid[x][y - 1]) {
+        ret.push(grid[x][y - 1]);
+      }
+
+      // North
+      if (grid[x] && grid[x][y + 1]) {
+        ret.push(grid[x][y + 1]);
+      }
+
+      if (this.diagonal) {
+        // Southwest
+        if (grid[x - 1] && grid[x - 1][y - 1]) {
+          ret.push(grid[x - 1][y - 1]);
+        }
+
+        // Southeast
+        if (grid[x + 1] && grid[x + 1][y - 1]) {
+          ret.push(grid[x + 1][y - 1]);
+        }
+
+        // Northwest
+        if (grid[x - 1] && grid[x - 1][y + 1]) {
+          ret.push(grid[x - 1][y + 1]);
+        }
+
+        // Northeast
+        if (grid[x + 1] && grid[x + 1][y + 1]) {
+          ret.push(grid[x + 1][y + 1]);
+        }
+      }
+
+      return ret;
+    };
+
+    Graph.prototype.toString = function() {
+      var graphString = [];
+      var nodes = this.grid;
+      for (var x = 0; x < nodes.length; x++) {
+        var rowDebug = [];
+        var row = nodes[x];
+        for (var y = 0; y < row.length; y++) {
+          rowDebug.push(row[y].weight);
+        }
+        graphString.push(rowDebug.join(" "));
+      }
+      return graphString.join("\n");
+    };
+
+    function GridNode(x, y, weight) {
+      this.x = x;
+      this.y = y;
+      this.weight = weight;
+    }
+
+    GridNode.prototype.toString = function() {
+      return "[" + this.x + " " + this.y + "]";
+    };
+
+    GridNode.prototype.getCost = function(fromNeighbor) {
+      // Take diagonal weight into consideration.
+      if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
+        return this.weight * 1.41421;
+      }
+      return this.weight;
+    };
+
+    GridNode.prototype.isWall = function() {
+      return this.weight === 0;
+    };
+
+    function BinaryHeap(scoreFunction) {
+      this.content = [];
+      this.scoreFunction = scoreFunction;
+    }
+
+    BinaryHeap.prototype = {
+      push: function(element) {
+        // Add the new element to the end of the array.
+        this.content.push(element);
+
+        // Allow it to sink down.
+        this.sinkDown(this.content.length - 1);
+      },
+      pop: function() {
+        // Store the first element so we can return it later.
+        var result = this.content[0];
+        // Get the element at the end of the array.
+        var end = this.content.pop();
+        // If there are any elements left, put the end element at the
+        // start, and let it bubble up.
+        if (this.content.length > 0) {
+          this.content[0] = end;
+          this.bubbleUp(0);
+        }
+        return result;
+      },
+      remove: function(node) {
+        var i = this.content.indexOf(node);
+
+        // When it is found, the process seen in 'pop' is repeated
+        // to fill up the hole.
+        var end = this.content.pop();
+
+        if (i !== this.content.length - 1) {
+          this.content[i] = end;
+
+          if (this.scoreFunction(end) < this.scoreFunction(node)) {
+            this.sinkDown(i);
+          } else {
+            this.bubbleUp(i);
+          }
+        }
+      },
+      size: function() {
+        return this.content.length;
+      },
+      rescoreElement: function(node) {
+        this.sinkDown(this.content.indexOf(node));
+      },
+      sinkDown: function(n) {
+        // Fetch the element that has to be sunk.
+        var element = this.content[n];
+
+        // When at 0, an element can not sink any further.
+        while (n > 0) {
+
+          // Compute the parent element's index, and fetch it.
+          var parentN = ((n + 1) >> 1) - 1;
+          var parent = this.content[parentN];
+          // Swap the elements if the parent is greater.
+          if (this.scoreFunction(element) < this.scoreFunction(parent)) {
+            this.content[parentN] = element;
+            this.content[n] = parent;
+            // Update 'n' to continue at the new position.
+            n = parentN;
+          }
+          // Found a parent that is less, no need to sink any further.
+          else {
+            break;
+          }
+        }
+      },
+      bubbleUp: function(n) {
+        // Look up the target element and its score.
+        var length = this.content.length;
+        var element = this.content[n];
+        var elemScore = this.scoreFunction(element);
+
+        while (true) {
+          // Compute the indices of the child elements.
+          var child2N = (n + 1) << 1;
+          var child1N = child2N - 1;
+          // This is used to store the new position of the element, if any.
+          var swap = null;
+          var child1Score;
+          // If the first child exists (is inside the array)...
+          if (child1N < length) {
+            // Look it up and compute its score.
+            var child1 = this.content[child1N];
+            child1Score = this.scoreFunction(child1);
+
+            // If the score is less than our element's, we need to swap.
+            if (child1Score < elemScore) {
+              swap = child1N;
+            }
+          }
+
+          // Do the same checks for the other child.
+          if (child2N < length) {
+            var child2 = this.content[child2N];
+            var child2Score = this.scoreFunction(child2);
+            if (child2Score < (swap === null ? elemScore : child1Score)) {
+              swap = child2N;
+            }
+          }
+
+          // If the element needs to be moved, swap it, and continue.
+          if (swap !== null) {
+            this.content[n] = this.content[swap];
+            this.content[swap] = element;
+            n = swap;
+          }
+          // Otherwise, we are done.
+          else {
+            break;
+          }
+        }
+      }
+    };
+
+    const Astar = {
+      astar: astar,
+      Graph: Graph
+    };
+    // module.exports={
+    //   astar: astar,
+    //   Graph: Graph
+    // };
+    // });
+
     let rots = [];
 
      class newtach {
@@ -204,20 +612,54 @@
                //     }
                //   })
                // }
-               for(let r of rots){
-                  r.coordinate = {
-                     x: -x,
-                     y
-                   };
+                let result = [];
+               for(let r of rots){ 
+                 let rp = utl.entityMap.get(r.id);
+                 let potion = rp.transform.position;
+                 let start = utl.graph.grid[-potion.x][potion.y];
+                 let end = utl.graph.grid[-x][y];
+                 result = Astar.astar.search(utl.graph, start, end);
+                 console.log(result);
+                 let ps = [];
+                 for(let objd of result){
+                   ps.push({
+                     x:objd.x,
+                     y:objd.y
+                   });
+                 }
+                  r.result = ps;
                }
-               let msg = {
-                 userId: 'zzw',
-                 actionName:'moveGroup',
-                 heros:rots
-               };
-               utl.socket.emit('123456', msg);
+               let listoo = [];
+               for(let fuck of result){
+                  let pobj = utl.showbox.clone();
+                  pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y);
+                  utl.newScene.addChild(pobj);
+                  listoo.push(pobj);
+               }
+               setTimeout(()=>{
+                 for(let ogh of listoo){
+                   ogh.removeSelf();
+                 }
+               },3000);
+               this.sendMsg(rots);
+               // let msg = {
+               //   userId: 'zzw',
+               //   actionName:'moveGroup',
+               //   heros:rots
+               // }
+               // utl.socket.emit('123456', msg);
              }
            }
+       }
+
+       sendMsg(rots){
+         
+         let msg = {
+           userId: 'zzw',
+           actionName:'moveGroup',
+           heros:rots
+         };
+         utl.socket.emit('123456', msg);
        }
        reset() {
           if (!this.startPoint) {
@@ -1239,38 +1681,32 @@
     }
 
     let address = 'http://172.16.25.101:3000';
-    let HttpRequest = Laya.HttpRequest;
+
     let Event = Laya.Event;
     let result = {};
-    let temfe = {
-    	x: 1
-    };
+
     let websocket = null;
-    const login = () => {
-    	let obj = {};
-    	let hr = new HttpRequest();
-    	let id = utl.userId;
-    	// let id = 435
-    	function onHttpRequestProgress(e) {
-    		console.log(e);
+    function createGraph() {
+    	let list = [];
+    	for (let i = 0; i < 500; i++) {
+    	    let list1 = [];
+    	    for (let o = 0; o < 500; o++) {
+    	        list1.push(1);
+    	    }
+    	    list.push(list1);
     	}
 
-    	function onHttpRequestComplete(e) {
-    		result.userInfo = JSON.parse(hr.data).data;
-    		console.log(66666, result);
-    		intoRoom();
+    	utl.graph = new Astar.Graph(list);
+    }
+    function resetGraph(){
+    	for(let obj of utl.graph.grid){
+    		for(let indexObj of obj){
+    			indexObj.weight = 1;
+    		}
     	}
+    }
 
-    	function onHttpRequestError(e) {
-    		console.log(e);
-    	}
 
-    	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
-    	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
-    	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address + '/login', 'name=fef&id=' + id, 'post', 'text');
-
-    };
     const getServiceAddress = () => {
     	let hr = new HttpRequest();
 
@@ -1293,304 +1729,12 @@
     	hr.send(address + '/get-socketAddress', '', 'get', 'text');
 
     };
-    const intoRoom = () => {
-    	let headers = [
-    		"Content-Type", "application/x-www-form-urlencoded",
-    		'token', result.userInfo.token,
-    		'user_id', result.userInfo.id
-    	];
-    	let hr = new HttpRequest();
-
-    	function onHttpRequestProgress(e) {
-    		console.log(123);
-    	}
-
-    	function onHttpRequestComplete(e) {
-    		socketMain();
-    		console.log(888888888, hr);
-    	}
-
-    	function onHttpRequestError(e) {
-    		console.log(534543, e);
-    	}
-    	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
-    	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
-    	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address + '/into-room?roomNo=123', null, 'get', 'text', headers);
-
-    };
-
-    function send() {
-    	// if(utl.messgeTime+1==utl.sendTime){
-    	let str = JSON.stringify(utl.sendMessage);
-    	websocket.send(str);
-    	// }
-    	// console.log(66666,utl)
-
-    }
-
-    function sendWe() {
-    	if (utl.messgeTime + 1 == utl.sendTime) {
-    		let str = JSON.stringify(utl.sendMessage);
-    		wx.sendSocketMessage({
-    			data: str
-    		});
-    	}
-    }
-
-    function df() {
-    	let player = playerMap.get(utl.id);
-    	player.twList.shift();
-    	player.flag = true;
-    	// tweens.shift()
-    	// twnFlag = true
-    	main();
-    	// setTimeout(()=>{
-    	// 	console.log(2222222)
-    	// },2000)
-    	console.log(33333333);
-    	// utl.cube.transform.position = new Laya.Vector3(temp.tar.x,0,temp.tar.z)
-
-    }
-    // let tweens = []
-    let playerMap = new Map();
-
-    function main() {
-    	if (utl.fireOnOff) {
-    		return
-    	}
-    	for (var [key, value] of playerMap.entries()) {
-    		// if(!value.timeFlag){
-    		// 	continue
-    		// }
-    		if (value.flag && value.twList.length > 0) {
-    			value.flag = false;
-    			drawPlayer(value);
-    		}
-    	}
-    }
-
-    function drawPlayer(value) {
-    	if (value.twList.length == 0) {
-    		return
-    	}
 
 
-    	let obj = value.twList[0];
-    	let tweenObj = {
-    		val: obj,
-    		value,
-    		x: 0,
-    	};
-
-    	let {
-    		id,
-    		type,
-    		position,
-    		shipEuler,
-    		speed,
-    		roteBody,
-    		rotationEuler
-    	} = obj;
-    	let box = utl.boxs.get(id);
-
-    	if (!box) {
-    		box = utl.models.get('pler').clone();
-    		utl.newScene.addChild(box);
-    		let ship = box.getChildByName('shipmain');
-    		let camera = ship.getChildByName('c1');
-    		if (id == utl.id) {
-    			// utl.realBox = box
-    			// utl.bullet = box.getChildByName('shipmain').getChildByName('ship').getChildByName('ac')
-    			// camera.clearColor = new Laya.Vector4(0, 0, 0, 1);
-    			camera.active = true;
-    		} else {
-    			box.getChildByName('camermain').active = false;
-    			camera.active = false;
-    		}
-
-    		utl.boxs.set(id, box);
 
 
-    		//创建新人物
-    	}
-    	let player = playerMap.get(id);
-    	let ship = box.getChildByName('shipmain');
-
-    	let shipcard = ship.getChildByName('ship');
-
-    	box.transform.position = new Laya.Vector3(position.x, position.y, position.z);
-    	box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
-
-
-    	shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
-
-    	if (type == 'FIRE') {
-    		let bullet = utl.models.get('bullet').clone();
-    		let sc = bullet.addComponent(Bullet);
-    		sc.startSpeed = speed;
-    		utl.newScene.addChild(bullet);
-
-    		let shipcar = bullet.getChildByName('Cube');
-
-    		bullet.transform.position = new Laya.Vector3(position.x, position.y, position.z);
-    		bullet.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
-    		shipcar.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
-
-    	}
-
-    	// box.transform.rotate(new Laya.Vector3(0,0,roteBody.sy* Math.PI / 180,),true);
-    	//    box.transform.rotate(new Laya.Vector3(0,roteBody.sx* Math.PI / 180,0),true);
-
-    	//    if(player.lastObj){
-    	//    	shipcard.transform.rotate(new Laya.Vector3(0, player.lastObj.x* Math.PI / 180,0),true);
-    	//    	shipcard.transform.rotate(new Laya.Vector3(player.lastObj.y* Math.PI / 180,0,0),true);
-    	//    }
-
-
-    	//    shipcard.transform.rotate(new Laya.Vector3(-roteBody.y* Math.PI / 180,0,0),true);
-    	//    shipcard.transform.rotate(new Laya.Vector3(0,-roteBody.x* Math.PI / 180,0),true);
-    	//    player.lastObj = roteBody
-    	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
-    	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
-    	// let ship = box.getChildByName('shipmain')
-
-    	//    let shipcard = ship.getChildByName('ship')
-    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
-
-    	Laya.Tween.to(
-    		tweenObj, {
-    			x: 10,
-    			update: new Laya.Handler(this, updateMove, [tweenObj])
-    		},
-    		20,
-    		Laya.Ease.linearNone,
-    		Laya.Handler.create(this, tweend, [tweenObj]),
-    		0);
-    }
-
-    function updateMove(value) {
-    	let obj = value.val;
-    	if (obj.speed > 0) {
-
-    		let box = utl.boxs.get(obj.id);
-    		box.transform.translate(new Laya.Vector3(0, -obj.speed / 10, 0), true);
-    	}
-
-    }
-
-    function tweend(obj) {
-    	let {
-    		id,
-    		position,
-    		shipEuler,
-    		roteBody,
-    		rotationEuler
-    	} = obj.val;
-    	let player = playerMap.get(id);
-
-    	// let box = utl.boxs.get(id)
-    	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
-    	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
-    	// let ship = box.getChildByName('shipmain')
-
-    	//    let shipcard = ship.getChildByName('ship')
-    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
-
-    	player.twList.shift();
-    	if (player.twList.length != 0) {
-    		drawPlayer(player);
-    	}
-
-    	// tweens.shift()
-    	// twnFlag = true
-    	// main()
-    }
-
-    function changeMove(obj) {
-
-    	utl.cube.transform.position = new Laya.Vector3(obj.tar.x, 0, obj.tar.z);
-    	// temp = obj.rote
-    }
-
-    function addInitTween(obj) {
-    	// obj.sendTime = obj.sendTime
-    	let id = obj.id;
-    	let tweens = [obj];
-    	let flag = true;
-    	let messgeTime = 0;
-    	let mapObj = {
-    		twList: tweens,
-    		pObj: obj,
-    		flag,
-    		timeFlag: true,
-    		messgeTime,
-    		lastObj: null
-    	};
-    	playerMap.set(id, mapObj);
-    	return mapObj
-    }
-    var temp = null;
-
-    function fixMessge(list) {
-    	if (list.length == 0) {
-    		return
-    	}
-    	for (let player of list) {
-    		// if(player.id==utl.id){
-    		// 	continue;
-    		// }
-    		if (!playerMap.get(player.id)) {
-    			let obj = addInitTween(player);
-    			drawPlayer(obj);
-    		} else {
-    			let pm = playerMap.get(player.id);
-    			if (pm.pObj.sendTime < player.sendTime) {
-    				pm.pObj = player;
-    				pm.pObj.sendTime = player.sendTime;
-    				pm.twList.push(player);
-    				if (pm.twList.length == 1) {
-    					drawPlayer(pm);
-    				}
-    				// if(!pm.timeFlag){
-    				// 	if(pm.twList.length>5){
-    				// 		pm.timeFlag = true
-    				// 	}
-    				// }
-    				// if(pm.twList.length==0){
-    				// 	pm.timeFlag = false
-    				// }
-    			}
-    		}
-
-
-    	}
-
-    }
-
-    function onDo() {
-    	if (utl.fireOnOff) {
-    		let shipcar = utl.boxs.get('123');
-    		shipcar.transform.translate(new Laya.Vector3(.1, 0, 0), true);
-    		// if(utl.sendTime==utl.messgeTime){
-    		// let ship = utl.box.getChildByName('shipmain')
-    		// let shipcar = utl.box.getChildByName('shipmain').getChildByName('ship')
-    		// let shipcar = utl.box
-    		let sPosition = shipcar.transform.position;
-    		let rotationEuler = shipcar.transform.rotationEuler;
-    		utl.sendTime++;
-    			utl.messgeTime = utl.sendTime;
-    		utl.sendMessage = [{
-    			id: utl.id,
-    			position: sPosition,
-    			sendTime: utl.sendTime,
-    			type: 'move',
-    			rotationEuler
-    		}];
-
-    	}
-    }
     const socketMain = () => {
+    	createGraph();
     	// const socket = new WebSocket('ws://xuxin.love:3000');
     	// // wx.connectSocket({
     	// //   url: 'ws://xuxin.love:3000'
@@ -1602,26 +1746,28 @@
 
     	// // })
     	// return
-    	// utl.socket = io('ws://192.168.11.37:3000');
-    	utl.socket = io('wss://xuxin.love:3000');
+    	utl.socket = io('ws://192.168.0.104:3000');
+    	// utl.socket = io('wss://xuxin.love:3000');
     	utl.socket.on('123456', (s) => {
+    		resetGraph();
     		utl.mapSp.graphics.clear();
     		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
     		for (let player of s.list) {
     			for (let rot of player.rots) {
-
     				if (utl.entityMap.has(rot.id)) {
     					if (rot.start) {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
     					}
     					else  {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
     						let x = ~~(rot.end.x / 500 * 400);
     						let y = ~~(rot.end.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    						utl.graph.grid[rot.end.x][rot.end.y].weight = 0;
     					} 
 
     				} else {
@@ -1634,92 +1780,22 @@
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
     					}
     					else{
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
     						let x = ~~(rot.end.x / 500 * 400);
     						let y = ~~(rot.end.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    						utl.graph.grid[rot.end.x][rot.end.y].weight = 0;
     					} 
     				}
     			}
     		}
-    		// let cube = s.list[0].rots[0]
-    		// utl.entityMap.get(cube.id).transform.position.x = -cube.end.x
-    		// utl.entityMap.get(cube.id).transform.position.z = cube.end.y
-    		// if (cube.end) {
-    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.end.x, 3, cube.end.y)
-    		// } else {
-    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.start.x, 3, cube.start.y)
-    		// }
-
     	});
     	utl.socket.on('event', function(data) {});
     	utl.socket.on('disconnect', function() {});
     	//------------------------------web-------------------
-    };
-    const creteBox = (sp, erd) => {
-    	let box = utl.newScene.addChild(sp);
-    	box.takeSpeed = erd.takeSpeed;
-    	box.speed = {
-    		z: 0,
-    		x: 0,
-    		y: 0
-    	};
-    	if (erd.rotation) {
-    		box.transform.rotation = new Laya.Vector3(erd.rotation.x, erd.rotation.y, erd.rotation.z);
-    	}
-    	if (erd.position) {
-    		box.transform.position = new Laya.Vector3(erd.position.x, erd.position.y, erd.position.z);
-    	}
-
-    	// utl.newScene.addChild(box)
-    	utl.players.set(erd.id, box);
-    };
-    const setBox = (players) => {
-    	let ps = new Map(players);
-    	utl.netPlayers = ps;
-    	let bs = utl.players;
-    	if (utl.newScene) {
-    		for (let k of ps.keys()) {
-    			let now = bs.get(k);
-    			let erd = ps.get(k);
-
-    			if (now) {
-    				now.takeSpeed = erd.takeSpeed;
-    				return
-    				if (erd.position && now.tempPosition) {
-    					let erdx = {
-    						x: ~~(erd.position.x * 100),
-    						y: ~~(erd.position.y * 100),
-    						z: ~~(erd.position.z * 100)
-    					};
-    					now.tempPositions.push(erdx);
-
-    				}
-    				if (erd.rotation && now.tempRotation) {
-    					let erdx = {
-    						x: ~~(erd.rotation.x * 100),
-    						y: ~~(erd.rotation.y * 100),
-    						z: ~~(erd.rotation.z * 100)
-    					};
-    					now.tempRotations.push(erdx);
-    				}
-
-    			} else {
-    				if (erd.id == utl.userId) {
-    					Laya.Sprite3D.load("res/t2/LayaScene_fff/Conventional/f.lh", Laya.Handler.create(null, (sp) => {
-    						creteBox(sp, erd);
-    					}));
-    				} else {
-    					let box4 = utl.box4.clone();
-    					creteBox(box4, erd);
-    				}
-
-    			}
-    		}
-    	}
-
     };
 
     /**
@@ -1728,7 +1804,7 @@
      * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
      */
       // import {getServiceAddress} from "../net/index"
-      let temp$1 =0,spled = {x:0,y:0,z:0},dfew=0;
+      let temp =0,spled = {x:0,y:0,z:0},dfew=0;
       let flagod = false;
       let fireFlag = false;
       let touchs = [
@@ -1742,10 +1818,10 @@
 
     let flag = true;  
 
-    function updateMove$1(obj){
+    function updateMove(obj){
         utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
     }
-    function tweend$1(){
+    function tweend(){
 
         let tweenObj= {
             x:0
@@ -1753,10 +1829,10 @@
         Laya.Tween.to(
                     tweenObj,
                     {x:10,
-                    update:new Laya.Handler(this,updateMove$1,[tweenObj])},
+                    update:new Laya.Handler(this,updateMove,[tweenObj])},
                     50,
                     Laya.Ease.linearNone,
-                    Laya.Handler.create(this,tweend$1,[tweenObj]),
+                    Laya.Handler.create(this,tweend,[tweenObj]),
                 0);
         // flag = true
     }
@@ -1789,7 +1865,7 @@
             Laya.stage.addChild(this.info);  
             utl.info =  this.info;
             this.drawUi();
-            temp$1 = this;
+            temp = this;
 
             // this.newScene.addChild(utl.models.get('light'));  
             var directionLight = this.newScene.addChild(new Laya.DirectionLight());
@@ -1851,7 +1927,11 @@
             addsImg.width =150;
             addsImg.pos(200, Laya.stage.height - 200);
             Laya.stage.addChild(addsImg);
-
+             utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+            var material = new Laya.BlinnPhongMaterial();
+            material.albedoColor=new Laya.Vector3(5,5,5);
+            material.diffuseColor=new Laya.Vector3(5,5,5);
+            utl.showbox.meshRenderer.material = material;
 
             // let rightHandself = this.loadingElse.get('right')
             // let rightHandselfImg = new  Laya.Image(rightHandself);
@@ -2357,17 +2437,6 @@
                 sprite.addChild(box);
                 let material = new Laya.BlinnPhongMaterial();
                 material.albedoColor=color;
-                // material.albedoColorA=new Laya.Vector3(130,288,242);
-                // material.albedoColorB=242
-                // material.albedoColorG=288
-                // material.albedoColorR=130
-
-
-                // material.diffuseColorB=242
-                // material.diffuseColorG=288
-                // material.diffuseColorR=130
-
-
                 material.diffuseColor=color;
                 box.meshRenderer.material = material;
                 sprite.transform.position = new Laya.Vector3(initx - 2*i, -1, 0);
@@ -2665,7 +2734,7 @@
      * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
      * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
      */
-      let temp$2 =0,spled$1 = {x:0,y:0,z:0},dfew$1=0;
+      let temp$1 =0,spled$1 = {x:0,y:0,z:0},dfew$1=0;
       let flagod$1 = false;
       let fireFlag$1 = false;
       let touchs$1 = [
@@ -2717,7 +2786,7 @@
                     utl.takeSpeed.y =  Math.floor(rotationInfo.beta);
                 }
             }
-            temp$2 = this;
+            temp$1 = this;
             this.newScene.addChild(utl.models.get('light'));  
            
 
@@ -2795,7 +2864,7 @@
             // utl.models.get('cube').active=false  
         }
         drawUi(){
-
+               console.log(55555555555555);
 
             // let fudf = utl.models.get('cotrll')
             // let ape2 = new Laya.Sprite();
@@ -2853,6 +2922,11 @@
             // ape3.height = 100
             // ape3.x = Laya.stage.width/2+200;
             // ape3.y = Laya.stage.height - 500;
+            utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+            utl.showbox.transform.rotate(new Laya.Vector3(0, 45, 0), false, false);
+            var material = new Laya.BlinnPhongMaterial();
+            material.color = new Laya.Color(1, 1, 1, 1);
+            utl.showbox.meshRenderer.material = material;
             
         }
         initTouch(){
@@ -3319,7 +3393,7 @@
     onTriggerEnter()
     {
         utl.entity.get('obx').removeSelf();
-        temp$2.creab();
+        temp$1.creab();
     console.log("onTriggerEnter");
     }
     onTriggerStay()
@@ -3379,7 +3453,7 @@
     GameConfig.screenMode = "none";
     GameConfig.alignV = "top";
     GameConfig.alignH = "left";
-    GameConfig.startScene = "test/load.scene";
+    GameConfig.startScene = "test/level.scene";
     GameConfig.sceneRoot = "";
     GameConfig.debug = false;
     GameConfig.stat = false;

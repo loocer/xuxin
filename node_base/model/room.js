@@ -51,10 +51,16 @@ class Room {
       player.addHero()
    }
    moveGroup(msg){
+      // let player = this.players.get(msg.userId)
+      // for (let hero of msg.heros) {
+      //    if(player.robots.has(hero.id)){
+      //       player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+      //    }
+      // }
       let player = this.players.get(msg.userId)
       for (let hero of msg.heros) {
          if(player.robots.has(hero.id)){
-            player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+            player.robots.get(hero.id).changeResult(hero)
          }
       }
    }

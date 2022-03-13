@@ -200,17 +200,6 @@ export default class Level extends Laya.Scene {
             sprite.addChild(box);
             let material = new Laya.BlinnPhongMaterial();
             material.albedoColor=color
-            // material.albedoColorA=new Laya.Vector3(130,288,242);
-            // material.albedoColorB=242
-            // material.albedoColorG=288
-            // material.albedoColorR=130
-
-
-            // material.diffuseColorB=242
-            // material.diffuseColorG=288
-            // material.diffuseColorR=130
-
-
             material.diffuseColor=color
             box.meshRenderer.material = material;
             sprite.transform.position = new Laya.Vector3(initx - 2*i, -1, 0);

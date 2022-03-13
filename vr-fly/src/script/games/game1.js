@@ -137,7 +137,11 @@ export default class GameUI extends Laya.Scene {
         addsImg.width =150
         addsImg.pos(200, Laya.stage.height - 200);
         Laya.stage.addChild(addsImg);
-
+         utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+        var material = new Laya.BlinnPhongMaterial();
+        material.albedoColor=new Laya.Vector3(5,5,5);
+        material.diffuseColor=new Laya.Vector3(5,5,5);
+        utl.showbox.meshRenderer.material = material;
 
         // let rightHandself = this.loadingElse.get('right')
         // let rightHandselfImg = new  Laya.Image(rightHandself);

@@ -36,6 +36,10 @@ class Robot1{
         box.end = box.graph.grid[p[0]][p[1]]
         box.query()
     }
+    changeResult(msg){
+        let box = this.map
+        box.result = msg.result
+    }
     update(){
         let box = this.map
         if(box.result.length>1){
