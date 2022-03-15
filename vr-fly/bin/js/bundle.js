@@ -103,6 +103,414 @@
         }
     };
 
+    // javascript-astar 0.4.1
+    // http://github.com/bgrins/javascript-astar
+    // Freely distributable under the MIT License.
+    // Implements the astar search algorithm in javascript using a Binary Heap.
+    // Includes Binary Heap (with modifications) from Marijn Haverbeke.
+    // http://eloquentjavascript.net/appendix2.html
+    // (function(definition) {
+    //   /* global module, define */
+    //   if (typeof module === 'object' && typeof module.exports === 'object') {
+    //     module.exports = definition();
+    //   } else if (typeof define === 'function' && define.amd) {
+    //     define([], definition);
+    //   } else {
+    //     var exports = definition();
+    //     window.astar = exports.astar;
+    //     window.Graph = exports.Graph;
+    //   }
+    // })(function() {
+
+    function pathTo(node) {
+      var curr = node;
+      var path = [];
+      while (curr.parent) {
+        path.unshift(curr);
+        curr = curr.parent;
+      }
+      return path;
+    }
+
+    function getHeap() {
+      return new BinaryHeap(function(node) {
+        return node.f;
+      });
+    }
+
+    var astar = {
+      /**
+      * Perform an A* Search on a graph given a start and end node.
+      * @param {Graph} graph
+      * @param {GridNode} start
+      * @param {GridNode} end
+      * @param {Object} [options]
+      * @param {bool} [options.closest] Specifies whether to return the
+                 path to the closest node if the target is unreachable.
+      * @param {Function} [options.heuristic] Heuristic function (see
+      *          astar.heuristics).
+      */
+      search: function(graph, start, end, options) {
+        graph.cleanDirty();
+        options = options || {};
+        var heuristic = options.heuristic || astar.heuristics.manhattan;
+        var closest = options.closest || false;
+
+        var openHeap = getHeap();
+        var closestNode = start; // set the start node to be the closest if required
+
+        start.h = heuristic(start, end);
+        graph.markDirty(start);
+
+        openHeap.push(start);
+
+        while (openHeap.size() > 0) {
+
+          // Grab the lowest f(x) to process next.  Heap keeps this sorted for us.
+          var currentNode = openHeap.pop();
+
+          // End case -- result has been found, return the traced path.
+          if (currentNode === end) {
+            return pathTo(currentNode);
+          }
+
+          // Normal case -- move currentNode from open to closed, process each of its neighbors.
+          currentNode.closed = true;
+
+          // Find all neighbors for the current node.
+          var neighbors = graph.neighbors(currentNode);
+
+          for (var i = 0, il = neighbors.length; i < il; ++i) {
+            var neighbor = neighbors[i];
+
+            if (neighbor.closed || neighbor.isWall()) {
+              // Not a valid node to process, skip to next neighbor.
+              continue;
+            }
+
+            // The g score is the shortest distance from start to current node.
+            // We need to check if the path we have arrived at this neighbor is the shortest one we have seen yet.
+            var gScore = currentNode.g + neighbor.getCost(currentNode);
+            var beenVisited = neighbor.visited;
+
+            if (!beenVisited || gScore < neighbor.g) {
+
+              // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
+              neighbor.visited = true;
+              neighbor.parent = currentNode;
+              neighbor.h = neighbor.h || heuristic(neighbor, end);
+              neighbor.g = gScore;
+              neighbor.f = neighbor.g + neighbor.h;
+              graph.markDirty(neighbor);
+              if (closest) {
+                // If the neighbour is closer than the current closestNode or if it's equally close but has
+                // a cheaper path than the current closest node then it becomes the closest node
+                if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
+                  closestNode = neighbor;
+                }
+              }
+
+              if (!beenVisited) {
+                // Pushing to heap will put it in proper place based on the 'f' value.
+                openHeap.push(neighbor);
+              } else {
+                // Already seen the node, but since it has been rescored we need to reorder it in the heap
+                openHeap.rescoreElement(neighbor);
+              }
+            }
+          }
+        }
+
+        if (closest) {
+          return pathTo(closestNode);
+        }
+
+        // No result was found - empty array signifies failure to find path.
+        return [];
+      },
+      // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+      heuristics: {
+        manhattan: function(pos0, pos1) {
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return d1 + d2;
+        },
+        diagonal: function(pos0, pos1) {
+          var D = 1;
+          var D2 = Math.sqrt(2);
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return (D * (d1 + d2)) + ((D2 - (2 * D)) * Math.min(d1, d2));
+        }
+      },
+      cleanNode: function(node) {
+        node.f = 0;
+        node.g = 0;
+        node.h = 0;
+        node.visited = false;
+        node.closed = false;
+        node.parent = null;
+      }
+    };
+
+    /**
+     * A graph memory structure
+     * @param {Array} gridIn 2D array of input weights
+     * @param {Object} [options]
+     * @param {bool} [options.diagonal] Specifies whether diagonal moves are allowed
+     */
+    function Graph(gridIn, options) {
+      options = options || {};
+      this.nodes = [];
+      this.diagonal = !!options.diagonal;
+      this.grid = [];
+      for (var x = 0; x < gridIn.length; x++) {
+        this.grid[x] = [];
+
+        for (var y = 0, row = gridIn[x]; y < row.length; y++) {
+          var node = new GridNode(x, y, row[y]);
+          this.grid[x][y] = node;
+          this.nodes.push(node);
+        }
+      }
+      this.init();
+    }
+
+    Graph.prototype.init = function() {
+      this.dirtyNodes = [];
+      for (var i = 0; i < this.nodes.length; i++) {
+        astar.cleanNode(this.nodes[i]);
+      }
+    };
+
+    Graph.prototype.cleanDirty = function() {
+      for (var i = 0; i < this.dirtyNodes.length; i++) {
+        astar.cleanNode(this.dirtyNodes[i]);
+      }
+      this.dirtyNodes = [];
+    };
+
+    Graph.prototype.markDirty = function(node) {
+      this.dirtyNodes.push(node);
+    };
+
+    Graph.prototype.neighbors = function(node) {
+      var ret = [];
+      var x = node.x;
+      var y = node.y;
+      var grid = this.grid;
+
+      // West
+      if (grid[x - 1] && grid[x - 1][y]) {
+        ret.push(grid[x - 1][y]);
+      }
+
+      // East
+      if (grid[x + 1] && grid[x + 1][y]) {
+        ret.push(grid[x + 1][y]);
+      }
+
+      // South
+      if (grid[x] && grid[x][y - 1]) {
+        ret.push(grid[x][y - 1]);
+      }
+
+      // North
+      if (grid[x] && grid[x][y + 1]) {
+        ret.push(grid[x][y + 1]);
+      }
+
+      if (this.diagonal) {
+        // Southwest
+        if (grid[x - 1] && grid[x - 1][y - 1]) {
+          ret.push(grid[x - 1][y - 1]);
+        }
+
+        // Southeast
+        if (grid[x + 1] && grid[x + 1][y - 1]) {
+          ret.push(grid[x + 1][y - 1]);
+        }
+
+        // Northwest
+        if (grid[x - 1] && grid[x - 1][y + 1]) {
+          ret.push(grid[x - 1][y + 1]);
+        }
+
+        // Northeast
+        if (grid[x + 1] && grid[x + 1][y + 1]) {
+          ret.push(grid[x + 1][y + 1]);
+        }
+      }
+
+      return ret;
+    };
+
+    Graph.prototype.toString = function() {
+      var graphString = [];
+      var nodes = this.grid;
+      for (var x = 0; x < nodes.length; x++) {
+        var rowDebug = [];
+        var row = nodes[x];
+        for (var y = 0; y < row.length; y++) {
+          rowDebug.push(row[y].weight);
+        }
+        graphString.push(rowDebug.join(" "));
+      }
+      return graphString.join("\n");
+    };
+
+    function GridNode(x, y, weight) {
+      this.x = x;
+      this.y = y;
+      this.weight = weight;
+    }
+
+    GridNode.prototype.toString = function() {
+      return "[" + this.x + " " + this.y + "]";
+    };
+
+    GridNode.prototype.getCost = function(fromNeighbor) {
+      // Take diagonal weight into consideration.
+      if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
+        return this.weight * 1.41421;
+      }
+      return this.weight;
+    };
+
+    GridNode.prototype.isWall = function() {
+      return this.weight === 0;
+    };
+
+    function BinaryHeap(scoreFunction) {
+      this.content = [];
+      this.scoreFunction = scoreFunction;
+    }
+
+    BinaryHeap.prototype = {
+      push: function(element) {
+        // Add the new element to the end of the array.
+        this.content.push(element);
+
+        // Allow it to sink down.
+        this.sinkDown(this.content.length - 1);
+      },
+      pop: function() {
+        // Store the first element so we can return it later.
+        var result = this.content[0];
+        // Get the element at the end of the array.
+        var end = this.content.pop();
+        // If there are any elements left, put the end element at the
+        // start, and let it bubble up.
+        if (this.content.length > 0) {
+          this.content[0] = end;
+          this.bubbleUp(0);
+        }
+        return result;
+      },
+      remove: function(node) {
+        var i = this.content.indexOf(node);
+
+        // When it is found, the process seen in 'pop' is repeated
+        // to fill up the hole.
+        var end = this.content.pop();
+
+        if (i !== this.content.length - 1) {
+          this.content[i] = end;
+
+          if (this.scoreFunction(end) < this.scoreFunction(node)) {
+            this.sinkDown(i);
+          } else {
+            this.bubbleUp(i);
+          }
+        }
+      },
+      size: function() {
+        return this.content.length;
+      },
+      rescoreElement: function(node) {
+        this.sinkDown(this.content.indexOf(node));
+      },
+      sinkDown: function(n) {
+        // Fetch the element that has to be sunk.
+        var element = this.content[n];
+
+        // When at 0, an element can not sink any further.
+        while (n > 0) {
+
+          // Compute the parent element's index, and fetch it.
+          var parentN = ((n + 1) >> 1) - 1;
+          var parent = this.content[parentN];
+          // Swap the elements if the parent is greater.
+          if (this.scoreFunction(element) < this.scoreFunction(parent)) {
+            this.content[parentN] = element;
+            this.content[n] = parent;
+            // Update 'n' to continue at the new position.
+            n = parentN;
+          }
+          // Found a parent that is less, no need to sink any further.
+          else {
+            break;
+          }
+        }
+      },
+      bubbleUp: function(n) {
+        // Look up the target element and its score.
+        var length = this.content.length;
+        var element = this.content[n];
+        var elemScore = this.scoreFunction(element);
+
+        while (true) {
+          // Compute the indices of the child elements.
+          var child2N = (n + 1) << 1;
+          var child1N = child2N - 1;
+          // This is used to store the new position of the element, if any.
+          var swap = null;
+          var child1Score;
+          // If the first child exists (is inside the array)...
+          if (child1N < length) {
+            // Look it up and compute its score.
+            var child1 = this.content[child1N];
+            child1Score = this.scoreFunction(child1);
+
+            // If the score is less than our element's, we need to swap.
+            if (child1Score < elemScore) {
+              swap = child1N;
+            }
+          }
+
+          // Do the same checks for the other child.
+          if (child2N < length) {
+            var child2 = this.content[child2N];
+            var child2Score = this.scoreFunction(child2);
+            if (child2Score < (swap === null ? elemScore : child1Score)) {
+              swap = child2N;
+            }
+          }
+
+          // If the element needs to be moved, swap it, and continue.
+          if (swap !== null) {
+            this.content[n] = this.content[swap];
+            this.content[swap] = element;
+            n = swap;
+          }
+          // Otherwise, we are done.
+          else {
+            break;
+          }
+        }
+      }
+    };
+
+    const Astar = {
+      astar: astar,
+      Graph: Graph
+    };
+    // module.exports={
+    //   astar: astar,
+    //   Graph: Graph
+    // };
+    // });
+
     let rots = [];
 
      class newtach {
@@ -151,7 +559,6 @@
          let msg = {
            userId: 'zzw',
            actionName:'addHero',
-           heros:rots
          };
          utl.socket.emit('123456', msg);
 
@@ -205,20 +612,54 @@
                //     }
                //   })
                // }
-               for(let r of rots){
-                  r.coordinate = {
-                     x: -x,
-                     y
-                   };
+                let result = [];
+               for(let r of rots){ 
+                 let rp = utl.entityMap.get(r.id);
+                 let potion = rp.transform.position;
+                 let start = utl.graph.grid[-potion.x][potion.y];
+                 let end = utl.graph.grid[-x][y];
+                 result = Astar.astar.search(utl.graph, start, end);
+                 console.log(result);
+                 let ps = [];
+                 for(let objd of result){
+                   ps.push({
+                     x:objd.x,
+                     y:objd.y
+                   });
+                 }
+                  r.result = ps;
                }
-               let msg = {
-                 userId: 'zzw',
-                 actionName:'moveGroup',
-                 heros:rots
-               };
-               utl.socket.emit('123456', msg);
+               let listoo = [];
+               for(let fuck of result){
+                  let pobj = utl.showbox.clone();
+                  pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y);
+                  utl.newScene.addChild(pobj);
+                  listoo.push(pobj);
+               }
+               setTimeout(()=>{
+                 for(let ogh of listoo){
+                   ogh.removeSelf();
+                 }
+               },3000);
+               this.sendMsg(rots);
+               // let msg = {
+               //   userId: 'zzw',
+               //   actionName:'moveGroup',
+               //   heros:rots
+               // }
+               // utl.socket.emit('123456', msg);
              }
            }
+       }
+
+       sendMsg(rots){
+         
+         let msg = {
+           userId: 'zzw',
+           actionName:'moveGroup',
+           heros:rots
+         };
+         utl.socket.emit('123456', msg);
        }
        reset() {
           if (!this.startPoint) {
@@ -1240,38 +1681,32 @@
     }
 
     let address = 'http://172.16.25.101:3000';
-    let HttpRequest = Laya.HttpRequest;
+
     let Event = Laya.Event;
     let result = {};
-    let temfe = {
-    	x: 1
-    };
+
     let websocket = null;
-    const login = () => {
-    	let obj = {};
-    	let hr = new HttpRequest();
-    	let id = utl.userId;
-    	// let id = 435
-    	function onHttpRequestProgress(e) {
-    		console.log(e);
+    function createGraph() {
+    	let list = [];
+    	for (let i = 0; i < 500; i++) {
+    	    let list1 = [];
+    	    for (let o = 0; o < 500; o++) {
+    	        list1.push(1);
+    	    }
+    	    list.push(list1);
     	}
 
-    	function onHttpRequestComplete(e) {
-    		result.userInfo = JSON.parse(hr.data).data;
-    		console.log(66666, result);
-    		intoRoom();
+    	utl.graph = new Astar.Graph(list);
+    }
+    function resetGraph(){
+    	for(let obj of utl.graph.grid){
+    		for(let indexObj of obj){
+    			indexObj.weight = 1;
+    		}
     	}
+    }
 
-    	function onHttpRequestError(e) {
-    		console.log(e);
-    	}
 
-    	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
-    	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
-    	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address + '/login', 'name=fef&id=' + id, 'post', 'text');
-
-    };
     const getServiceAddress = () => {
     	let hr = new HttpRequest();
 
@@ -1294,421 +1729,73 @@
     	hr.send(address + '/get-socketAddress', '', 'get', 'text');
 
     };
-    const intoRoom = () => {
-    	let headers = [
-    		"Content-Type", "application/x-www-form-urlencoded",
-    		'token', result.userInfo.token,
-    		'user_id', result.userInfo.id
-    	];
-    	let hr = new HttpRequest();
-
-    	function onHttpRequestProgress(e) {
-    		console.log(123);
-    	}
-
-    	function onHttpRequestComplete(e) {
-    		socketMain();
-    		console.log(888888888, hr);
-    	}
-
-    	function onHttpRequestError(e) {
-    		console.log(534543, e);
-    	}
-    	hr.once(Event.PROGRESS, undefined, onHttpRequestProgress);
-    	hr.once(Event.COMPLETE, undefined, onHttpRequestComplete);
-    	hr.once(Event.ERROR, undefined, onHttpRequestError);
-    	hr.send(address + '/into-room?roomNo=123', null, 'get', 'text', headers);
-
-    };
-
-    function send() {
-    	// if(utl.messgeTime+1==utl.sendTime){
-    	let str = JSON.stringify(utl.sendMessage);
-    	websocket.send(str);
-    	// }
-    	// console.log(66666,utl)
-
-    }
-
-    function sendWe() {
-    	if (utl.messgeTime + 1 == utl.sendTime) {
-    		let str = JSON.stringify(utl.sendMessage);
-    		wx.sendSocketMessage({
-    			data: str
-    		});
-    	}
-    }
-
-    function df() {
-    	let player = playerMap.get(utl.id);
-    	player.twList.shift();
-    	player.flag = true;
-    	// tweens.shift()
-    	// twnFlag = true
-    	main();
-    	// setTimeout(()=>{
-    	// 	console.log(2222222)
-    	// },2000)
-    	console.log(33333333);
-    	// utl.cube.transform.position = new Laya.Vector3(temp.tar.x,0,temp.tar.z)
-
-    }
-    // let tweens = []
-    let playerMap = new Map();
-
-    function main() {
-    	if (utl.fireOnOff) {
-    		return
-    	}
-    	for (var [key, value] of playerMap.entries()) {
-    		// if(!value.timeFlag){
-    		// 	continue
-    		// }
-    		if (value.flag && value.twList.length > 0) {
-    			value.flag = false;
-    			drawPlayer(value);
-    		}
-    	}
-    }
-
-    function drawPlayer(value) {
-    	if (value.twList.length == 0) {
-    		return
-    	}
 
 
-    	let obj = value.twList[0];
-    	let tweenObj = {
-    		val: obj,
-    		value,
-    		x: 0,
-    	};
-
-    	let {
-    		id,
-    		type,
-    		position,
-    		shipEuler,
-    		speed,
-    		roteBody,
-    		rotationEuler
-    	} = obj;
-    	let box = utl.boxs.get(id);
-
-    	if (!box) {
-    		box = utl.models.get('pler').clone();
-    		utl.newScene.addChild(box);
-    		let ship = box.getChildByName('shipmain');
-    		let camera = ship.getChildByName('c1');
-    		if (id == utl.id) {
-    			// utl.realBox = box
-    			// utl.bullet = box.getChildByName('shipmain').getChildByName('ship').getChildByName('ac')
-    			// camera.clearColor = new Laya.Vector4(0, 0, 0, 1);
-    			camera.active = true;
-    		} else {
-    			box.getChildByName('camermain').active = false;
-    			camera.active = false;
-    		}
-
-    		utl.boxs.set(id, box);
 
 
-    		//创建新人物
-    	}
-    	let player = playerMap.get(id);
-    	let ship = box.getChildByName('shipmain');
-
-    	let shipcard = ship.getChildByName('ship');
-
-    	box.transform.position = new Laya.Vector3(position.x, position.y, position.z);
-    	box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
-
-
-    	shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
-
-    	if (type == 'FIRE') {
-    		let bullet = utl.models.get('bullet').clone();
-    		let sc = bullet.addComponent(Bullet);
-    		sc.startSpeed = speed;
-    		utl.newScene.addChild(bullet);
-
-    		let shipcar = bullet.getChildByName('Cube');
-
-    		bullet.transform.position = new Laya.Vector3(position.x, position.y, position.z);
-    		bullet.transform.rotationEuler = new Laya.Vector3(rotationEuler.x, rotationEuler.y, rotationEuler.z);
-    		shipcar.transform.rotationEuler = new Laya.Vector3(shipEuler.x, shipEuler.y, shipEuler.z);
-
-    	}
-
-    	// box.transform.rotate(new Laya.Vector3(0,0,roteBody.sy* Math.PI / 180,),true);
-    	//    box.transform.rotate(new Laya.Vector3(0,roteBody.sx* Math.PI / 180,0),true);
-
-    	//    if(player.lastObj){
-    	//    	shipcard.transform.rotate(new Laya.Vector3(0, player.lastObj.x* Math.PI / 180,0),true);
-    	//    	shipcard.transform.rotate(new Laya.Vector3(player.lastObj.y* Math.PI / 180,0,0),true);
-    	//    }
-
-
-    	//    shipcard.transform.rotate(new Laya.Vector3(-roteBody.y* Math.PI / 180,0,0),true);
-    	//    shipcard.transform.rotate(new Laya.Vector3(0,-roteBody.x* Math.PI / 180,0),true);
-    	//    player.lastObj = roteBody
-    	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
-    	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
-    	// let ship = box.getChildByName('shipmain')
-
-    	//    let shipcard = ship.getChildByName('ship')
-    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
-
-    	Laya.Tween.to(
-    		tweenObj, {
-    			x: 10,
-    			update: new Laya.Handler(this, updateMove, [tweenObj])
-    		},
-    		20,
-    		Laya.Ease.linearNone,
-    		Laya.Handler.create(this, tweend, [tweenObj]),
-    		0);
-    }
-
-    function updateMove(value) {
-    	let obj = value.val;
-    	if (obj.speed > 0) {
-
-    		let box = utl.boxs.get(obj.id);
-    		box.transform.translate(new Laya.Vector3(0, -obj.speed / 10, 0), true);
-    	}
-
-    }
-
-    function tweend(obj) {
-    	let {
-    		id,
-    		position,
-    		shipEuler,
-    		roteBody,
-    		rotationEuler
-    	} = obj.val;
-    	let player = playerMap.get(id);
-
-    	// let box = utl.boxs.get(id)
-    	// box.transform.position = new Laya.Vector3(position.x,position.y,position.z)
-    	// box.transform.rotationEuler = new Laya.Vector3(rotationEuler.x,rotationEuler.y,rotationEuler.z)
-    	// let ship = box.getChildByName('shipmain')
-
-    	//    let shipcard = ship.getChildByName('ship')
-    	//    shipcard.transform.rotationEuler = new Laya.Vector3(shipEuler.x,shipEuler.y,shipEuler.z)
-
-    	player.twList.shift();
-    	if (player.twList.length != 0) {
-    		drawPlayer(player);
-    	}
-
-    	// tweens.shift()
-    	// twnFlag = true
-    	// main()
-    }
-
-    function changeMove(obj) {
-
-    	utl.cube.transform.position = new Laya.Vector3(obj.tar.x, 0, obj.tar.z);
-    	// temp = obj.rote
-    }
-
-    function addInitTween(obj) {
-    	// obj.sendTime = obj.sendTime
-    	let id = obj.id;
-    	let tweens = [obj];
-    	let flag = true;
-    	let messgeTime = 0;
-    	let mapObj = {
-    		twList: tweens,
-    		pObj: obj,
-    		flag,
-    		timeFlag: true,
-    		messgeTime,
-    		lastObj: null
-    	};
-    	playerMap.set(id, mapObj);
-    	return mapObj
-    }
-    var temp = null;
-
-    function fixMessge(list) {
-    	if (list.length == 0) {
-    		return
-    	}
-    	for (let player of list) {
-    		// if(player.id==utl.id){
-    		// 	continue;
-    		// }
-    		if (!playerMap.get(player.id)) {
-    			let obj = addInitTween(player);
-    			drawPlayer(obj);
-    		} else {
-    			let pm = playerMap.get(player.id);
-    			if (pm.pObj.sendTime < player.sendTime) {
-    				pm.pObj = player;
-    				pm.pObj.sendTime = player.sendTime;
-    				pm.twList.push(player);
-    				if (pm.twList.length == 1) {
-    					drawPlayer(pm);
-    				}
-    				// if(!pm.timeFlag){
-    				// 	if(pm.twList.length>5){
-    				// 		pm.timeFlag = true
-    				// 	}
-    				// }
-    				// if(pm.twList.length==0){
-    				// 	pm.timeFlag = false
-    				// }
-    			}
-    		}
-
-
-    	}
-
-    }
-
-    function onDo() {
-    	if (utl.fireOnOff) {
-    		let shipcar = utl.boxs.get('123');
-    		shipcar.transform.translate(new Laya.Vector3(.1, 0, 0), true);
-    		// if(utl.sendTime==utl.messgeTime){
-    		// let ship = utl.box.getChildByName('shipmain')
-    		// let shipcar = utl.box.getChildByName('shipmain').getChildByName('ship')
-    		// let shipcar = utl.box
-    		let sPosition = shipcar.transform.position;
-    		let rotationEuler = shipcar.transform.rotationEuler;
-    		utl.sendTime++;
-    			utl.messgeTime = utl.sendTime;
-    		utl.sendMessage = [{
-    			id: utl.id,
-    			position: sPosition,
-    			sendTime: utl.sendTime,
-    			type: 'move',
-    			rotationEuler
-    		}];
-
-    	}
-    }
     const socketMain = () => {
+    	createGraph();
+    	// const socket = new WebSocket('ws://xuxin.love:3000');
+    	// // wx.connectSocket({
+    	// //   url: 'ws://xuxin.love:3000'
+    	// // })
+    	// // wx.onSocketOpen(function(res) {
+    	// //  wx.onSocketMessage((e)=>{
+    	// //  	console.log(e)
+    	// //  })
 
-    	utl.socket = io('ws://39.103.132.21:3000');
-    	// utl.socket = io('ws://192.168.0.105:3000');
+    	// // })
+    	// return
+    	utl.socket = io('ws://192.168.0.104:3000');
+    	// utl.socket = io('wss://xuxin.love:3000');
     	utl.socket.on('123456', (s) => {
+    		resetGraph();
     		utl.mapSp.graphics.clear();
     		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
     		for (let player of s.list) {
     			for (let rot of player.rots) {
-
     				if (utl.entityMap.has(rot.id)) {
-    					// if (rot.end) {
-    					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
-    					// 	let x = ~~(rot.end.x / 500 * 400)
-    					// 	let y = ~~(rot.end.y / 500 * 400)
-    					// 	utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-    					// } else {
+    					if (rot.start) {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-    					// }
+    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
+    					}
+    					else  {
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
+    						let x = ~~(rot.end.x / 500 * 400);
+    						let y = ~~(rot.end.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    						utl.graph.grid[rot.end.x][rot.end.y].weight = 0;
+    					} 
 
     				} else {
     					let map2 = utl.models.get('cube').clone();
     					map2.getChildByName('on').active = false;
     					utl.newScene.addChild(map2);
     					utl.entityMap.set(rot.id, map2);
-    					// if (rot.end) {
-    					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
-    					// 	let x = ~~(rot.end.x / 500 * 400)
-    					// 	let y = ~~(rot.end.y / 500 * 400)
-    					// 	utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
-    					// } else {
+    					if (rot.start) {
     						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y);
     						let x = ~~(rot.start.x / 500 * 400);
     						let y = ~~(rot.start.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
-    					// }
+    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
+    					}
+    					else{
+    						utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y);
+    						let x = ~~(rot.end.x / 500 * 400);
+    						let y = ~~(rot.end.y / 500 * 400);
+    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    						utl.graph.grid[rot.end.x][rot.end.y].weight = 0;
+    					} 
     				}
     			}
     		}
-    		// let cube = s.list[0].rots[0]
-    		// utl.entityMap.get(cube.id).transform.position.x = -cube.end.x
-    		// utl.entityMap.get(cube.id).transform.position.z = cube.end.y
-    		// if (cube.end) {
-    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.end.x, 3, cube.end.y)
-    		// } else {
-    		// 	utl.entityMap.get(cube.id).transform.position = new Laya.Vector3(-cube.start.x, 3, cube.start.y)
-    		// }
-
     	});
     	utl.socket.on('event', function(data) {});
     	utl.socket.on('disconnect', function() {});
     	//------------------------------web-------------------
-    };
-    const creteBox = (sp, erd) => {
-    	let box = utl.newScene.addChild(sp);
-    	box.takeSpeed = erd.takeSpeed;
-    	box.speed = {
-    		z: 0,
-    		x: 0,
-    		y: 0
-    	};
-    	if (erd.rotation) {
-    		box.transform.rotation = new Laya.Vector3(erd.rotation.x, erd.rotation.y, erd.rotation.z);
-    	}
-    	if (erd.position) {
-    		box.transform.position = new Laya.Vector3(erd.position.x, erd.position.y, erd.position.z);
-    	}
-
-    	// utl.newScene.addChild(box)
-    	utl.players.set(erd.id, box);
-    };
-    const setBox = (players) => {
-    	let ps = new Map(players);
-    	utl.netPlayers = ps;
-    	let bs = utl.players;
-    	if (utl.newScene) {
-    		for (let k of ps.keys()) {
-    			let now = bs.get(k);
-    			let erd = ps.get(k);
-
-    			if (now) {
-    				now.takeSpeed = erd.takeSpeed;
-    				return
-    				if (erd.position && now.tempPosition) {
-    					let erdx = {
-    						x: ~~(erd.position.x * 100),
-    						y: ~~(erd.position.y * 100),
-    						z: ~~(erd.position.z * 100)
-    					};
-    					now.tempPositions.push(erdx);
-
-    				}
-    				if (erd.rotation && now.tempRotation) {
-    					let erdx = {
-    						x: ~~(erd.rotation.x * 100),
-    						y: ~~(erd.rotation.y * 100),
-    						z: ~~(erd.rotation.z * 100)
-    					};
-    					now.tempRotations.push(erdx);
-    				}
-
-    			} else {
-    				if (erd.id == utl.userId) {
-    					Laya.Sprite3D.load("res/t2/LayaScene_fff/Conventional/f.lh", Laya.Handler.create(null, (sp) => {
-    						creteBox(sp, erd);
-    					}));
-    				} else {
-    					let box4 = utl.box4.clone();
-    					creteBox(box4, erd);
-    				}
-
-    			}
-    		}
-    	}
-
     };
 
     /**
@@ -1717,7 +1804,7 @@
      * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
      */
       // import {getServiceAddress} from "../net/index"
-      let temp$1 =0,spled = {x:0,y:0,z:0},dfew=0;
+      let temp =0,spled = {x:0,y:0,z:0},dfew=0;
       let flagod = false;
       let fireFlag = false;
       let touchs = [
@@ -1731,10 +1818,10 @@
 
     let flag = true;  
 
-    function updateMove$1(obj){
+    function updateMove(obj){
         utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
     }
-    function tweend$1(){
+    function tweend(){
 
         let tweenObj= {
             x:0
@@ -1742,10 +1829,10 @@
         Laya.Tween.to(
                     tweenObj,
                     {x:10,
-                    update:new Laya.Handler(this,updateMove$1,[tweenObj])},
+                    update:new Laya.Handler(this,updateMove,[tweenObj])},
                     50,
                     Laya.Ease.linearNone,
-                    Laya.Handler.create(this,tweend$1,[tweenObj]),
+                    Laya.Handler.create(this,tweend,[tweenObj]),
                 0);
         // flag = true
     }
@@ -1778,7 +1865,7 @@
             Laya.stage.addChild(this.info);  
             utl.info =  this.info;
             this.drawUi();
-            temp$1 = this;
+            temp = this;
 
             // this.newScene.addChild(utl.models.get('light'));  
             var directionLight = this.newScene.addChild(new Laya.DirectionLight());
@@ -1840,7 +1927,11 @@
             addsImg.width =150;
             addsImg.pos(200, Laya.stage.height - 200);
             Laya.stage.addChild(addsImg);
-
+             utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+            var material = new Laya.BlinnPhongMaterial();
+            material.albedoColor=new Laya.Vector3(5,5,5);
+            material.diffuseColor=new Laya.Vector3(5,5,5);
+            utl.showbox.meshRenderer.material = material;
 
             // let rightHandself = this.loadingElse.get('right')
             // let rightHandselfImg = new  Laya.Image(rightHandself);
@@ -2152,6 +2243,7 @@
      */
     let ls = [
         {index:2,title:'start game'},
+        {index:3,title:'start observer'}
     ];
     class Level extends Laya.Scene {
         constructor() {
@@ -2252,12 +2344,24 @@
                 // Laya.Physics.rayCastAll(ray, _outHitAllInfo, 30, 10);
                  if (outHitResult.succeeded){
                      let index = outHitResult.collider.owner.parent.name.charAt(0);
-                     utl.playStatusObj = {
-                        doingIndex:1
-                     };
-                     this.removeSelf();
-                     Laya.stage.offAll();
-                     Laya.Scene.open('test/load.scene');
+                     index++;
+                     if(index==1){
+                        utl.playStatusObj = {
+                            doingIndex:1
+                        };
+                        this.removeSelf();
+                        Laya.stage.offAll();
+                        Laya.Scene.open('test/load.scene');
+                     }
+                     if(index==2){
+                        utl.playStatusObj = {
+                            doingIndex:2
+                        };
+                        this.removeSelf();
+                        Laya.stage.offAll();
+                        Laya.Scene.open('test/load.scene');
+                     }
+                     
                  }
                 
             }
@@ -2346,17 +2450,6 @@
                 sprite.addChild(box);
                 let material = new Laya.BlinnPhongMaterial();
                 material.albedoColor=color;
-                // material.albedoColorA=new Laya.Vector3(130,288,242);
-                // material.albedoColorB=242
-                // material.albedoColorG=288
-                // material.albedoColorR=130
-
-
-                // material.diffuseColorB=242
-                // material.diffuseColorG=288
-                // material.diffuseColorR=130
-
-
                 material.diffuseColor=color;
                 box.meshRenderer.material = material;
                 sprite.transform.position = new Laya.Vector3(initx - 2*i, -1, 0);
@@ -2571,8 +2664,14 @@
                     this.box.transform.position = new Laya.Vector3(-this.boxLangth/2+this.boxedLangth*3/2, 0.0, 2);
                     if(this.boxedLangth==1){
                         this.removeSelf();
+                        if(index==1){
+                            Laya.Scene.open(`test/game${index}.scene`);
+                        }
+                        if(index==2){
+                            Laya.Scene.open(`observation/game.scene`);
+                        }
                         // Laya.stage.addChild(GameUI);
-                        Laya.Scene.open(`test/game${index}.scene`);
+                        // Laya.Scene.open(`test/game${index}.scene`)
                     }
                     resolve();
                 }));
@@ -2597,7 +2696,12 @@
                         this.removeSelf();
                         // Laya.stage.addChild(GameUI);
                         // Laya.Scene.open('test/main.scene')
-                        Laya.Scene.open(`test/game${index}.scene`);
+                        if(index==1){
+                            Laya.Scene.open(`test/game${index}.scene`);
+                        }
+                        if(index==2){
+                            Laya.Scene.open(`observation/game.scene`);
+                        }
                     }
                     resolve();
                 }));
@@ -2654,7 +2758,7 @@
      * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
      * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
      */
-      let temp$2 =0,spled$1 = {x:0,y:0,z:0},dfew$1=0;
+      let temp$1 =0,spled$1 = {x:0,y:0,z:0},dfew$1=0;
       let flagod$1 = false;
       let fireFlag$1 = false;
       let touchs$1 = [
@@ -2706,7 +2810,7 @@
                     utl.takeSpeed.y =  Math.floor(rotationInfo.beta);
                 }
             }
-            temp$2 = this;
+            temp$1 = this;
             this.newScene.addChild(utl.models.get('light'));  
            
 
@@ -2784,7 +2888,7 @@
             // utl.models.get('cube').active=false  
         }
         drawUi(){
-
+               console.log(55555555555555);
 
             // let fudf = utl.models.get('cotrll')
             // let ape2 = new Laya.Sprite();
@@ -2842,6 +2946,11 @@
             // ape3.height = 100
             // ape3.x = Laya.stage.width/2+200;
             // ape3.y = Laya.stage.height - 500;
+            utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+            utl.showbox.transform.rotate(new Laya.Vector3(0, 45, 0), false, false);
+            var material = new Laya.BlinnPhongMaterial();
+            material.color = new Laya.Color(1, 1, 1, 1);
+            utl.showbox.meshRenderer.material = material;
             
         }
         initTouch(){
@@ -3308,7 +3417,7 @@
     onTriggerEnter()
     {
         utl.entity.get('obx').removeSelf();
-        temp$2.creab();
+        temp$1.creab();
     console.log("onTriggerEnter");
     }
     onTriggerStay()
@@ -3348,6 +3457,957 @@
     }
     }
 
+    // javascript-astar 0.4.1
+    // http://github.com/bgrins/javascript-astar
+    // Freely distributable under the MIT License.
+    // Implements the astar search algorithm in javascript using a Binary Heap.
+    // Includes Binary Heap (with modifications) from Marijn Haverbeke.
+    // http://eloquentjavascript.net/appendix2.html
+    // (function(definition) {
+    //   /* global module, define */
+    //   if (typeof module === 'object' && typeof module.exports === 'object') {
+    //     module.exports = definition();
+    //   } else if (typeof define === 'function' && define.amd) {
+    //     define([], definition);
+    //   } else {
+    //     var exports = definition();
+    //     window.astar = exports.astar;
+    //     window.Graph = exports.Graph;
+    //   }
+    // })(function() {
+
+    function pathTo$1(node) {
+      var curr = node;
+      var path = [];
+      while (curr.parent) {
+        path.unshift(curr);
+        curr = curr.parent;
+      }
+      return path;
+    }
+
+    function getHeap$1() {
+      return new BinaryHeap$1(function(node) {
+        return node.f;
+      });
+    }
+
+    var astar$1 = {
+      /**
+      * Perform an A* Search on a graph given a start and end node.
+      * @param {Graph} graph
+      * @param {GridNode} start
+      * @param {GridNode} end
+      * @param {Object} [options]
+      * @param {bool} [options.closest] Specifies whether to return the
+                 path to the closest node if the target is unreachable.
+      * @param {Function} [options.heuristic] Heuristic function (see
+      *          astar.heuristics).
+      */
+      search: function(graph, start, end, options) {
+        graph.cleanDirty();
+        options = options || {};
+        var heuristic = options.heuristic || astar$1.heuristics.manhattan;
+        var closest = options.closest || false;
+
+        var openHeap = getHeap$1();
+        var closestNode = start; // set the start node to be the closest if required
+
+        start.h = heuristic(start, end);
+        graph.markDirty(start);
+
+        openHeap.push(start);
+
+        while (openHeap.size() > 0) {
+
+          // Grab the lowest f(x) to process next.  Heap keeps this sorted for us.
+          var currentNode = openHeap.pop();
+
+          // End case -- result has been found, return the traced path.
+          if (currentNode === end) {
+            return pathTo$1(currentNode);
+          }
+
+          // Normal case -- move currentNode from open to closed, process each of its neighbors.
+          currentNode.closed = true;
+
+          // Find all neighbors for the current node.
+          var neighbors = graph.neighbors(currentNode);
+
+          for (var i = 0, il = neighbors.length; i < il; ++i) {
+            var neighbor = neighbors[i];
+
+            if (neighbor.closed || neighbor.isWall()) {
+              // Not a valid node to process, skip to next neighbor.
+              continue;
+            }
+
+            // The g score is the shortest distance from start to current node.
+            // We need to check if the path we have arrived at this neighbor is the shortest one we have seen yet.
+            var gScore = currentNode.g + neighbor.getCost(currentNode);
+            var beenVisited = neighbor.visited;
+
+            if (!beenVisited || gScore < neighbor.g) {
+
+              // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
+              neighbor.visited = true;
+              neighbor.parent = currentNode;
+              neighbor.h = neighbor.h || heuristic(neighbor, end);
+              neighbor.g = gScore;
+              neighbor.f = neighbor.g + neighbor.h;
+              graph.markDirty(neighbor);
+              if (closest) {
+                // If the neighbour is closer than the current closestNode or if it's equally close but has
+                // a cheaper path than the current closest node then it becomes the closest node
+                if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
+                  closestNode = neighbor;
+                }
+              }
+
+              if (!beenVisited) {
+                // Pushing to heap will put it in proper place based on the 'f' value.
+                openHeap.push(neighbor);
+              } else {
+                // Already seen the node, but since it has been rescored we need to reorder it in the heap
+                openHeap.rescoreElement(neighbor);
+              }
+            }
+          }
+        }
+
+        if (closest) {
+          return pathTo$1(closestNode);
+        }
+
+        // No result was found - empty array signifies failure to find path.
+        return [];
+      },
+      // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+      heuristics: {
+        manhattan: function(pos0, pos1) {
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return d1 + d2;
+        },
+        diagonal: function(pos0, pos1) {
+          var D = 1;
+          var D2 = Math.sqrt(2);
+          var d1 = Math.abs(pos1.x - pos0.x);
+          var d2 = Math.abs(pos1.y - pos0.y);
+          return (D * (d1 + d2)) + ((D2 - (2 * D)) * Math.min(d1, d2));
+        }
+      },
+      cleanNode: function(node) {
+        node.f = 0;
+        node.g = 0;
+        node.h = 0;
+        node.visited = false;
+        node.closed = false;
+        node.parent = null;
+      }
+    };
+
+    /**
+     * A graph memory structure
+     * @param {Array} gridIn 2D array of input weights
+     * @param {Object} [options]
+     * @param {bool} [options.diagonal] Specifies whether diagonal moves are allowed
+     */
+    function Graph$1(gridIn, options) {
+      options = options || {};
+      this.nodes = [];
+      this.diagonal = !!options.diagonal;
+      this.grid = [];
+      for (var x = 0; x < gridIn.length; x++) {
+        this.grid[x] = [];
+
+        for (var y = 0, row = gridIn[x]; y < row.length; y++) {
+          var node = new GridNode$1(x, y, row[y]);
+          this.grid[x][y] = node;
+          this.nodes.push(node);
+        }
+      }
+      this.init();
+    }
+
+    Graph$1.prototype.init = function() {
+      this.dirtyNodes = [];
+      for (var i = 0; i < this.nodes.length; i++) {
+        astar$1.cleanNode(this.nodes[i]);
+      }
+    };
+
+    Graph$1.prototype.cleanDirty = function() {
+      for (var i = 0; i < this.dirtyNodes.length; i++) {
+        astar$1.cleanNode(this.dirtyNodes[i]);
+      }
+      this.dirtyNodes = [];
+    };
+
+    Graph$1.prototype.markDirty = function(node) {
+      this.dirtyNodes.push(node);
+    };
+
+    Graph$1.prototype.neighbors = function(node) {
+      var ret = [];
+      var x = node.x;
+      var y = node.y;
+      var grid = this.grid;
+
+      // West
+      if (grid[x - 1] && grid[x - 1][y]) {
+        ret.push(grid[x - 1][y]);
+      }
+
+      // East
+      if (grid[x + 1] && grid[x + 1][y]) {
+        ret.push(grid[x + 1][y]);
+      }
+
+      // South
+      if (grid[x] && grid[x][y - 1]) {
+        ret.push(grid[x][y - 1]);
+      }
+
+      // North
+      if (grid[x] && grid[x][y + 1]) {
+        ret.push(grid[x][y + 1]);
+      }
+
+      if (this.diagonal) {
+        // Southwest
+        if (grid[x - 1] && grid[x - 1][y - 1]) {
+          ret.push(grid[x - 1][y - 1]);
+        }
+
+        // Southeast
+        if (grid[x + 1] && grid[x + 1][y - 1]) {
+          ret.push(grid[x + 1][y - 1]);
+        }
+
+        // Northwest
+        if (grid[x - 1] && grid[x - 1][y + 1]) {
+          ret.push(grid[x - 1][y + 1]);
+        }
+
+        // Northeast
+        if (grid[x + 1] && grid[x + 1][y + 1]) {
+          ret.push(grid[x + 1][y + 1]);
+        }
+      }
+
+      return ret;
+    };
+
+    Graph$1.prototype.toString = function() {
+      var graphString = [];
+      var nodes = this.grid;
+      for (var x = 0; x < nodes.length; x++) {
+        var rowDebug = [];
+        var row = nodes[x];
+        for (var y = 0; y < row.length; y++) {
+          rowDebug.push(row[y].weight);
+        }
+        graphString.push(rowDebug.join(" "));
+      }
+      return graphString.join("\n");
+    };
+
+    function GridNode$1(x, y, weight) {
+      this.x = x;
+      this.y = y;
+      this.weight = weight;
+    }
+
+    GridNode$1.prototype.toString = function() {
+      return "[" + this.x + " " + this.y + "]";
+    };
+
+    GridNode$1.prototype.getCost = function(fromNeighbor) {
+      // Take diagonal weight into consideration.
+      if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
+        return this.weight * 1.41421;
+      }
+      return this.weight;
+    };
+
+    GridNode$1.prototype.isWall = function() {
+      return this.weight === 0;
+    };
+
+    function BinaryHeap$1(scoreFunction) {
+      this.content = [];
+      this.scoreFunction = scoreFunction;
+    }
+
+    BinaryHeap$1.prototype = {
+      push: function(element) {
+        // Add the new element to the end of the array.
+        this.content.push(element);
+
+        // Allow it to sink down.
+        this.sinkDown(this.content.length - 1);
+      },
+      pop: function() {
+        // Store the first element so we can return it later.
+        var result = this.content[0];
+        // Get the element at the end of the array.
+        var end = this.content.pop();
+        // If there are any elements left, put the end element at the
+        // start, and let it bubble up.
+        if (this.content.length > 0) {
+          this.content[0] = end;
+          this.bubbleUp(0);
+        }
+        return result;
+      },
+      remove: function(node) {
+        var i = this.content.indexOf(node);
+
+        // When it is found, the process seen in 'pop' is repeated
+        // to fill up the hole.
+        var end = this.content.pop();
+
+        if (i !== this.content.length - 1) {
+          this.content[i] = end;
+
+          if (this.scoreFunction(end) < this.scoreFunction(node)) {
+            this.sinkDown(i);
+          } else {
+            this.bubbleUp(i);
+          }
+        }
+      },
+      size: function() {
+        return this.content.length;
+      },
+      rescoreElement: function(node) {
+        this.sinkDown(this.content.indexOf(node));
+      },
+      sinkDown: function(n) {
+        // Fetch the element that has to be sunk.
+        var element = this.content[n];
+
+        // When at 0, an element can not sink any further.
+        while (n > 0) {
+
+          // Compute the parent element's index, and fetch it.
+          var parentN = ((n + 1) >> 1) - 1;
+          var parent = this.content[parentN];
+          // Swap the elements if the parent is greater.
+          if (this.scoreFunction(element) < this.scoreFunction(parent)) {
+            this.content[parentN] = element;
+            this.content[n] = parent;
+            // Update 'n' to continue at the new position.
+            n = parentN;
+          }
+          // Found a parent that is less, no need to sink any further.
+          else {
+            break;
+          }
+        }
+      },
+      bubbleUp: function(n) {
+        // Look up the target element and its score.
+        var length = this.content.length;
+        var element = this.content[n];
+        var elemScore = this.scoreFunction(element);
+
+        while (true) {
+          // Compute the indices of the child elements.
+          var child2N = (n + 1) << 1;
+          var child1N = child2N - 1;
+          // This is used to store the new position of the element, if any.
+          var swap = null;
+          var child1Score;
+          // If the first child exists (is inside the array)...
+          if (child1N < length) {
+            // Look it up and compute its score.
+            var child1 = this.content[child1N];
+            child1Score = this.scoreFunction(child1);
+
+            // If the score is less than our element's, we need to swap.
+            if (child1Score < elemScore) {
+              swap = child1N;
+            }
+          }
+
+          // Do the same checks for the other child.
+          if (child2N < length) {
+            var child2 = this.content[child2N];
+            var child2Score = this.scoreFunction(child2);
+            if (child2Score < (swap === null ? elemScore : child1Score)) {
+              swap = child2N;
+            }
+          }
+
+          // If the element needs to be moved, swap it, and continue.
+          if (swap !== null) {
+            this.content[n] = this.content[swap];
+            this.content[swap] = element;
+            n = swap;
+          }
+          // Otherwise, we are done.
+          else {
+            break;
+          }
+        }
+      }
+    };
+
+    const Astar$1 = {
+      astar: astar$1,
+      Graph: Graph$1
+    };
+    // module.exports={
+    //   astar: astar,
+    //   Graph: Graph
+    // };
+    // });
+
+    let address$1 = 'http://172.16.25.101:3000';
+
+    let Event$1 = Laya.Event;
+    let result$1 = {};
+
+    let websocket$1 = null;
+    let allBoy = [];
+    function createGraph$1() {
+    	let list = [];
+    	for (let i = 0; i < 500; i++) {
+    	    let list1 = [];
+    	    for (let o = 0; o < 500; o++) {
+    	        list1.push(1);
+    			let map2 = utl.models.get('cube').clone();
+    			map2.getChildByName('on').active = false;
+    			utl.newScene.addChild(map2);
+    			map2.transform.position = new Laya.Vector3(-o, 3, i);
+    			allBoy.push(map2);
+    	    }
+    	    list.push(list1);
+    	}
+
+    	utl.graph = new Astar$1.Graph(list);
+    }
+    function resetGraph$1(){
+    	for(let obj of utl.graph.grid){
+    		for(let indexObj of obj){
+    			indexObj.weight = 1;
+    		}
+    	}
+    }
+
+
+    const getServiceAddress$1 = () => {
+    	let hr = new HttpRequest();
+
+    	function onHttpRequestProgress(e) {
+    		console.log(123);
+    	}
+
+    	function onHttpRequestComplete(e) {
+    		result$1.serviceAddress = JSON.parse(hr.data).data;
+    		login();
+    		console.log(3458888, result$1);
+    	}
+
+    	function onHttpRequestError(e) {
+    		console.log(534543, e);
+    	}
+    	hr.once(Event$1.PROGRESS, undefined, onHttpRequestProgress);
+    	hr.once(Event$1.COMPLETE, undefined, onHttpRequestComplete);
+    	hr.once(Event$1.ERROR, undefined, onHttpRequestError);
+    	hr.send(address$1 + '/get-socketAddress', '', 'get', 'text');
+
+    };
+
+
+
+
+    const socketMain$1 = () => {
+    	createGraph$1();
+    	// const socket = new WebSocket('ws://xuxin.love:3000');
+    	// // wx.connectSocket({
+    	// //   url: 'ws://xuxin.love:3000'
+    	// // })
+    	// // wx.onSocketOpen(function(res) {
+    	// //  wx.onSocketMessage((e)=>{
+    	// //  	console.log(e)
+    	// //  })
+
+    	// // })
+    	// return
+    	utl.socket = io('ws://192.168.0.104:3000');
+    	// utl.socket = io('wss://xuxin.love:3000');
+    	utl.socket.on('123456-observer', (s) => {
+    		resetGraph$1();
+    		utl.mapSp.graphics.clear();
+    		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+    		for (let obj of s.grid) {
+    			for(let g of obj){
+
+    			}
+    				// if (utl.entityMap.has(rot.id)) {
+    				// 	if (rot.start) {
+    				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
+    				// 		let x = ~~(rot.start.x / 500 * 400)
+    				// 		let y = ~~(rot.start.y / 500 * 400)
+    				// 		utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    				// 		utl.graph.grid[rot.start.x][rot.start.y].weight = 0
+    				// 	}
+    				// 	else  {
+    				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
+    				// 		let x = ~~(rot.end.x / 500 * 400)
+    				// 		let y = ~~(rot.end.y / 500 * 400)
+    				// 		utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+    				// 		utl.graph.grid[rot.end.x][rot.end.y].weight = 0
+    				// 	} 
+
+    				// } else {
+    				// 	let map2 = utl.models.get('cube').clone()
+    				// 	map2.getChildByName('on').active = false
+    				// 	utl.newScene.addChild(map2);
+    				// 	utl.entityMap.set(rot.id, map2)
+    				// 	if (rot.start) {
+    				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
+    				// 		let x = ~~(rot.start.x / 500 * 400)
+    				// 		let y = ~~(rot.start.y / 500 * 400)
+    				// 		utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    				// 		utl.graph.grid[rot.start.x][rot.start.y].weight = 0
+    				// 	}
+    				// 	else{
+    				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
+    				// 		let x = ~~(rot.end.x / 500 * 400)
+    				// 		let y = ~~(rot.end.y / 500 * 400)
+    				// 		utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+    				// 		utl.graph.grid[rot.end.x][rot.end.y].weight = 0
+    				// 	} 
+    				// }
+    			
+    		}
+    	});
+    	utl.socket.on('event', function(data) {});
+    	utl.socket.on('disconnect', function() {});
+    	//------------------------------web-------------------
+    };
+
+    /**
+     * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
+     * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
+     * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
+     */
+     // import {getServiceAddress} from "../net/index"
+     let temp$2 =0,spled$2 = {x:0,y:0,z:0},dfew$2=0;
+     let flagod$2 = false;
+     let fireFlag$2 = false;
+     let touchs$2 = [
+       ['newTouch',{flag:false,Tclass:newtach}],
+       // ['newTor',{flag:false,Tclass:newTor}],
+       // ['fire',{flag:false,Tclass:fire}],
+       // ['rightTouch',{flag:false,Tclass:rightTouch}],
+       // ['leftRote',{flag:false,Tclass:leftRote}],
+       // ['rightRote',{flag:false,Tclass:rightRote}]
+     ];
+
+    let flag$1 = true;  
+
+    function updateMove$1(obj){
+       utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
+    }
+    function tweend$1(){
+
+       let tweenObj= {
+           x:0
+       }; 
+       Laya.Tween.to(
+                   tweenObj,
+                   {x:10,
+                   update:new Laya.Handler(this,updateMove$1,[tweenObj])},
+                   50,
+                   Laya.Ease.linearNone,
+                   Laya.Handler.create(this,tweend$1,[tweenObj]),
+               0);
+       // flag = true
+    }
+
+    class GameUI$2 extends Laya.Scene {
+       constructor() {
+           super();
+           this.isTwoTouch = false;
+           this.twoFirst = true;
+           this.fucntkTemp =0;
+           this.temprx=0;
+           this.tempry=0;
+           this.temprz=0;
+           this.spled = 0;
+           this.spledy=0;
+           this.loadScene("test/TestScene.scene");
+           this.newScene = Laya.stage.addChild(new Laya.Scene3D());
+           this.loadingElse = new Map(utl.loadingElse);
+
+
+           utl.newScene = this.newScene;
+           this.initTouch();
+            // this.addMouseEvent();
+           this.info = new Laya.Text();
+           this.info.text = 'userId:'+utl.id;
+           this.info.fontSize = 50;
+           this.info.color = "#FFFFFF";
+           this.info.size(Laya.stage.width, Laya.stage.height);
+           this.info.pos(50,50);
+           Laya.stage.addChild(this.info);  
+           utl.info =  this.info;
+           this.drawUi();
+           temp$2 = this;
+
+           // this.newScene.addChild(utl.models.get('light'));  
+           var directionLight = this.newScene.addChild(new Laya.DirectionLight());
+           directionLight.color = new Laya.Vector3(0.3, 0.3, 0.1);
+           directionLight.transform.worldMatrix.setForward(new Laya.Vector3(-1, -1, -1));
+
+           socketMain$1();
+          
+
+          
+           Laya.timer.loop(5,this,this.onUpdate);
+           
+
+           // let map2 = utl.models.get('cube')
+           // map2.getChildByName('on').active = false
+           // console.log(map2)
+           // this.newScene.addChild(map2);
+           // utl.entityMap.set('cube',map2)
+          
+           let camera = utl.models.get('camera');
+           // // camera.active=false
+           // camera.clearColor = new Laya.Vector4(0, 0, 0, 1);
+
+           utl.camera = camera;
+           this.newScene.addChild(camera);
+
+
+
+           let  terrain= utl.models.get('plane');
+           this.newScene.addChild(terrain);
+
+
+           let box = utl.models.get('box');
+           utl.box = box;
+           this.newScene.addChild(box);
+          
+       }
+       addMouseEvent(){
+           
+           //鼠标事件监听
+           this.sp.on(Laya.Event.CLICK,this, this.onMouseDown);
+       }
+       onMouseDown() {
+           // let point = new Laya.Vector2();
+           // point.x = Laya.MouseManager.instance.mouseX;
+           // point.y = Laya.MouseManager.instance.mouseY;
+          console.log(6666666666);
+
+       }
+       drawUi(){
+           this.sp = new Laya.Sprite();
+           Laya.stage.addChild(this.sp);
+           this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+           utl.mapSp = this.sp;
+           this.addMouseEvent();
+           let adds = this.loadingElse.get('adds');
+           let addsImg = new  Laya.Image(adds);
+           addsImg.height = 150;
+           addsImg.width =150;
+           addsImg.pos(200, Laya.stage.height - 200);
+           Laya.stage.addChild(addsImg);
+            utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+           var material = new Laya.BlinnPhongMaterial();
+           material.albedoColor=new Laya.Vector3(5,5,5);
+           material.diffuseColor=new Laya.Vector3(5,5,5);
+           utl.showbox.meshRenderer.material = material;
+
+           // let rightHandself = this.loadingElse.get('right')
+           // let rightHandselfImg = new  Laya.Image(rightHandself);
+           // rightHandselfImg.height = 150
+           // rightHandselfImg.width =150
+           // rightHandselfImg.pos(Laya.stage.width - 400, Laya.stage.height - 200);
+           // Laya.stage.addChild(rightHandselfImg);
+
+
+
+
+           // let leftHand = this.loadingElse.get('cotrll')
+           // let leftHandImg = new  Laya.Image(leftHand);
+           // leftHandImg.height = 450
+           // leftHandImg.width =450
+           // leftHandImg.pos(300, Laya.stage.height - 600);
+           // Laya.stage.addChild(leftHandImg);
+
+
+           // let rightHand = this.loadingElse.get('fire')
+           // let rightHandImg = new  Laya.Image(rightHand);
+           // rightHandImg.height = 200
+           // rightHandImg.width =200
+           // rightHandImg.pos(Laya.stage.width - 600, Laya.stage.height -400);
+           // Laya.stage.addChild(rightHandImg);
+
+
+           // // let col = this.loadingElse.get('speed')
+           // // let dialog = new  Laya.Image(col);
+           // // dialog.height = 600
+           // // dialog.width =100
+           // // dialog.pos(Laya.stage.width - 100, Laya.stage.height - 650);
+           // // Laya.stage.addChild(dialog);
+
+           // //-----------add and less speed
+           // let lessSpeed = this.loadingElse.get('lessSpeed')
+           // let lessSpeedImg = new  Laya.Image(lessSpeed);
+           // lessSpeedImg.height = 100
+           // lessSpeedImg.width =100
+           // lessSpeedImg.pos(Laya.stage.width - 150, Laya.stage.height - 200);
+           // Laya.stage.addChild(lessSpeedImg);
+
+
+           // let addSpeed = this.loadingElse.get('addSpeed')
+           // let addSpeedImg = new  Laya.Image(addSpeed);
+           // addSpeedImg.height = 100
+           // addSpeedImg.width =100
+           // addSpeedImg.pos(Laya.stage.width - 150, Laya.stage.height - 350);
+           // Laya.stage.addChild(addSpeedImg);
+           //-----------add and less speed
+           
+       }
+       initTouch(){
+           for(let touch of touchs$2){
+               touch[1].event = new touch[1].Tclass();
+           }
+       }
+       onFire(){
+           if(utl.fireOnOff){
+               utl.msType = 'FIRE';
+               // let ship = utl.box.getChildByName('shipmain')
+               // let shipcar = ship.getChildByName('ship')
+               // let aum =utl.bullet.clone();
+               
+               // // let ball =new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1,1));
+               // let script = aum.addComponent(Bullet);
+               // this.newScene.addChild(aum)
+           }
+           
+       }
+       
+       flying(touchCount){
+
+           // this.info.text = touchCount
+         
+           for(let obj of touchs$2){
+               obj[1].flag = false;
+           }   
+           // let touchCount = this.scene.input.touchCount();
+           if (1 === touchCount){
+               //判断是否为两指触控，撤去一根手指后引发的touchCount===1
+               // if(this.isTwoTouch){
+               //     return;
+               // }
+               let touch = this.newScene.input.getTouch(0);
+               for(let obj of touchs$2){
+                   if(obj[1].event.scaleSmall(touch.position.x,touch.position.y)){
+                       obj[1].flag = true;
+                       obj[1].event.leftFormatMovePosition(touch.position.x,touch.position.y);
+                   }else{
+                       obj[1].flag = false;
+                   }
+               }
+               
+           }
+           else if (2 === touchCount){
+               // this.isTwoTouch = true;
+               //获取两个触碰点
+               let touch = this.newScene.input.getTouch(0);
+               let touch2 = this.newScene.input.getTouch(1);
+               for(let obj of touchs$2){
+                   if(obj[1].event.scaleSmall(touch.position.x,touch.position.y)){
+                       obj[1].flag = true;
+                       obj[1].event.leftFormatMovePosition(touch.position.x,touch.position.y);
+                   }
+                   if(obj[1].event.scaleSmall(touch2.position.x,touch2.position.y)){
+                       obj[1].flag = true;
+                       obj[1].event.leftFormatMovePosition(touch2.position.x,touch2.position.y);
+                   }
+                   if(!obj[1].event.scaleSmall(touch.position.x,touch.position.y)&&!obj[1].event.scaleSmall(touch2.position.x,touch2.position.y)){
+                       obj[1].flag = false;
+                   }
+               }   
+                   
+                  
+           }
+           else if (0 === touchCount){
+               // this.text.text = "触控点归零";
+               // this.first = true;
+               // this.twoFirst = true;
+               // // this.lastPosition.x = 0;
+               // // this.lastPosition.y = 0;
+               // this.isTwoTouch = false;
+               // utl.takeSpeed.x = 0
+               // utl.takeSpeed.y = 0
+           }
+           // let touchsMap = new Map(touchs)
+           // if(!touchsMap.get('newTor').flag){
+           //     utl.takeSpeed.x = 0
+           //     utl.takeSpeed.y = 0
+           // }
+           // if(!touchsMap.get('rightTouch').flag){
+           //     utl.roteGun.x = 0
+           //     utl.roteGun.y = 0
+           // }
+           // // if(!fireFlag){
+           //     utl.fireOnOff = touchsMap.get('rightTouch').flag
+           //     utl.roteLeftFlag = touchsMap.get('leftRote').flag
+           //     utl.roteRightFlag = touchsMap.get('rightRote').flag
+           // // }
+           // this.info.text = flagod+','+touchCount
+
+       }
+       gunMove(){
+            let ship = utl.box.getChildByName('camermain');
+            let acObj = ship.getChildByName('ac');
+
+           
+
+            if(utl.roteGun.x!=utl.roteGunTemp.x){
+                    if(Math.abs(utl.roteGun.x-utl.roteGunTemp.x)>.1){
+                       utl.roteGunTemp.x = utl.roteGun.x>utl.roteGunTemp.x?utl.roteGunTemp.x+.1:utl.roteGunTemp.x-.1;
+                   }else{
+                       if(utl.roteGun.x==0){
+                           utl.roteGunTemp.x = 0;
+                       }
+                       
+                   }
+               }
+               if(utl.roteGun.y!=utl.roteGunTemp.y){
+                   if(Math.abs(utl.roteGun.y-utl.roteGunTemp.y)>.1){
+                       utl.roteGunTemp.y = utl.roteGun.y>utl.roteGunTemp.y?utl.roteGunTemp.y+.1:utl.roteGunTemp.y-.1;
+                   }else{
+                       if(utl.roteGun.y==0){
+                           utl.roteGunTemp.y = 0;
+                       }
+                      
+                   }
+               }
+               let x = utl.roteGunTemp.x;       
+               let y = utl.roteGunTemp.y;
+
+            
+
+
+           acObj.transform.rotate(new Laya.Vector3(0,0,-utl.roteGunback.y* Math.PI / 180),true);
+           acObj.transform.rotate(new Laya.Vector3(0,-utl.roteGunback.x* Math.PI / 180,0),true);
+         
+           acObj.transform.rotate(new Laya.Vector3(0,x* Math.PI / 180,0),true);
+           acObj.transform.rotate(new Laya.Vector3(0,0,y* Math.PI / 180),true);
+
+          
+
+           utl.roteGunback.x = x;
+           utl.roteGunback.y = y;
+       }
+       checkFire(){
+            let bmain =utl.bullet.getChildByName('ship');
+           let bcube = bmain.getChildByName('Cube');
+           let from = bcube.getChildByName('e1').transform.position;
+           let to = bcube.getChildByName('e2').transform.position;
+           this.newScene.physicsSimulation.raycastFromTo(from, to, utl.hitResult);
+           if( utl.hitResult.collider&&utl.hitResult.collider.owner.name=='baga'){
+               // utl.hitResult.collider.owner.active=false 
+               // console.log(utl.hitResult.normal) 
+               // utl.hitResult.collider.owner.meshRenderer.sharedMaterial.albedoColor = new Laya.Vector4(1.0, 1.0, 1.0, 1.0);
+               // console.log(1111)
+           }
+          
+           // console.log(utl.hitResult.collider)
+       }
+       checkMovetoGround(){
+            let p = utl.box.transform.position;
+            let x = p.x;
+            let z = p.z;
+            let y = p.y;
+            if(p.x>utl.bestGround){
+                x = utl.bestGround;
+            }
+            if(p.x<-utl.bestGround){
+                x = -utl.bestGround;
+            }
+            if(p.z>utl.bestGround){
+                z = utl.bestGround;
+            }
+            if(p.z<-utl.bestGround){
+                z = -utl.bestGround;
+            }
+            if(p.y>utl.bestGround){
+                y = utl.bestGround;
+            }
+            utl.box.transform.position = new Laya.Vector3(x,y,z);
+       }
+       onUpdate() {
+           let touchCount = this.newScene.input.touchCount();
+           let touch = this.newScene.input.getTouch(0);
+           let touch1 = this.newScene.input.getTouch(1);
+
+           // if(touchCount==1){
+           //     if(touch.position.x<400&&touch.position.y<400){
+           //         console.log(touch.position)
+           //         return 
+           //     }
+           // }
+           if(touchCount==0){
+            
+               touchs$2[0][1].event.leftFormatMovePosition(null,0); 
+
+           }
+           if(touchCount==1){
+               let point =  touch.position;
+               touchs$2[0][1].event.drawSelect({x:point.x,y:point.y},touchCount); 
+
+           }
+           if(touchCount>1){
+                let point =  touch.position;
+               touchs$2[0][1].event.leftFormatMovePosition(point,touchCount); 
+            }   
+           // if(touchCount>1){
+           //     // console.log(touch,touchCount)
+           //     let x = (touch.position.x + touch1.position.x) / 2
+           //     let y = (touch.position.y + touch1.position.y) / 2
+           //     let z = (touch.position.z + touch1.position.z) / 2
+           //     let point =  new Laya.Vector3(x, y, z) 
+           //      // let point =  touch.position
+           //     this._ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));
+           //     this.outs = [];
+           //         //产生射线
+           //     utl.camera.viewportPointToRay(point,this._ray);
+           //         //拿到射线碰撞的物体
+           //     this.newScene.physicsSimulation.rayCastAll(this._ray,this.outs);
+           //         //如果碰撞到物体
+           //     if (this.outs.length !== 0)
+           //     {
+
+           //             for (let i = 0; i <  this.outs.length; i++){
+           //                 if(this.outs[i].collider.owner.name=="plane"){
+           //                     touchs[0][1].event.leftFormatMovePosition(this.outs,touchCount)    
+           //                 }
+           //             }
+           //                 //在射线击中的位置添加一个立方体
+                         
+           //     }
+
+
+           // }
+           // else{
+           //    touchs[0][1].event.leftFormatMovePosition(null,0)  
+           // }
+          
+       } 
+    }
+
     /**This class is automatically generated by LayaAirIDE, please do not make any modifications. */
 
     class GameConfig {
@@ -3360,6 +4420,7 @@
     		reg("script/Ioading.js",InitUI$1);
     		reg("script/GameUI.js",GameUI$1);
     		reg("script/hand/fire.js",fire);
+    		reg("script/observation/game.js",GameUI$2);
         }
     }
     GameConfig.width = 640;

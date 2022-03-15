@@ -94,8 +94,14 @@ export default class InitUI extends Laya.Scene {
                 this.box.transform.position = new Laya.Vector3(-this.boxLangth/2+this.boxedLangth*3/2, 0.0, 2);
                 if(this.boxedLangth==1){
                     this.removeSelf();
+                    if(index==1){
+                        Laya.Scene.open(`test/game${index}.scene`)
+                    }
+                    if(index==2){
+                        Laya.Scene.open(`observation/game.scene`)
+                    }
                     // Laya.stage.addChild(GameUI);
-                    Laya.Scene.open(`test/game${index}.scene`)
+                    // Laya.Scene.open(`test/game${index}.scene`)
                 }
                 resolve();
             }));
@@ -120,7 +126,12 @@ export default class InitUI extends Laya.Scene {
                     this.removeSelf();
                     // Laya.stage.addChild(GameUI);
                     // Laya.Scene.open('test/main.scene')
-                    Laya.Scene.open(`test/game${index}.scene`)
+                    if(index==1){
+                        Laya.Scene.open(`test/game${index}.scene`)
+                    }
+                    if(index==2){
+                        Laya.Scene.open(`observation/game.scene`)
+                    }
                 }
                 resolve();
             }));

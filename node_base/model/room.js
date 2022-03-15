@@ -48,17 +48,19 @@ class Room {
    }
    addHero(msg){
       let player = this.players.get(msg.userId)
-      for (let hero of msg.heros) {
-         if(player.robots.has(hero.id)){
-            player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
-         }
-      }
+      player.addHero()
    }
    moveGroup(msg){
+      // let player = this.players.get(msg.userId)
+      // for (let hero of msg.heros) {
+      //    if(player.robots.has(hero.id)){
+      //       player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+      //    }
+      // }
       let player = this.players.get(msg.userId)
       for (let hero of msg.heros) {
          if(player.robots.has(hero.id)){
-            player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
+            player.robots.get(hero.id).changeResult(hero)
          }
       }
    }
@@ -67,8 +69,13 @@ class Room {
       for (let obj of this.players.values()) {
          list.push(obj.getPushMsg())
       }
+     
+      
       io.emit(this.id, {
          list
+      });
+      io.emit(this.id+'-observer', {
+         grid:this.graph.grid
       });
    }
 }

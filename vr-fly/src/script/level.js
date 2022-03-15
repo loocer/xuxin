@@ -6,6 +6,7 @@
 import utl from "./utl.js"
 let ls = [
     {index:2,title:'start game'},
+    {index:3,title:'start observer'}
 ]
 export default class Level extends Laya.Scene {
     constructor() {
@@ -106,12 +107,24 @@ export default class Level extends Laya.Scene {
             // Laya.Physics.rayCastAll(ray, _outHitAllInfo, 30, 10);
              if (outHitResult.succeeded){
                  let index = outHitResult.collider.owner.parent.name.charAt(0)
-                 utl.playStatusObj = {
-                    doingIndex:1
+                 index++
+                 if(index==1){
+                    utl.playStatusObj = {
+                        doingIndex:1
+                    }
+                    this.removeSelf();
+                    Laya.stage.offAll();
+                    Laya.Scene.open('test/load.scene')
                  }
-                 this.removeSelf();
-                 Laya.stage.offAll();
-                 Laya.Scene.open('test/load.scene')
+                 if(index==2){
+                    utl.playStatusObj = {
+                        doingIndex:2
+                    }
+                    this.removeSelf();
+                    Laya.stage.offAll();
+                    Laya.Scene.open('test/load.scene')
+                 }
+                 
              }
             
         }
@@ -200,17 +213,6 @@ export default class Level extends Laya.Scene {
             sprite.addChild(box);
             let material = new Laya.BlinnPhongMaterial();
             material.albedoColor=color
-            // material.albedoColorA=new Laya.Vector3(130,288,242);
-            // material.albedoColorB=242
-            // material.albedoColorG=288
-            // material.albedoColorR=130
-
-
-            // material.diffuseColorB=242
-            // material.diffuseColorG=288
-            // material.diffuseColorR=130
-
-
             material.diffuseColor=color
             box.meshRenderer.material = material;
             sprite.transform.position = new Laya.Vector3(initx - 2*i, -1, 0);

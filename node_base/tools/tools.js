@@ -31,8 +31,10 @@ const findIntPition=(graph,center,pindex)=>{// center = {x:3,y:3}
     let index = pindex||1
     let list  = findBy(index,center)
     for(let item of list){
-        if(graph.grid[item[0]][item[1]].weight==1){
-            return item
+        if(item[0]>0&&item[1]>0){
+            if(graph.grid[item[0]][item[1]].weight==1){
+                return item
+            }
         }
     }
     return  findIntPition(graph,center,++index)
@@ -66,5 +68,5 @@ module.exports={
     findIntPition
 }
 createGraph()
-let item = findIntPition(graphe,{x:2,y:2})
+let item = findIntPition(graphe,{x:-1,y:0})
 console.log(item)

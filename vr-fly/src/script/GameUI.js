@@ -143,7 +143,7 @@ export default class GameUI extends Laya.Scene {
         // utl.models.get('cube').active=false  
     }
     drawUi(){
-
+           console.log(55555555555555)
 
         // let fudf = utl.models.get('cotrll')
         // let ape2 = new Laya.Sprite();
@@ -201,6 +201,11 @@ export default class GameUI extends Laya.Scene {
         // ape3.height = 100
         // ape3.x = Laya.stage.width/2+200;
         // ape3.y = Laya.stage.height - 500;
+        utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
+        utl.showbox.transform.rotate(new Laya.Vector3(0, 45, 0), false, false);
+        var material = new Laya.BlinnPhongMaterial();
+        material.color = new Laya.Color(1, 1, 1, 1);
+        utl.showbox.meshRenderer.material = material;
         
     }
     initTouch(){

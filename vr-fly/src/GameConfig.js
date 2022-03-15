@@ -5,6 +5,7 @@ import level from "./script/level"
 import Ioading from "./script/Ioading"
 import GameUI from "./script/GameUI"
 import fire from "./script/hand/fire"
+import game from "./script/observation/game"
 
 export default class GameConfig {
     static init() {
@@ -16,6 +17,7 @@ export default class GameConfig {
 		reg("script/Ioading.js",Ioading);
 		reg("script/GameUI.js",GameUI);
 		reg("script/hand/fire.js",fire);
+		reg("script/observation/game.js",game);
     }
 }
 GameConfig.width = 640;

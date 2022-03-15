@@ -1,5 +1,6 @@
 // import Robot  from './robot/robot1'
 let Robot = require('./robot/robot1')
+let {findIntPition} = require('../tools/tools')
 class Player {
    constructor(room) {
       this.id = 'zzw';
@@ -19,7 +20,7 @@ class Player {
       // robot1.map.graph = this.room.graph
       // this.robots.set(robot1.id, robot1)
       // robot1.setEnd([40, 3])
-      for(let i=0;i<100;i++){
+      for(let i=0;i<2;i++){
          let robot1 = new Robot(id,this.room.graph,[2*i, 3])
          // robot1.map.graph = this.room.graph
          this.robots.set(robot1.id, robot1)
@@ -27,9 +28,20 @@ class Player {
      
       //    robot1.setEnd( [55,57])
    }
+   addHero(){
+      let id = this.id
+      let {graph} = this.room
+      let item = findIntPition(graph,{x:0,y:0})
+      let robot1 = new Robot(id,this.room.graph,[item[0], item[1]])
+      // robot1.map.graph = this.room.graph
+      this.robots.set(robot1.id, robot1)
+   }
    getPushMsg() {
       let rots = []
       for (let rot of this.robots.values()) {
+         // let {start,end} = rot.map
+         // this.room.graph.grid[start.x][start.y].weight = 0
+         // this.room.graph.grid[end.x][end.y].weight = 1
          rots.push(rot.getPushMsg())
       }
       return {
