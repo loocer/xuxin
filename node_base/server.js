@@ -11,18 +11,10 @@ let Main = require('./main')
 //     io.emit('chat message', msg);
 //   });
 // });
-// // var allControl=require('./controller/allControl');
+var allControl=require('./controller/allControl');
 
-// //设置跨域访问
-// app.all('*', function(req, res, next) {
-//    res.header("Access-Control-Allow-Origin", "*");
-//    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-//    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
-//    res.header("X-Powered-By",' 3.2.1');
-//    res.header("Content-Type", "application/json;charset=utf-8");
-//    next();
-// });
-// // allControl.setAllControl(app);
+//设置跨域访问
+
 
 // //配置服务端口
 // var server = app.listen(3000, function () {
@@ -41,20 +33,28 @@ let Main = require('./main')
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 // app.get('/', (req, res) => {
 //   res.sendFile(__dirname + '/index.html');
 // });
-let main = new Main(io);
-    main.createRoom()
-socketManner(io)
+// let main = new Main(io);
+//     main.createRoom()
+// socketManner(io)
 // io.on('connection', (socket) => {
 //   socket.on('chat message', msg => {
 //     io.emit('chat message', msg);
 //   });
 // });
-
+app.all('*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By",' 3.2.1');
+  res.header("Content-Type", "application/json;charset=utf-8");
+  next();
+});
+allControl.setAllControl(app);
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
 });
