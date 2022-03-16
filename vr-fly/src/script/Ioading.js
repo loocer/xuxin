@@ -98,7 +98,7 @@ export default class InitUI extends Laya.Scene {
                         Laya.Scene.open(`test/game${index}.scene`)
                     }
                     if(index==2){
-                        Laya.Scene.open(`observation/game.scene`)
+                        Laya.Scene.open(`test/weightObservation.scene`)
                     }
                     // Laya.stage.addChild(GameUI);
                     // Laya.Scene.open(`test/game${index}.scene`)
@@ -130,7 +130,7 @@ export default class InitUI extends Laya.Scene {
                         Laya.Scene.open(`test/game${index}.scene`)
                     }
                     if(index==2){
-                        Laya.Scene.open(`observation/game.scene`)
+                        Laya.Scene.open(`test/weightObservation.scene`)
                     }
                 }
                 resolve();

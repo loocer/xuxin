@@ -11,9 +11,9 @@ import { Astar} from "./astar"
 let allBoy = []
 function createGraph() {
 	let list = []
-	for (let i = 0; i < 500; i++) {
+	for (let i = 0; i < 50; i++) {
 	    let list1 = []
-	    for (let o = 0; o < 500; o++) {
+	    for (let o = 0; o < 50; o++) {
 	        list1.push(1)
 			let map2 = utl.models.get('cube').clone()
 			map2.getChildByName('on').active = false
@@ -63,6 +63,7 @@ export const getServiceAddress = () => {
 
 export const socketMain = () => {
 	createGraph()
+	return
 	// const socket = new WebSocket('ws://xuxin.love:3000');
 	// // wx.connectSocket({
 	// //   url: 'ws://xuxin.love:3000'

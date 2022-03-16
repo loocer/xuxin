@@ -128,7 +128,7 @@ export default class GameUI extends Laya.Scene {
    drawUi(){
        this.sp = new Laya.Sprite();
        Laya.stage.addChild(this.sp);
-       this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+       this.sp.graphics.drawRect(0, 0, 500, 500, "#00000066");
        utl.mapSp = this.sp
        this.addMouseEvent()
        let adds = this.loadingElse.get('adds')

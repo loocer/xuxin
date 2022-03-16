@@ -2568,6 +2568,14 @@
             ['plane','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Plane.lh'],
             ['box','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/box.lh'],
     	],
+        [
+    		['light','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Light.lh'],
+            ['cube','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Cube.lh'],
+            ['camera','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Camera.lh'],
+            // ['terrain','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Terrain.lh'],
+            ['plane','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Plane.lh'],
+            ['box','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/box.lh'],
+    	]
     ];
 
     /**
@@ -2668,7 +2676,7 @@
                             Laya.Scene.open(`test/game${index}.scene`);
                         }
                         if(index==2){
-                            Laya.Scene.open(`observation/game.scene`);
+                            Laya.Scene.open(`test/weightObservation.scene`);
                         }
                         // Laya.stage.addChild(GameUI);
                         // Laya.Scene.open(`test/game${index}.scene`)
@@ -2700,7 +2708,7 @@
                             Laya.Scene.open(`test/game${index}.scene`);
                         }
                         if(index==2){
-                            Laya.Scene.open(`observation/game.scene`);
+                            Laya.Scene.open(`test/weightObservation.scene`);
                         }
                     }
                     resolve();
@@ -3874,9 +3882,9 @@
     let allBoy = [];
     function createGraph$1() {
     	let list = [];
-    	for (let i = 0; i < 500; i++) {
+    	for (let i = 0; i < 50; i++) {
     	    let list1 = [];
-    	    for (let o = 0; o < 500; o++) {
+    	    for (let o = 0; o < 50; o++) {
     	        list1.push(1);
     			let map2 = utl.models.get('cube').clone();
     			map2.getChildByName('on').active = false;
@@ -3926,6 +3934,7 @@
 
     const socketMain$1 = () => {
     	createGraph$1();
+    	return
     	// const socket = new WebSocket('ws://xuxin.love:3000');
     	// // wx.connectSocket({
     	// //   url: 'ws://xuxin.love:3000'

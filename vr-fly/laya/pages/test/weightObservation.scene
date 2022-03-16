@@ -3,7 +3,7 @@
     "type":"Scene",
     "selectedBox":2,
     "searchKey":"Scene",
-    "props":{"width":640,"sceneColor":"#000000","runtime":"script/observation/game.js","height":1136},
+    "props":{"width":10000,"sceneColor":"#000000","runtime":"script/observation/game.js","height":3000},
     "nodeParent":-1,
     "maxID":3,
     "label":"Scene",
