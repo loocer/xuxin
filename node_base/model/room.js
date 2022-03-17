@@ -70,13 +70,13 @@ class Room {
          list.push(obj.getPushMsg())
       }
      
-      
+      io.emit('123456-observer', {
+         grid:this.graph.grid
+      });
       io.emit(this.id, {
          list
       });
-      io.emit(this.id+'-observer', {
-         grid:this.graph.grid
-      });
+      
    }
 }
 module.exports = Room

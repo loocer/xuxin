@@ -11,15 +11,10 @@ import { Astar} from "./astar"
 let allBoy = []
 function createGraph() {
 	let list = []
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 500; i++) {
 	    let list1 = []
-	    for (let o = 0; o < 50; o++) {
+	    for (let o = 0; o < 500; o++) {
 	        list1.push(1)
-			let map2 = utl.models.get('cube').clone()
-			map2.getChildByName('on').active = false
-			utl.newScene.addChild(map2);
-			map2.transform.position = new Laya.Vector3(-o, 3, i)
-			allBoy.push(map2)
 	    }
 	    list.push(list1)
 	}
@@ -62,8 +57,8 @@ export const getServiceAddress = () => {
 
 
 export const socketMain = () => {
-	createGraph()
-	return
+	// createGraph()
+	// return
 	// const socket = new WebSocket('ws://xuxin.love:3000');
 	// // wx.connectSocket({
 	// //   url: 'ws://xuxin.love:3000'
@@ -75,16 +70,26 @@ export const socketMain = () => {
 
 	// // })
 	// return
-	utl.socket = io('ws://192.168.0.104:3000');
+	utl.socket = io('ws://192.168.11.37:3000');
 	// utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456-observer', (s) => {
-		resetGraph()
+		// resetGraph()
 		utl.mapSp.graphics.clear()
-		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
+		utl.mapSp.graphics.drawRect(0, 0, 500, 500, "#00000066");
+		utl.mapSp.graphics.drawCircle(12, 400, 5, "#00ffff");
+		// return
+		let i=0,t=0;
 		for (let obj of s.grid) {
 			for(let g of obj){
-
+				if(g.weight){
+					utl.mapSp.graphics.drawCircle(t, 500 - i, 5, "#ffffff");
+				}else{
+					utl.mapSp.graphics.drawCircle(t, 500 - i, 5, "#00ffff");
+				}
+				t++
 			}
+			t = 0
+			i++
 				// if (utl.entityMap.has(rot.id)) {
 				// 	if (rot.start) {
 				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
