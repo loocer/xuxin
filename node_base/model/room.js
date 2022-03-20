@@ -70,13 +70,24 @@ class Room {
          list.push(obj.getPushMsg())
       }
      
-      io.emit('123456-observer', {
-         grid:this.graph.grid
-      });
+      
       io.emit(this.id, {
          list
       });
-      
+      let glist =[]
+      for(let graid of this.graph.grid){
+         for(let objd of graid){
+            if(objd.weight==0){
+               glist.push({
+                  x:objd.x,
+                  y:objd.y,
+               })
+            }
+         }
+      }
+      io.emit('123456-observer', {
+         glist
+      });
    }
 }
 module.exports = Room

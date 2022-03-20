@@ -105,10 +105,9 @@
            for(let r of rots){ 
              let rp = utl.entityMap.get(r.id)
              let potion = rp.transform.position
-             let start = utl.graph.grid[-potion.x][potion.y]
+             let start = utl.graph.grid[-potion.x][potion.z]
              let end = utl.graph.grid[-x][y]
              result = Astar.astar.search(utl.graph, start, end);
-             console.log(result)
              let ps = []
              for(let objd of result){
                ps.push({
@@ -118,18 +117,18 @@
              }
               r.result = ps
            }
-           let listoo = []
-           for(let fuck of result){
-              let pobj = utl.showbox.clone()
-              pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y)
-              utl.newScene.addChild(pobj)
-              listoo.push(pobj)
-           }
-           setTimeout(()=>{
-             for(let ogh of listoo){
-               ogh.removeSelf();
-             }
-           },3000)
+           // let listoo = []
+           // for(let fuck of result){
+           //    let pobj = utl.showbox.clone()
+           //    pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y)
+           //    utl.newScene.addChild(pobj)
+           //    listoo.push(pobj)
+           // }
+           // setTimeout(()=>{
+           //   for(let ogh of listoo){
+           //     ogh.removeSelf();
+           //   }
+           // },3000)
            this.sendMsg(rots)
            // let msg = {
            //   userId: 'zzw',

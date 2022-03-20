@@ -52,8 +52,8 @@ const httpsServer = https.createServer(credentials, app);
 // //   console.log(`Socket.IO server running at http://localhost:${port}/`);
 // // });
 
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+// const http = require('http').Server(app);
+const io = require('socket.io')(httpsServer);
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
@@ -68,7 +68,7 @@ socketManner(io)
 //   });
 // });
 
-http.listen(port, () => {
+httpsServer.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
 });
 // httpsServer.listen(port, function () {

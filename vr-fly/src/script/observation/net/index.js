@@ -70,26 +70,17 @@ export const socketMain = () => {
 
 	// // })
 	// return
-	utl.socket = io('ws://192.168.11.37:3000');
-	// utl.socket = io('wss://xuxin.love:3000');
+	// utl.socket = io('ws://192.168.0.105:3000');
+	utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456-observer', (s) => {
 		// resetGraph()
 		utl.mapSp.graphics.clear()
-		utl.mapSp.graphics.drawRect(0, 0, 500, 500, "#00000066");
-		utl.mapSp.graphics.drawCircle(12, 400, 5, "#00ffff");
+		utl.mapSp.graphics.drawRect(0, 0, 1000, 1000, "#00000066");
+		// utl.mapSp.graphics.drawCircle(12, 400, 5, "#00ffff");
 		// return
 		let i=0,t=0;
-		for (let obj of s.grid) {
-			for(let g of obj){
-				if(g.weight){
-					utl.mapSp.graphics.drawCircle(t, 500 - i, 5, "#ffffff");
-				}else{
-					utl.mapSp.graphics.drawCircle(t, 500 - i, 5, "#00ffff");
-				}
-				t++
-			}
-			t = 0
-			i++
+		for (let g of s.glist) {
+			utl.mapSp.graphics.drawCircle(g.x*2, 1000 - g.y*2, 5, "#00ffff");
 				// if (utl.entityMap.has(rot.id)) {
 				// 	if (rot.start) {
 				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
