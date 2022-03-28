@@ -34,7 +34,18 @@ class Room {
       this.players.set(player.id, player)
    }
    update() {
+      for(let graid of this.graph.grid){
+         for(let objd of graid){
+            objd.weight=1
+         }
+      }
       let players = this.players
+      for (let value of players.values()) {
+         for (let rot of value.robots.values()) {
+            let {move2} = rot.map
+            this.graph.grid[move2.x][move2.y].weight=0
+         }
+      }
       for (let value of players.values()) {
          value.update()
       }
@@ -96,15 +107,6 @@ class Room {
       }
    }
    pushMsg(io) {
-      let list = []
-      for (let obj of this.players.values()) {
-         list.push(obj.getPushMsg())
-      }
-     
-      
-      io.emit(this.id, {
-         list
-      });
       let glist =[]
       for(let graid of this.graph.grid){
          for(let objd of graid){
@@ -114,8 +116,19 @@ class Room {
                   y:objd.y,
                })
             }
+            // objd.weight=1
          }
       }
+      let list = []
+      for (let obj of this.players.values()) {
+         list.push(obj.getPushMsg())
+      }
+     
+      
+      io.emit(this.id, {
+         list
+      });
+     
       io.emit('123456-observer', {
          glist
       });

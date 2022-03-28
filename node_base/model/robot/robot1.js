@@ -25,6 +25,7 @@ class Robot1 {
     }
     getPushMsg() {
         let box = this.map
+        box.graph.grid[box.move2.x][box.move2.y].weight = 0
         return {
             id: this.id,
             start: box.move1,
@@ -38,10 +39,10 @@ class Robot1 {
     }
     ryMoveGroup(){
         let box = this.map
-        let p0 = box.move1
-        let p1 = box.move1
-        box.graph.grid[p0.x][p0.y].weight = 1
-        box.graph.grid[p1.x][p1.y].weight = 1
+        // let p0 = box.move1
+        // let p1 = box.move1
+        // box.graph.grid[p0.x][p0.y].weight = 1
+        // box.graph.grid[p1.x][p1.y].weight = 1
 
         box.start.weight = 1
         box.move1 = box.move2

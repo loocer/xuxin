@@ -1698,7 +1698,7 @@
     }
 
     let address = 'http://172.16.25.101:3000';
-    var io$1 = require("./io.js");//微信兼容serketio
+
     let Event = Laya.Event;
     let result = {};
 
@@ -1764,7 +1764,7 @@
 
     	// // })
     	// return
-    	utl.socket = io$1('ws://192.168.0.105:3000');
+    	utl.socket = io('ws://192.168.0.105:3000');
     	// utl.socket = io('wss://xuxin.love:3000');
     	utl.socket.on('123456', (s) => {
     		resetGraph();
@@ -1959,7 +1959,7 @@
     	};
     	// timeFrame.get(id).queryId = obj.start.queryId
     	list.shift();
-    	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},400,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
+    	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},300,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
     }
     function updateMove(value){
     	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y);

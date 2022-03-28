@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-
+    var io = require("../io.js");
     var utl = {
         id:Date.parse(new  Date())+'',
         entityMap:new Map(),
@@ -1698,7 +1698,7 @@
     }
 
     let address = 'http://172.16.25.101:3000';
-    var io$1 = require("./io.js");//微信兼容serketio
+    //微信兼容serketio
     let Event = Laya.Event;
     let result = {};
 
@@ -1764,8 +1764,8 @@
 
     	// // })
     	// return
-    	utl.socket = io$1('ws://192.168.0.105:3000');
-    	// utl.socket = io('wss://xuxin.love:3000');
+    	// utl.socket = io('ws://192.168.0.105:3000');
+    	utl.socket = io$1('wss://xuxin.love:3000');
     	utl.socket.on('123456', (s) => {
     		resetGraph();
     		utl.mapSp.graphics.clear();

@@ -60,7 +60,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 let main = new Main(io);
-    main.createRoom()
+main.createRoom()
 socketManner(io)
 // io.on('connection', (socket) => {
 //   socket.on('chat message', msg => {
