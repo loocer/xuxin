@@ -36,6 +36,17 @@ class Robot1 {
         box.end = box.graph.grid[p[0]][p[1]]
         box.query()
     }
+    ryMoveGroup(){
+        let box = this.map
+        let p0 = box.move1
+        let p1 = box.move1
+        box.graph.grid[p0.x][p0.y].weight = 1
+        box.graph.grid[p1.x][p1.y].weight = 1
+
+        box.start.weight = 1
+        box.move1 = box.move2
+        box.result = []
+    }
     changeResult(msg) {
         let box = this.map
         let p0 = box.move1

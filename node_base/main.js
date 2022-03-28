@@ -14,10 +14,10 @@ class Main{
    work(){
       setInterval(()=>{
          this.update()
-      },200)
+      },300)
       setInterval(()=>{
         this.pushMsg()
-     },200)
+     },300)
    }
    pushMsg(){
        for(let room of this.rooms){

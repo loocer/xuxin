@@ -90,7 +90,7 @@
          ) {
            let x = ~~p2.x
            let y = ~~p2.z
-
+           this.sendMsg(rots,{x,y})
            // let heros = []
            // for (let hero of utl.entityMap.keys()) {
            //   heros.push({
@@ -101,22 +101,31 @@
            //     }
            //   })
            // }
-            let result = []
-           for(let r of rots){ 
-             let rp = utl.entityMap.get(r.id)
-             let potion = rp.transform.position
-             let start = utl.graph.grid[-potion.x][potion.z]
-             let end = utl.graph.grid[-x][y]
-             result = Astar.astar.search(utl.graph, start, end);
-             let ps = []
-             for(let objd of result){
-               ps.push({
-                 x:objd.x,
-                 y:objd.y
-               })
-             }
-              r.result = ps
-           }
+
+
+
+           //----------------------foo1
+           // let result = []
+           // for(let r of rots){ 
+           //   let rp = utl.entityMap.get(r.id)
+           //   let potion = rp.transform.position
+           //   let start = utl.graph.grid[-potion.x][potion.z]
+           //   let end = utl.graph.grid[-x][y]
+           //   result = Astar.astar.search(utl.graph, start, end);
+           //   let ps = []
+           //   for(let objd of result){
+           //     ps.push({
+           //       x:objd.x,
+           //       y:objd.y
+           //     })
+           //   }
+           //    r.result = ps
+           // }
+           // this.sendMsg(rots)
+
+
+
+
            // let listoo = []
            // for(let fuck of result){
            //    let pobj = utl.showbox.clone()
@@ -129,7 +138,7 @@
            //     ogh.removeSelf();
            //   }
            // },3000)
-           this.sendMsg(rots)
+           
            // let msg = {
            //   userId: 'zzw',
            //   actionName:'moveGroup',
@@ -139,16 +148,25 @@
          }
        }
    }
-
-   sendMsg(rots){
+   sendMsg(rots,target){
      
      let msg = {
        userId: 'zzw',
-       actionName:'moveGroup',
-       heros:rots
+       actionName:'ry-moveGroup',
+       heros:rots,
+       target
      }
      utl.socket.emit('123456', msg);
    }
+   // sendMsg(rots){
+     
+   //   let msg = {
+   //     userId: 'zzw',
+   //     actionName:'moveGroup',
+   //     heros:rots
+   //   }
+   //   utl.socket.emit('123456', msg);
+   // }
    reset() {
       if (!this.startPoint) {
         return

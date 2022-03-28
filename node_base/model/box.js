@@ -212,6 +212,15 @@ class Box{
       if(this.check()){
         this.standingTime = 0
         this.changeState()
+        // let p = this.result[0]
+        // let p1 = this.result[1]
+        // this.move1 = {x:p.x,y:p.y}
+        // this.move2 = {x:p1.x,y:p1.y}
+      }else{
+        let p = this.result[0]
+        let p1 = this.result[0]
+        this.move1 = {x:p.x,y:p.y}
+        this.move2 = {x:p1.x,y:p1.y}
       }
     }
     if(this.result.length==1){
@@ -219,10 +228,12 @@ class Box{
       this.move1 = {x:p.x,y:p.y}
       this.move2 = {x:p.x,y:p.y}
     }else{
-      let p = this.result[0]
-      let p1 = this.result[1]
-      this.move1 = {x:p.x,y:p.y}
-      this.move2 = {x:p1.x,y:p1.y}
+      // let p = this.result[0]
+      // let p1 = this.result[1]
+      // let queryId1 = (new Date()).valueOf();
+      // this.move1 = {x:p.x,y:p.y,queryId:queryId1}
+      // let queryId2 = (new Date()).valueOf()+'22';
+      // this.move2 = {x:p1.x,y:p1.y,queryId:queryId2}
     }
     
   }

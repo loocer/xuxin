@@ -7,6 +7,7 @@ class Room {
       this.id = '123456';
       this.heros = []
       this.graph = null
+      this.moveGroups = []
       this.createGraph()
       boxs.set(this.id, this)
    }
@@ -39,16 +40,46 @@ class Room {
       }
    }
    receive(msg) { //{userId:0,heros:[],coordinate:{x,y,z}}
-      if(msg.actionName=='moveGroup'){
-         this.moveGroup(msg)
+      if(msg.actionName=='ry-moveGroup'){
+         this.ryMoveGroup(msg)
       }
       if(msg.actionName=='addHero'){
          this.addHero(msg)
+      }
+      if(msg.actionName=='moveGroup'){
+         this.moveGroup(msg)
       }
    }
    addHero(msg){
       let player = this.players.get(msg.userId)
       player.addHero()
+   }
+   ryMoveGroup(msg){
+      let player = this.players.get(msg.userId)
+      let heres = []
+      for (let hero of msg.heros) {
+         if(player.robots.has(hero.id)){
+            let h = player.robots.get(hero.id)
+            h.ryMoveGroup(hero)
+            // console.log(h.map.move2,h.map.move1)
+            heres.push({
+               id:hero.id,
+               x:h.map.move2.x,
+               y:h.map.move2.y
+            })
+         }
+      }
+      let id = (new Date()).valueOf();
+      player.ryMoveGroup = {
+         id,
+         heros:heres,
+         target:msg.target
+      }
+      // this.moveGroups.push({
+      //    id:'123456-moveGroup',
+      //    heros:heres,
+      //    target:msg.target
+      // })
    }
    moveGroup(msg){
       // let player = this.players.get(msg.userId)
@@ -88,6 +119,13 @@ class Room {
       io.emit('123456-observer', {
          glist
       });
+      for(let obj of this.moveGroups){
+         io.emit(obj.id, {
+            heros:obj.heros,
+            target:obj.target
+         });
+      }
+      this.moveGroups = []
    }
 }
 module.exports = Room
