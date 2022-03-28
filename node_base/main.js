@@ -13,8 +13,8 @@ class Main{
    }
    work(){
       setInterval(()=>{
-         this.update()
          this.pushMsg()
+         this.update()
       },200)
    //    setInterval(()=>{
         

@@ -25,7 +25,7 @@ class Robot1 {
     }
     getPushMsg() {
         let box = this.map
-        box.graph.grid[box.move2.x][box.move2.y].weight = 0
+        // box.graph.grid[box.move2.x][box.move2.y].weight = 0
         return {
             id: this.id,
             start: box.move1,

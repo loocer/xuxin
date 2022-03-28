@@ -93,7 +93,7 @@ export const socketMain = () => {
 						let x = ~~(rot.end.x / 500 * 400)
 						let y = ~~(rot.end.y / 500 * 400)
 						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-						utl.graph.grid[rot.end.x][rot.end.y].weight = 0
+						utl.graph.grid[rot.start.x][rot.start.y].weight = 0
 					// } 
 					// let tweenObj = rot.start	
 					// tweenObj.x = -tweenObj.x
