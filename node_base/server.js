@@ -11,8 +11,8 @@ const credentials = {
 };
 
 // 创建 HTTP 与 HTTPS 服务器
-// const httpsServer = https.createServer(credentials, app);
-const httpsServer = require('http').Server(app);
+const httpsServer = https.createServer(credentials, app);
+// const httpsServer = require('http').Server(app);
 
 
 
