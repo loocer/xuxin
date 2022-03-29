@@ -104,8 +104,8 @@ export default class GameUI extends Laya.Scene {
 
 
 
-       let  terrain= utl.models.get('plane')
-       this.newScene.addChild(terrain);
+       // let  terrain= utl.models.get('plane')
+       // this.newScene.addChild(terrain);
 
 
        let box = utl.models.get('box')

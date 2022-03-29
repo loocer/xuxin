@@ -79,8 +79,9 @@ export const socketMain = () => {
 		// utl.mapSp.graphics.drawCircle(12, 400, 5, "#00ffff");
 		// return
 		let i=0,t=0;
+		utl.info.text=s.glist.length
 		for (let g of s.glist) {
-			utl.mapSp.graphics.drawCircle(g.x*2, 1000 - g.y*2, 5, "#00ffff");
+			utl.mapSp.graphics.drawCircle(g.x*4, 1000 - g.y*4, 5, "#00ffff");
 				// if (utl.entityMap.has(rot.id)) {
 				// 	if (rot.start) {
 				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)

@@ -175,8 +175,8 @@
         return
       }
       if (
-           Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-           Math.abs(this.startPoint.y - this.endPoint.y) < 10
+           Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+           Math.abs(this.startPoint.y - this.endPoint.y) < 20
       ){
         this.eventCheck()
       // }
@@ -244,8 +244,8 @@
        this.endPoint = p
        let p1 = this.startPoint
        if (
-         Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-         Math.abs(this.startPoint.y - this.endPoint.y) < 10
+         Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+         Math.abs(this.startPoint.y - this.endPoint.y) <20
        ) {
 
        } else {

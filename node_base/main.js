@@ -13,8 +13,9 @@ class Main{
    }
    work(){
       setInterval(()=>{
-         this.pushMsg()
          this.update()
+         this.pushMsg()
+        
       },200)
    //    setInterval(()=>{
         

@@ -191,8 +191,8 @@ class Box{
     let p1 = this.result[0]
     this.move1 = {x:p0.x,y:p0.y}
     this.move2 = {x:p1.x,y:p1.y}
-    // this.graph.grid[p0.x][p0.y].weight = 1
-    // this.graph.grid[p1.x][p1.y].weight = 0
+    this.graph.grid[p0.x][p0.y].weight = 1
+    this.graph.grid[p1.x][p1.y].weight = 0
     // this.drawPositions = {
     //   // start:positionBox[p0[0],p0[1]],
     //   // end:positionBox[p1[0],p1[1]]

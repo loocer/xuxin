@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    var io = require("../io.js");
+var io = require("../io.js");
     var utl = {
         id:Date.parse(new  Date())+'',
         entityMap:new Map(),
@@ -686,8 +686,8 @@
             return
           }
           if (
-               Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-               Math.abs(this.startPoint.y - this.endPoint.y) < 10
+               Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+               Math.abs(this.startPoint.y - this.endPoint.y) < 20
           ){
             this.eventCheck();
           // }
@@ -755,8 +755,8 @@
            this.endPoint = p;
            let p1 = this.startPoint;
            if (
-             Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-             Math.abs(this.startPoint.y - this.endPoint.y) < 10
+             Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+             Math.abs(this.startPoint.y - this.endPoint.y) <20
            ) {
 
            } else {
@@ -1698,7 +1698,7 @@
     }
 
     let address = 'http://172.16.25.101:3000';
-    //微信兼容serketio
+
     let Event = Laya.Event;
     let result = {};
 
@@ -1765,7 +1765,7 @@
     	// // })
     	// return
     	// utl.socket = io('ws://192.168.0.105:3000');
-    	utl.socket = io$1('wss://xuxin.love:3000');
+    	utl.socket = io('wss://xuxin.love:3000');
     	utl.socket.on('123456', (s) => {
     		resetGraph();
     		utl.mapSp.graphics.clear();
@@ -1789,7 +1789,7 @@
     						let x = ~~(rot.end.x / 500 * 400);
     						let y = ~~(rot.end.y / 500 * 400);
     						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-    						utl.graph.grid[rot.end.x][rot.end.y].weight = 0;
+    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
     					// } 
     					// let tweenObj = rot.start	
     					// tweenObj.x = -tweenObj.x
@@ -1915,7 +1915,10 @@
     	}
     	let result = [];
     	let {x,y} = ryMoveGroup.target;
-    	let queryId = (new Date()).valueOf();
+    	
+    	for(let r of ryMoveGroup.heros){ 
+    		utl.graph.grid[r.x][r.y].weight = 1;
+    	}
         for(let r of ryMoveGroup.heros){ 
         	timeFrame.get(r.id).flag = false;
     		timeFrame.get(r.id).list = [];
@@ -1959,7 +1962,7 @@
     	};
     	// timeFrame.get(id).queryId = obj.start.queryId
     	list.shift();
-    	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},400,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
+    	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},300,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
     }
     function updateMove(value){
     	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y);
@@ -2051,7 +2054,7 @@
             this.info.color = "#FFFFFF";
             this.info.size(Laya.stage.width, Laya.stage.height);
             this.info.pos(50,50);
-            Laya.stage.addChild(this.info);  
+            // Laya.stage.addChild(this.info);  
             utl.info =  this.info;
             this.drawUi();
             temp = this;
@@ -4139,8 +4142,9 @@
     		// utl.mapSp.graphics.drawCircle(12, 400, 5, "#00ffff");
     		// return
     		let i=0,t=0;
+    		utl.info.text=s.glist.length;
     		for (let g of s.glist) {
-    			utl.mapSp.graphics.drawCircle(g.x*2, 1000 - g.y*2, 5, "#00ffff");
+    			utl.mapSp.graphics.drawCircle(g.x*4, 1000 - g.y*4, 5, "#00ffff");
     				// if (utl.entityMap.has(rot.id)) {
     				// 	if (rot.start) {
     				// 		utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
@@ -4281,8 +4285,8 @@
 
 
 
-           let  terrain= utl.models.get('plane');
-           this.newScene.addChild(terrain);
+           // let  terrain= utl.models.get('plane')
+           // this.newScene.addChild(terrain);
 
 
            let box = utl.models.get('box');

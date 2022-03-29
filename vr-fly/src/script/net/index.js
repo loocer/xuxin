@@ -68,8 +68,8 @@ export const socketMain = () => {
 
 	// // })
 	// return
-	utl.socket = io('ws://192.168.0.105:3000');
-	// utl.socket = io('wss://xuxin.love:3000');
+	// utl.socket = io('ws://192.168.0.105:3000');
+	utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456', (s) => {
 		resetGraph()
 		utl.mapSp.graphics.clear()
@@ -219,7 +219,10 @@ function queryString(){
 	}
 	let result = []
 	let {x,y} = ryMoveGroup.target
-	let queryId = (new Date()).valueOf();
+	
+	for(let r of ryMoveGroup.heros){ 
+		utl.graph.grid[r.x][r.y].weight = 1
+	}
     for(let r of ryMoveGroup.heros){ 
     	timeFrame.get(r.id).flag = false
 		timeFrame.get(r.id).list = []

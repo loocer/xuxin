@@ -72,7 +72,7 @@ export default class GameUI extends Laya.Scene {
         this.info.color = "#FFFFFF";
         this.info.size(Laya.stage.width, Laya.stage.height);
         this.info.pos(50,50)
-        Laya.stage.addChild(this.info);  
+        // Laya.stage.addChild(this.info);  
         utl.info =  this.info
         this.drawUi()
         temp = this
