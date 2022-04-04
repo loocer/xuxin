@@ -11,7 +11,7 @@
   import leftRote from "./hand/leftRote.js"
   import rightRote from "./hand/rightRote.js"
   import Bullet from "./entity/bullet.js"
-  import Enemy from "./entity/enemy.js"
+  import Enemy from "./entity/bullet.js"
   import {getServiceAddress} from "./net/index"
   let temp =0,spled = {x:0,y:0,z:0},dfew=0
   let flagod = false

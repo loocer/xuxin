@@ -101,7 +101,9 @@ export default class GameUI extends Laya.Scene {
 
         utl.camera = camera
         this.newScene.addChild(camera);
-
+        if(utl.playerId=='player-2'){
+            utl.camera.transform.position = new Laya.Vector3(-500, 30, 0)
+        }
 
 
         let  terrain= utl.models.get('plane')
@@ -109,6 +111,7 @@ export default class GameUI extends Laya.Scene {
 
 
         let box = utl.models.get('box')
+        console.log(box,'-00000000000000000')
         utl.box = box
         this.newScene.addChild(box);
        

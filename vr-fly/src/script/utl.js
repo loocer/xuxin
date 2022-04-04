@@ -2,33 +2,27 @@ export default  {
     id:Date.parse(new  Date())+'',
     entityMap:new Map(),
     playerId:'zzw',
+    allBleed:100,
+    pColor:{
+        'p1':'#00ffff',
+        'p2':'#0000ff'
+    },
 
 
-
-    boxs:new Map(),
-    sendMessage:[],
-    sendTime:0,
-    messgeTime:0,
-    websocket:null,
+   
 
     playStatusObj:{
-        doingIndex:1
+        doingIndex:1//打开页面1，观察。2：游戏
     },
-	tachLeftFlag:false,//左边点击
-	tachRightFlag:false,//左边点击
+	
 	box:null,
     userId:Date.parse(new  Date())+'',
     models:new Map(),
-    realBox:null,
-    box4:null,
+    // realBox:null,
+    // box4:null,
     camera:null,
     bestGround:250,
-    speedMove:.1,
-    speed:{
-    	z:0,
-    	x:0,
-    	y:0
-    },
+   
     c1:null,
     c2:null,
     walkingDirection:1,//1：up,2:down,3:left,4:right
@@ -39,32 +33,32 @@ export default  {
         x:0,
         y:0
     },
-    roteGun:{
-        x:0,
-        y:0
-    },
-    roteGunback:{
-        x:0,
-        y:0
-    },
-    roteGunTemp:{
-        x:0,
-        y:0
-    },
-    takeSpeed:{
-    	z:0,
-    	x:0,
-    	y:0
-    },
-    roteLeftFlag:false,
-    roteRightFlag:false,
-    entity:new Map(),
-    operationYype:1,//1:虚拟手柄 2:屏幕方向
+    // roteGun:{
+    //     x:0,
+    //     y:0
+    // },
+    // roteGunback:{
+    //     x:0,
+    //     y:0
+    // },
+    // roteGunTemp:{
+    //     x:0,
+    //     y:0
+    // },
+    // takeSpeed:{
+    // 	z:0,
+    // 	x:0,
+    // 	y:0
+    // },
+    // roteLeftFlag:false,
+    // roteRightFlag:false,
+    heroMap:new Map(),
+    // operationYype:1,//1:虚拟手柄 2:屏幕方向
     loadIndex:0,
-    fireOnOff:false,
+    // fireOnOff:false,
     msType:'move',
-    updates:[],
-    firs:[],
+    // updates:[],
+    // firs:[],
     loadingElse:[
          ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
         // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],

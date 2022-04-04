@@ -54,7 +54,9 @@ export const getServiceAddress = () => {
 
 
 let ryMoveGroup = null
-
+let outPos = new Laya.Vector3();
+let tempRotMap = new Map()
+let time = 0
 export const socketMain = () => {
 	createGraph()
 	// const socket = new WebSocket('ws://xuxin.love:3000');
@@ -71,11 +73,13 @@ export const socketMain = () => {
 	// utl.socket = io('ws://192.168.0.105:3000');
 	utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456', (s) => {
+		time++
 		resetGraph()
+		tempRotMap.clear()
 		utl.mapSp.graphics.clear()
 		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
 		for (let player of s.list) {
-			if(player.playerId=='zzw'){
+			if(player.playerId==utl.playerId){
 				ryMoveGroup = player.ryMoveGroup
 			}
 			for (let rot of player.rots) {
@@ -92,7 +96,7 @@ export const socketMain = () => {
 						// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
 						let x = ~~(rot.end.x / 500 * 400)
 						let y = ~~(rot.end.y / 500 * 400)
-						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
+						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
 						utl.graph.grid[rot.start.x][rot.start.y].weight = 0
 					// } 
 					// let tweenObj = rot.start	
@@ -115,11 +119,48 @@ export const socketMain = () => {
 						})
 						
 					}
+					utl.heroMap.get(rot.id).rot = rot
 					
 				} else {
 
 					let map2 = utl.models.get('cube').clone()
 					map2.getChildByName('on').active = false
+					if(rot.initPs=='p2'){
+						let material = map2._children[1].meshRenderer.material
+						material.albedoColorA=1
+						material.albedoColorB=0.9
+						material.albedoColorG=0.1
+						material.albedoColorR=0.1
+					}
+					if(rot.initPs=='p1'){
+						let material = map2._children[1].meshRenderer.material
+						material.albedoColorA=1
+						material.albedoColorB=0.5
+						material.albedoColorG=0.5
+						material.albedoColorR=0.1
+					}
+					let materialmmm = map2._children[0].meshRenderer.material
+						materialmmm.albedoColorA=1
+						materialmmm.albedoColorB=0.9
+						materialmmm.albedoColorG=0.9
+						materialmmm.albedoColorR=0.9
+					let sp = new Laya.Sprite();
+				    Laya.stage.addChild(sp);
+				    sp.visible = false
+				    sp.graphics.drawRect(0, 0, 80, 10, "#00ef6b");
+					utl.heroMap.set(rot.id,{sp,rot})
+
+
+					
+// albedoColor
+// w: 1
+// x: 0.8851529
+// y: 0.9
+// z: 0.9716981
+					// material1.albedoColor.w=1
+					// material1.albedoColor.x=.2
+					// material1.albedoColor.y=0.2
+					// material1.albedoColor.z=.2
 					utl.newScene.addChild(map2);
 					utl.entityMap.set(rot.id, map2)
 					// if (rot.start) {
@@ -151,13 +192,14 @@ export const socketMain = () => {
 						// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
 						let x = ~~(rot.end.x / 500 * 400)
 						let y = ~~(rot.end.y / 500 * 400)
-						utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
+						utl.mapSp.graphics.drawCircle(x, 400 - y,5, utl.pColor[rot.initPs]);
 						// let tweenObj = rot.start	
 						// tweenObj.id = rot.id
 						// Laya.Tween.to(tweenObj,{x:-rot.end.x,y:rot.end.y,update:new Laya.Handler(this,updateMove,[tweenObj])},600,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[tweenObj]),0);
 						// utl.graph.grid[rot.end.x][rot.end.y].weight = 0
 					// } 
 				}
+				utl.entityMap.get(rot.id).time = time
 				if(timeFrame.get(rot.id).list.length==1){
 					// console.log(timeFrame.get(rot.id))
 					// if(
@@ -169,9 +211,22 @@ export const socketMain = () => {
 					// }
 					
 				}
+				let p = utl.entityMap.get(rot.id).transform.position
+				let sp = utl.heroMap.get(rot.id).sp
+				// utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+			 //    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+
+
+			    let bleed = utl.heroMap.get(rot.id).rot.bleed/utl.allBleed
+			    utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+			    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+			    sp.graphics.clear()
+			    sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
+			    sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[rot.initPs]);
 			}
 		}
 		queryString()
+		checkAndClear(time)
 	});
 	// utl.socket.on('123456-moveGroup', (s) => {
 		
@@ -213,6 +268,16 @@ export const socketMain = () => {
 	utl.socket.on('disconnect', function() {});
 	//------------------------------web-------------------
 }
+function checkAndClear(time){
+	for(let id of utl.entityMap.keys()){
+		if(utl.entityMap.get(id).time<time-3){
+			utl.entityMap.get(id).destroy()
+			utl.heroMap.get(id).sp.destroy()
+			utl.entityMap.delete(id)
+			utl.heroMap.delete(id)
+		}
+	}
+}
 function queryString(){
 	if(!ryMoveGroup){
 		return
@@ -244,11 +309,11 @@ function queryString(){
       timeFrame.get(r.id).flag = true
    }
      let msg = {
-       userId: 'zzw',
+       playerId: utl.playerId,
        actionName:'moveGroup',
        heros:ryMoveGroup.heros
      }
-     
+     console.log(msg)
      utl.socket.emit('123456', msg);
 }
 function engMain(id){
@@ -270,8 +335,23 @@ function engMain(id){
 }
 function updateMove(value){
 	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y)
+
+	let p = utl.entityMap.get(value.id).transform.position
+	let sp = utl.heroMap.get(value.id).sp
+	// utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+ //    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+
+
+    let bleed = utl.heroMap.get(value.id).rot.bleed/utl.allBleed
+    utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+    sp.graphics.clear()
+    sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
+    sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
+	// sp.scaleX = sp.scaleY =  0.125 * p.z + 0.75;
+
 	// let obj = value.val
-	// if(obj.speed>0){
+	// if(obj.speed>0)
 		
 	// 	let box = utl.boxs.get(obj.id)
 	// 	box.transform.translate(new Laya.Vector3(0,-obj.speed/10,0),true)

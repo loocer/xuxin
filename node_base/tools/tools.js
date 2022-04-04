@@ -31,7 +31,7 @@ const findIntPition=(graph,center,pindex)=>{// center = {x:3,y:3}
     let index = pindex||1
     let list  = findBy(index,center)
     for(let item of list){
-        if(item[0]>0&&item[1]>0){
+        if(item[0]>0&&item[1]>0&&item[0]<500&&item[1]<500){
             if(graph.grid[item[0]][item[1]].weight==1){
                 return item
             }
@@ -64,8 +64,31 @@ function findBy(index,center){
     }
     return list
 }
+const findfuckPition=(center,rotMap,pindex)=>{// center = {x:3,y:3}
+    if(pindex>5){
+        return null
+    }
+    let index = pindex||1
+    let list  = findBy(index,center)
+    for(let item of list){
+        if(item[0]>0&&item[1]>0&&item[0]<500&&item[1]<500){
+            if(rotMap.has(item[0]+'-'+item[1])){
+                if(rotMap.get(item[0]+'-'+item[1]).rot.player.id!=rotMap.get(center.x+'-'+center.y).rot.player.id){
+                    return rotMap.get(item[0]+'-'+item[1])
+                }
+            }
+        }
+    }
+    return  findfuckPition(center,rotMap,++index)
+}
+const initPointPostion = {
+    'p1':{x:0,y:0},
+    'p2':{x:499,y:0},
+}
 module.exports={
-    findIntPition
+    findIntPition,
+    findfuckPition,
+    initPointPostion
 }
 createGraph()
 let item = findIntPition(graphe,{x:-1,y:0})

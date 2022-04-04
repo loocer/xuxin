@@ -5,6 +5,7 @@ import level from "./script/level"
 import Ioading from "./script/Ioading"
 import GameUI from "./script/GameUI"
 import fire from "./script/hand/fire"
+import scene from "./script/players/scene"
 import game from "./script/observation/game"
 
 export default class GameConfig {
@@ -17,6 +18,7 @@ export default class GameConfig {
 		reg("script/Ioading.js",Ioading);
 		reg("script/GameUI.js",GameUI);
 		reg("script/hand/fire.js",fire);
+		reg("script/players/scene.js",scene);
 		reg("script/observation/game.js",game);
     }
 }

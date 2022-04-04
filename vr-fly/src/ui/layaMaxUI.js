@@ -3,13 +3,13 @@ var View=Laya.View;
 var Dialog=Laya.Dialog;
 var Scene=Laya.Scene;
 var REG = Laya.ClassUtils.regClass;
-export class gameUI extends Scene {
+export class roomsUI extends Scene {
 	constructor(){ 
 		super();
 	}
 	createChildren() {
 		super.createChildren();
-		this.loadScene("test/game");
+		this.loadScene("test/rooms");
 	}
 }
-REG("ui.test.gameUI",gameUI);
+REG("ui.test.roomsUI",roomsUI);

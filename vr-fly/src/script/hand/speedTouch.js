@@ -1,7 +1,7 @@
  import utl from "../utl.js"
  import { Astar} from "../net/astar.js"
  let rots = []
-
+let outPos = new Laya.Vector3();
  export default class newtach {
    constructor() {
      this.status = 0
@@ -44,9 +44,8 @@
       return eventList
    }
    addpBack(){
-     console.log(454545)
      let msg = {
-       userId: 'zzw',
+       playerId: utl.playerId,
        actionName:'addHero',
      }
      utl.socket.emit('123456', msg);
@@ -75,6 +74,7 @@
        let x = p.x / 400 * 500
        let y = p.y / 400 * 500
        utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
+       this.updateView()
    }
    changePointBack(){
        let p = this.startPoint
@@ -151,7 +151,7 @@
    sendMsg(rots,target){
      
      let msg = {
-       userId: 'zzw',
+       playerId: utl.playerId,
        actionName:'ry-moveGroup',
        heros:rots,
        target
@@ -179,56 +179,7 @@
            Math.abs(this.startPoint.y - this.endPoint.y) < 20
       ){
         this.eventCheck()
-      // }
-
-     // if (this.startPoint.x - this.endPoint.x < 10 &&
-     //   this.startPoint.y - this.endPoint.y < 10 &&
-     //   this.endPoint.x < 400 &&
-     //   this.endPoint.y < 400
-     // ) {
-     //   let p = this.startPoint
-     //   let x = p.x / 400 * 500
-     //   let y = p.y / 400 * 500
-     //   utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
-     // } else {
-     //   let p = this.startPoint
-     //   let p2 = this.trsV2ToV3(p)
-     //   if (
-     //     p2.x < 0 &&
-     //     p2.z > 0 &&
-     //     p2.x > -500 &&
-     //     p2.z < 500) {
-     //     if (
-     //       Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-     //       Math.abs(this.startPoint.y - this.endPoint.y) < 10
-     //     ) {
-     //       let x = ~~p2.x
-     //       let y = ~~p2.z
-
-     //       // let heros = []
-     //       // for (let hero of utl.entityMap.keys()) {
-     //       //   heros.push({
-     //       //     id: hero,
-     //       //     coordinate: {
-     //       //       x: -x,
-     //       //       y
-     //       //     }
-     //       //   })
-     //       // }
-     //       for(let r of rots){
-     //          r.coordinate = {
-     //             x: -x,
-     //             y
-     //           }
-     //       }
-     //       let msg = {
-     //         userId: 'zzw',
-     //         heros:rots
-     //       }
-     //       utl.socket.emit('123456', msg);
-     //     }
-     //   }
-
+    
      }
      this.startPoint = null
      this.endPoint = null
@@ -297,6 +248,7 @@
      for (let key of utl.entityMap.keys()) {
       let en = utl.entityMap.get(key)
        let pos = en.transform.position
+       let sp = utl.heroMap.get(key).sp
        let fx = pos.x
        let fz = pos.z
        if (fx < msx &&
@@ -304,14 +256,22 @@
          fz < msz &&
          fz > miz) {
          rots.push({id: key})
-         en.getChildByName('on').active = true
-         en.getChildByName('off').active = false
+         if(utl.heroMap.get(key).rot.playerId==utl.playerId){
+           en.getChildByName('on').active = true
+           en.getChildByName('off').active = false
+          
+         }
+          sp.visible = true
+            // utl.camera.viewport.project(pos, utl.camera.projectionViewMatrix, outPos);
+            // sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
        } else {
          en.getChildByName('on').active = false
          en.getChildByName('off').active = true
+         sp.visible = false
        }
 
      }
+     this.updateView()
    }
    leftFormatMovePosition(out, tnum) {
      let xx = 0
@@ -342,6 +302,7 @@
      }
      if (tnum == 2) {
        this.sp.graphics.clear()
+       
        utl.camera.transform.translate(new Laya.Vector3(this.move[0], this.move[1], 0), true);
        if (utl.camera.transform.position.x > 0 ||
          utl.camera.transform.position.x < -500 ||
@@ -351,8 +312,23 @@
          utl.camera.transform.translate(new Laya.Vector3(-this.move[0], -this.move[1], 0), true);
        }
      }
+     this.updateView()
      this.status = tnum
      this.x = xx
      this.z = zz
    }
+    updateView(){
+        for (let key of utl.entityMap.keys()) {
+          let en = utl.entityMap.get(key)
+            let sp = utl.heroMap.get(key).sp
+            let netRot = utl.heroMap.get(key).rot
+            let p = en.transform.position
+            let bleed = netRot.bleed/utl.allBleed
+            utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+            sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+            sp.graphics.clear()
+            sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
+            sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[netRot.initPs]);
+         }
+     }
  }

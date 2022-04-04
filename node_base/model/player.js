@@ -1,40 +1,22 @@
 // import Robot  from './robot/robot1'
 let Robot = require('./robot/robot1')
-let {findIntPition} = require('../tools/tools')
+let {findIntPition,initPointPostion,findfuckPition} = require('../tools/tools')
 class Player {
-   constructor(room) {
+   constructor(room,{initPs}) {
       this.id = 'zzw';
+      this.state = true
       this.room = room
       this.ryMoveGroup = null
       this.indexRyId = 0//当前推送的id
       this.robots = new Map()
-      this.createRobot()
-   }
-   createRobot() {
-      let id = this.id
-      // let robot = new Robot(id,this.room.graph)
-      // // robot.map.graph = this.room.graph
-      // this.robots.set(robot.id, robot)
-      // robot.setEnd([99, 22])
-
-
-      // let robot1 = new Robot(id)
-      // robot1.map.graph = this.room.graph
-      // this.robots.set(robot1.id, robot1)
-      // robot1.setEnd([40, 3])
-      for(let i=0;i<1;i++){
-         let robot1 = new Robot(id,this.room.graph,[2*i, 3])
-         // robot1.map.graph = this.room.graph
-         this.robots.set(robot1.id, robot1)
-      }
-     
-      //    robot1.setEnd( [55,57])
+      this.initPs = initPs
+      this.rsInitPostion = initPointPostion[initPs]
    }
    addHero(){
       let id = this.id
       let {graph} = this.room
-      let item = findIntPition(graph,{x:0,y:0})
-      let robot1 = new Robot(id,this.room.graph,[item[0], item[1]])
+      let item = findIntPition(graph,this.rsInitPostion)
+      let robot1 = new Robot(this,[item[0], item[1]])
       // robot1.map.graph = this.room.graph
       this.robots.set(robot1.id, robot1)
    }
@@ -60,7 +42,26 @@ class Player {
    }
    update() {
       for (let rot of this.robots.values()) {
+         if(rot.bleed<0){
+            rot.state = false
+            this.robots.delete(rot.id)
+            this.room.heroMap.delete(rot.id)
+         }
          rot.update()
+         this.changeAction(rot)
+      }
+   }
+   changeAction(rot){
+      let {x,y} = rot.map.move1
+      let m2 = rot.map.move2
+      this.room.heroMap.set(x+'-'+y,{
+         rot
+      })
+      if(m2.x==x&&m2.y==y){
+         let fRot = findfuckPition({x,y},this.room.heroMap)
+         if(fRot){
+            fRot.rot.bleed--
+         }
       }
    }
 }

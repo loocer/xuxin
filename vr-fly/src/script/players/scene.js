@@ -3,15 +3,15 @@
  * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
  * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
  */
-import utl from "./utl.js"
+import utl from "../utl.js"
 let ls = [
-    {index:2,title:'start game'},
-    {index:3,title:'start observer'}
+    {index:2,title:'team1'},
+    {index:3,title:'team2'}
 ]
 export default class Level extends Laya.Scene {
     constructor() {
         super();
-        this.loadScene("test/level.scene");
+        this.loadScene("test/players.scene");
         
         this.isTouchFlag = false
         this.touchPosition = {
@@ -109,16 +109,18 @@ export default class Level extends Laya.Scene {
                  let index = outHitResult.collider.owner.parent.name.charAt(0)
                  index++
                  if(index==1){
+                     utl.playerId ='player-1'
                     utl.playStatusObj = {
                         doingIndex:1
                     }
                     this.removeSelf();
                     Laya.stage.offAll();
-                    Laya.Scene.open('test/players.scene')
+                    Laya.Scene.open('test/load.scene')
                  }
                  if(index==2){
+                     utl.playerId ='player-2'
                     utl.playStatusObj = {
-                        doingIndex:2
+                        doingIndex:1
                     }
                     this.removeSelf();
                     Laya.stage.offAll();
@@ -181,7 +183,7 @@ export default class Level extends Laya.Scene {
      updatatxt(){
          for(let i in ls){
              let box = this.newScene.getChildByName(i+'flckbox')
-             let info = Laya.stage.getChildByName(i+'flcktxt')
+             let info = Laya.stage.getChildByName(i+'player')
              let outPos =  new Laya.Vector3();
              this.camera.viewport.project(box.transform.position, this.camera.projectionViewMatrix, outPos);
              info.pos((outPos.x-100)/Laya.stage.clientScaleX, outPos.y / Laya.stage.clientScaleY);
@@ -233,7 +235,7 @@ export default class Level extends Laya.Scene {
             let outPos =  new Laya.Vector3();
             info.text = ls[i].title
             info.fontSize = 40;
-            info.name = i+ 'flcktxt'
+            info.name = i+ 'player'
             info.color = textColor;
             info.width = 50;
             info.font = "Microsoft YaHei";

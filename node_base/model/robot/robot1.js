@@ -2,13 +2,18 @@
 // import boxs  from '../../tools/rooms'
 let Box = require('../box')
 class Robot1 {
-    constructor(playerId, graph, start) {
+    constructor(player, start) {
         this.id = (new Date()).valueOf();
-        console.log(this.id)
-        this.playerId = playerId
+        this.state = true
+        this.player = player
+        this.status = {
+            isOnFire:false,
+            isBeHit:false,
 
+        }
+        this.bleed = 100
         this.start = start || [0, 0]
-        this.map = new Box(graph, this.start);
+        this.map = new Box(player.room.graph, this.start);
         //    this.end = [99,22]
         //    this.setBox()
     }
@@ -28,6 +33,10 @@ class Robot1 {
         // box.graph.grid[box.move2.x][box.move2.y].weight = 0
         return {
             id: this.id,
+            initPs:this.player.initPs,
+            playerId:this.player.id,
+            bleed:this.bleed,
+            state:this.state,
             start: box.move1,
             end: box.move2,
         }

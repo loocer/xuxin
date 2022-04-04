@@ -6,6 +6,7 @@ class Room {
       this.players = new Map()
       this.id = '123456';
       this.heros = []
+      this.heroMap = new Map()
       this.graph = null
       this.moveGroups = []
       this.createGraph()
@@ -30,8 +31,12 @@ class Room {
       this.positionBox = positionBox
    }
    addPlayer() {
-      let player = new Player(this)
+      let player = new Player(this,{initPs:'p1'})
+      player.id = 'player-1'
       this.players.set(player.id, player)
+      let player2 =new Player(this,{initPs:'p2'})
+      player2.id = 'player-2'
+      this.players.set(player2.id, player2)
    }
    update() {
       for(let graid of this.graph.grid){
@@ -51,6 +56,7 @@ class Room {
       }
    }
    receive(msg) { //{userId:0,heros:[],coordinate:{x,y,z}}
+
       if(msg.actionName=='ry-moveGroup'){
          this.ryMoveGroup(msg)
       }
@@ -62,11 +68,12 @@ class Room {
       }
    }
    addHero(msg){
-      let player = this.players.get(msg.userId)
+
+      let player = this.players.get(msg.playerId)
       player.addHero()
    }
    ryMoveGroup(msg){
-      let player = this.players.get(msg.userId)
+      let player = this.players.get(msg.playerId)
       let heres = []
       for (let hero of msg.heros) {
          if(player.robots.has(hero.id)){
@@ -99,7 +106,7 @@ class Room {
       //       player.robots.get(hero.id).changeMove([hero.coordinate.x, hero.coordinate.y])
       //    }
       // }
-      let player = this.players.get(msg.userId)
+      let player = this.players.get(msg.playerId)
       for (let hero of msg.heros) {
          if(player.robots.has(hero.id)){
             player.robots.get(hero.id).changeResult(hero)
