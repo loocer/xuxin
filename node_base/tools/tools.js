@@ -65,7 +65,7 @@ function findBy(index,center){
     return list
 }
 const findfuckPition=(center,rotMap,pindex)=>{// center = {x:3,y:3}
-    if(pindex>20){
+    if(pindex>50){
         return null
     }
     let index = pindex||1
