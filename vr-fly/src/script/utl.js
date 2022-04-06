@@ -7,7 +7,9 @@ export default  {
         'p1':'#00ffff',
         'p2':'#0000ff'
     },
-
+    buttonStatus:{
+        addHero:false
+    },
 
    
 
@@ -61,6 +63,8 @@ export default  {
     // firs:[],
     loadingElse:[
          ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
+         ['addsStop','https://xuxin.love/img/redcode/icon/add-stop.png'],
+         ['addsStart','https://xuxin.love/img/redcode/icon/add-start.png'],
         // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
         // ['fire','https://xuxin.love/img/fly/fires.png'],
         // ['left','https://xuxin.love/img/fly/left.png'],

@@ -1,6 +1,6 @@
 (function () {
    'use strict';
-  var io=require('../io')
+
    var utl = {
        id:Date.parse(new  Date())+'',
        entityMap:new Map(),
@@ -10,7 +10,9 @@
            'p1':'#00ffff',
            'p2':'#0000ff'
        },
-
+       buttonStatus:{
+           addHero:false
+       },
 
       
 
@@ -64,6 +66,8 @@
        // firs:[],
        loadingElse:[
             ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
+            ['addsStop','https://xuxin.love/img/redcode/icon/add-stop.png'],
+            ['addsStart','https://xuxin.love/img/redcode/icon/add-start.png'],
            // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
            // ['fire','https://xuxin.love/img/fly/fires.png'],
            // ['left','https://xuxin.love/img/fly/left.png'],
@@ -548,12 +552,30 @@
          ];
          return eventList
       }
-      addpBack(){
-        let msg = {
+      addMsg(){
+       let msg = {
           playerId: utl.playerId,
           actionName:'addHero',
         };
         utl.socket.emit('123456', msg);
+        if(utl.buttonStatus.addHero){
+         setTimeout(()=>{
+           this.addMsg();
+         },1000);
+        }
+        
+      }
+      addpBack(){
+       // buttonStatus
+       utl.buttonStatus.addHero=!utl.buttonStatus.addHero;
+       if(utl.buttonStatus.addHero){
+         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-start.png'; 
+         this.addMsg();
+       }else{
+         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-stop.png';
+       }
+       
+        
 
       }
       eventCheck(){
@@ -1479,6 +1501,7 @@
    	// // })
    	// return
    	// utl.socket = io('ws://192.168.0.105:3000');
+   	// utl.socket = io('ws://192.168.11.37:3000');
    	utl.socket = io('wss://xuxin.love:3000');
    	utl.socket.on('123456', (s) => {
    		time++;
@@ -1489,6 +1512,7 @@
    		for (let player of s.list) {
    			if(player.playerId==utl.playerId){
    				ryMoveGroup = player.ryMoveGroup;
+   				utl.info.text =  player.killNum;
    			}
    			for (let rot of player.rots) {
    				let queryList = [];
@@ -1742,6 +1766,9 @@
    	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},300,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
    }
    function updateMove(value){
+   	if(!utl.entityMap.has(value.id)){
+   		return
+   	}
    	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y);
 
    	let p = utl.entityMap.get(value.id).transform.position;
@@ -1841,12 +1868,12 @@
            this.initTouch();
             // this.addMouseEvent();
            this.info = new Laya.Text();
-           this.info.text = 'userId:'+utl.id;
+           this.info.text = 'kill num:';
            this.info.fontSize = 50;
            this.info.color = "#FFFFFF";
            this.info.size(Laya.stage.width, Laya.stage.height);
            this.info.pos(50,50);
-           // Laya.stage.addChild(this.info);  
+           Laya.stage.addChild(this.info);  
            utl.info =  this.info;
            this.drawUi();
            temp = this;
@@ -1908,11 +1935,12 @@
            this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
            utl.mapSp = this.sp;
            this.addMouseEvent();
-           let adds = this.loadingElse.get('adds');
+           let adds = this.loadingElse.get('addsStop');
            let addsImg = new  Laya.Image(adds);
            addsImg.height = 150;
            addsImg.width =150;
            addsImg.pos(200, Laya.stage.height - 200);
+           utl.addsImg = addsImg;
            Laya.stage.addChild(addsImg);
             utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
            var material = new Laya.BlinnPhongMaterial();
