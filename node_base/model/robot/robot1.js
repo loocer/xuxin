@@ -9,9 +9,9 @@ class Robot1 {
         this.status = {
             isOnFire:false,
             isBeHit:false,
-
         }
         this.bleed = 100
+        this.killNum = 0
         this.start = start || [0, 0]
         this.map = new Box(player.room.graph, this.start);
         //    this.end = [99,22]

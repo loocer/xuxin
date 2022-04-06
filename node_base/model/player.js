@@ -10,6 +10,7 @@ class Player {
       this.indexRyId = 0//当前推送的id
       this.robots = new Map()
       this.initPs = initPs
+      this.killNum = 0
       this.rsInitPostion = initPointPostion[initPs]
    }
    addHero(){
@@ -37,6 +38,7 @@ class Player {
       return {
          playerId: this.id,
          ryMoveGroup,
+         killNum:this.killNum,
          rots
       }
    }
@@ -67,12 +69,14 @@ class Player {
       return null
    }
    changeAction(rot){
-      let {x,y} = rot.map.move1
-      let m2 = rot.map.move2
       let elRot = this.findFuckRot(rot)
       if(elRot){
          elRot.bleed--
          rot.status.isOnFire = true
+         if(elRot.bleed<0){
+            this.killNum++
+            rot.killNum++
+         }
       }else{
          rot.status.isOnFire = false
       }

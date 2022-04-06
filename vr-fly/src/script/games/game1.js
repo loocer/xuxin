@@ -67,12 +67,12 @@ export default class GameUI extends Laya.Scene {
         this.initTouch()
          // this.addMouseEvent();
         this.info = new Laya.Text();
-        this.info.text = 'userId:'+utl.id
+        this.info.text = 'kill num:'
         this.info.fontSize = 50;
         this.info.color = "#FFFFFF";
         this.info.size(Laya.stage.width, Laya.stage.height);
         this.info.pos(50,50)
-        // Laya.stage.addChild(this.info);  
+        Laya.stage.addChild(this.info);  
         utl.info =  this.info
         this.drawUi()
         temp = this

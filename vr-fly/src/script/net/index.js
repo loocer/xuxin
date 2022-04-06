@@ -71,8 +71,8 @@ export const socketMain = () => {
 	// // })
 	// return
 	// utl.socket = io('ws://192.168.0.105:3000');
-	utl.socket = io('ws://192.168.11.37:3000');
-	// utl.socket = io('wss://xuxin.love:3000');
+	// utl.socket = io('ws://192.168.11.37:3000');
+	utl.socket = io('wss://xuxin.love:3000');
 	utl.socket.on('123456', (s) => {
 		time++
 		resetGraph()
@@ -82,6 +82,7 @@ export const socketMain = () => {
 		for (let player of s.list) {
 			if(player.playerId==utl.playerId){
 				ryMoveGroup = player.ryMoveGroup
+				utl.info.text =  player.killNum
 			}
 			for (let rot of player.rots) {
 				let queryList = []
@@ -335,6 +336,9 @@ function engMain(id){
 	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},300,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
 }
 function updateMove(value){
+	if(!utl.entityMap.has(value.id)){
+		return
+	}
 	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y)
 
 	let p = utl.entityMap.get(value.id).transform.position
