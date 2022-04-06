@@ -51,17 +51,30 @@ class Player {
          this.changeAction(rot)
       }
    }
+   findFuckRot(rot){
+      let {x,y} = rot.map.move1
+      for(let p of this.room.players.values()){
+         if(p.id!=this.id){
+            for(let elRot of p.robots.values()){
+               let x1 = elRot.map.move1.x
+               let y1 = elRot.map.move1.y
+               if(Math.sqrt((x1-x)*(x1-x)+(y1-y)*(y1-y))<20){
+                  return elRot
+               }
+            }
+         }
+      }
+      return null
+   }
    changeAction(rot){
       let {x,y} = rot.map.move1
       let m2 = rot.map.move2
-      this.room.heroMap.set(x+'-'+y,{
-         rot
-      })
-      if(m2.x==x&&m2.y==y){
-         let fRot = findfuckPition({x,y},this.room.heroMap)
-         if(fRot){
-            fRot.rot.bleed--
-         }
+      let elRot = this.findFuckRot(rot)
+      if(elRot){
+         elRot.bleed--
+         rot.status.isOnFire = true
+      }else{
+         rot.status.isOnFire = false
       }
    }
 }
