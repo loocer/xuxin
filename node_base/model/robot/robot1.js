@@ -13,6 +13,7 @@ class Robot1 {
         }
         this.bleed = 100
         this.start = start || [0, 0]
+        this.heroMapKey = null
         this.map = new Box(player.room.graph, this.start);
         //    this.end = [99,22]
         //    this.setBox()
