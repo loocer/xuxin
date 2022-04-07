@@ -67,12 +67,12 @@ export default class GameUI extends Laya.Scene {
         this.initTouch()
          // this.addMouseEvent();
         this.info = new Laya.Text();
-        this.info.text = 'userId:'+utl.id
+        this.info.text = 'kill num:'
         this.info.fontSize = 50;
         this.info.color = "#FFFFFF";
         this.info.size(Laya.stage.width, Laya.stage.height);
         this.info.pos(50,50)
-        // Laya.stage.addChild(this.info);  
+        Laya.stage.addChild(this.info);  
         utl.info =  this.info
         this.drawUi()
         temp = this
@@ -134,11 +134,12 @@ export default class GameUI extends Laya.Scene {
         this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
         utl.mapSp = this.sp
         this.addMouseEvent()
-        let adds = this.loadingElse.get('adds')
+        let adds = this.loadingElse.get('addsStop')
         let addsImg = new  Laya.Image(adds);
         addsImg.height = 150
         addsImg.width =150
         addsImg.pos(200, Laya.stage.height - 200);
+        utl.addsImg = addsImg
         Laya.stage.addChild(addsImg);
          utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
         var material = new Laya.BlinnPhongMaterial();

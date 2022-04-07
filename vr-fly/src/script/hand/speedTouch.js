@@ -43,12 +43,30 @@ let outPos = new Laya.Vector3();
       ]
       return eventList
    }
-   addpBack(){
-     let msg = {
+   addMsg(){
+    let msg = {
        playerId: utl.playerId,
        actionName:'addHero',
      }
      utl.socket.emit('123456', msg);
+     if(utl.buttonStatus.addHero){
+      setTimeout(()=>{
+        this.addMsg()
+      },1000)
+     }
+     
+   }
+   addpBack(){
+    // buttonStatus
+    utl.buttonStatus.addHero=!utl.buttonStatus.addHero
+    if(utl.buttonStatus.addHero){
+      utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-start.png' 
+      this.addMsg()
+    }else{
+      utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-stop.png'
+    }
+    
+     
 
    }
    eventCheck(){
