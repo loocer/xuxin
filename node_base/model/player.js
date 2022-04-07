@@ -25,9 +25,8 @@ class Player {
       let rots = []
       let ryMoveGroup = null
       if(this.ryMoveGroup&&this.indexRyId != this.ryMoveGroup.id){
-         let {graph} = this.room
+         // let {graph} = this.room
          ryMoveGroup=this.ryMoveGroup
-         ryMoveGroup.graph = graph
          this.indexRyId = this.ryMoveGroup.id
       }
       

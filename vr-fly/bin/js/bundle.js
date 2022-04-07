@@ -1500,14 +1500,9 @@
 
    	// // })
    	// return
-<<<<<<< HEAD
-   	utl.socket = io('ws://192.168.0.105:3000');
-   	// utl.socket = io('wss://xuxin.love:3000');
-=======
    	// utl.socket = io('ws://192.168.0.105:3000');
    	// utl.socket = io('ws://192.168.11.37:3000');
    	utl.socket = io('wss://xuxin.love:3000');
->>>>>>> 21361b6b264452092b047a0018b2b03994d28370
    	utl.socket.on('123456', (s) => {
    		time++;
    		resetGraph();
@@ -1520,7 +1515,6 @@
    				utl.info.text =  player.killNum;
    			}
    			for (let rot of player.rots) {
-   				let queryList = [];
    				if (utl.entityMap.has(rot.id)) {
    					// if (rot.start) {
    					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
@@ -1550,11 +1544,17 @@
 
    					}else{
    						// timeFrame.get(rot.id).queryId = rot.start.queryId
-   						timeFrame.get(rot.id).list.push({
-   							start:rot.start,
-   							end:rot.end
-   						});
-   						
+   						if(timeFrame.get(rot.id).list.length>10){
+   							timeFrame.get(rot.id).list = [{
+   								start:rot.start,
+   								end:rot.end
+   							}];
+   						}else{
+   							timeFrame.get(rot.id).list.push({
+   								start:rot.start,
+   								end:rot.end
+   							});
+   						}
    					}
    					utl.heroMap.get(rot.id).rot = rot;
    					

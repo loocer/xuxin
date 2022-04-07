@@ -300,7 +300,7 @@ function queryString(){
 		timeFrame.get(r.id).list = []
      	let start = utl.graph.grid[r.x][r.y]
      	let end = utl.graph.grid[~~-x][~~y]
-     	result = Astar.astar.search(ryMoveGroup.graph, start, end);
+     	result = Astar.astar.search(utl.graph, start, end);
     	let ps = []
     	ps.push({
     	 	x:start.x,
