@@ -85,7 +85,6 @@ export const socketMain = () => {
 				utl.info.text =  player.killNum
 			}
 			for (let rot of player.rots) {
-				let queryList = []
 				if (utl.entityMap.has(rot.id)) {
 					// if (rot.start) {
 					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
@@ -115,11 +114,17 @@ export const socketMain = () => {
 
 					}else{
 						// timeFrame.get(rot.id).queryId = rot.start.queryId
-						timeFrame.get(rot.id).list.push({
-							start:rot.start,
-							end:rot.end
-						})
-						
+						if(timeFrame.get(rot.id).list.length>10){
+							timeFrame.get(rot.id).list = [{
+								start:rot.start,
+								end:rot.end
+							}]
+						}else{
+							timeFrame.get(rot.id).list.push({
+								start:rot.start,
+								end:rot.end
+							})
+						}
 					}
 					utl.heroMap.get(rot.id).rot = rot
 					
@@ -295,7 +300,7 @@ function queryString(){
 		timeFrame.get(r.id).list = []
      	let start = utl.graph.grid[r.x][r.y]
      	let end = utl.graph.grid[~~-x][~~y]
-     	result = Astar.astar.search(utl.graph, start, end);
+     	result = Astar.astar.search(ryMoveGroup.graph, start, end);
     	let ps = []
     	ps.push({
     	 	x:start.x,

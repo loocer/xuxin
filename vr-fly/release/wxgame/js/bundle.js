@@ -1,6 +1,6 @@
 (function () {
    'use strict';
-
+var io = require('../io')
    var utl = {
        id:Date.parse(new  Date())+'',
        entityMap:new Map(),
