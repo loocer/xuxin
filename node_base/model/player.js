@@ -45,13 +45,13 @@ class Player {
    }
    update() {
       for (let rot of this.robots.values()) {
-         if(rot.bleed<0){
-            rot.state = false
-            this.robots.delete(rot.id)
-            this.room.heroMap.delete(rot.id)
-         }
+         // if(rot.bleed<0){
+         //    rot.state = false
+         //    this.robots.delete(rot.id)
+         //    this.room.heroMap.delete(rot.id)
+         // }
          rot.update()
-         this.changeAction(rot)
+         // this.changeAction(rot)
       }
    }
    findFuckRot(rot){
