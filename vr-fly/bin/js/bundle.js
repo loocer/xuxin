@@ -1500,9 +1500,14 @@
 
    	// // })
    	// return
+<<<<<<< HEAD
+   	utl.socket = io('ws://192.168.0.105:3000');
+   	// utl.socket = io('wss://xuxin.love:3000');
+=======
    	// utl.socket = io('ws://192.168.0.105:3000');
    	// utl.socket = io('ws://192.168.11.37:3000');
    	utl.socket = io('wss://xuxin.love:3000');
+>>>>>>> 21361b6b264452092b047a0018b2b03994d28370
    	utl.socket.on('123456', (s) => {
    		time++;
    		resetGraph();
@@ -4281,8 +4286,8 @@
 
    	// // })
    	// return
-   	// utl.socket = io('ws://192.168.0.105:3000');
-   	utl.socket = io('wss://xuxin.love:3000');
+   	utl.socket = io('ws://192.168.0.105:3000');
+   	// utl.socket = io('wss://xuxin.love:3000');
    	utl.socket.on('123456-observer', (s) => {
    		// resetGraph()
    		utl.mapSp.graphics.clear();
