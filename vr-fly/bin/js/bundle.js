@@ -1506,8 +1506,8 @@
    	// // })
    	// return
    	// utl.socket = io('ws://192.168.0.105:3000');
-   	utl.socket = io('ws://192.168.11.37:3000');
-   	// utl.socket = io('wss://xuxin.love:3000');
+   	// utl.socket = io('ws://192.168.11.37:3000');
+   	utl.socket = io('wss://xuxin.love:3000');
    	utl.socket.on('123456', (s) => {
    		
    		time++;
@@ -1518,7 +1518,6 @@
    		for (let player of s.list) {
    			if (player.playerId == utl.playerId) {
    				ryMoveGroup = player.ryMoveGroup;
-   				console.log('laile ------',ryMoveGroup);
    				utl.info.text = player.killNum;
    			}
    			for (let rot of player.rots) {
@@ -1718,7 +1717,6 @@
    		actionName: 'moveGroup',
    		heros: ryMoveGroup.heros
    	};
-   	console.log(msg);
    	utl.socket.emit('123456', msg);
    }
 

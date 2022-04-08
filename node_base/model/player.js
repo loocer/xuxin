@@ -51,7 +51,7 @@ class Player {
          //    this.room.heroMap.delete(rot.id)
          // }
          rot.update()
-         // this.changeAction(rot)
+         this.changeAction(rot)
       }
    }
    findFuckRot(rot){
