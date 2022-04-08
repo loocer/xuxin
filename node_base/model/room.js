@@ -68,7 +68,7 @@ class Room {
       }
    }
    addHero(msg){
-
+      console.log(msg)
       let player = this.players.get(msg.playerId)
       player.addHero()
    }
@@ -114,18 +114,18 @@ class Room {
       }
    }
    pushMsg(io) {
-      let glist =[]
-      for(let graid of this.graph.grid){
-         for(let objd of graid){
-            if(objd.weight==0){
-               glist.push({
-                  x:objd.x,
-                  y:objd.y,
-               })
-            }
-            // objd.weight=1
-         }
-      }
+      // let glist =[]
+      // for(let graid of this.graph.grid){
+      //    for(let objd of graid){
+      //       if(objd.weight==0){
+      //          glist.push({
+      //             x:objd.x,
+      //             y:objd.y,
+      //          })
+      //       }
+      //       // objd.weight=1
+      //    }
+      // }
       let list = []
       for (let obj of this.players.values()) {
          list.push(obj.getPushMsg())
@@ -136,16 +136,16 @@ class Room {
          list
       });
      
-      io.emit('123456-observer', {
-         glist
-      });
-      for(let obj of this.moveGroups){
-         io.emit(obj.id, {
-            heros:obj.heros,
-            target:obj.target
-         });
-      }
-      this.moveGroups = []
+      // io.emit('123456-observer', {
+      //    glist
+      // });
+      // for(let obj of this.moveGroups){
+      //    io.emit(obj.id, {
+      //       heros:obj.heros,
+      //       target:obj.target
+      //    });
+      // }
+      // this.moveGroups = []
    }
 }
 module.exports = Room

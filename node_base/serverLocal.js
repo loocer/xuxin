@@ -3,12 +3,12 @@ let Main = require('./main')
 const https = require('https');
 const fs = require('fs');
 const app = require('express')();
-const privateKey = fs.readFileSync('./6360482_xuxin.love.key');
-const certificate = fs.readFileSync('./6360482_xuxin.love.pem');
-const credentials = {
-  key: privateKey,
-  cert: certificate
-};
+// const privateKey = fs.readFileSync('./6360482_xuxin.love.key');
+// const certificate = fs.readFileSync('./6360482_xuxin.love.pem');
+// const credentials = {
+//   key: privateKey,
+//   cert: certificate
+// };
 
 // 创建 HTTP 与 HTTPS 服务器
 // const httpsServer = https.createServer(credentials, app);

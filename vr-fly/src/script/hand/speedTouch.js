@@ -44,10 +44,12 @@ let outPos = new Laya.Vector3();
       return eventList
    }
    addMsg(){
+
     let msg = {
        playerId: utl.playerId,
        actionName:'addHero',
      }
+     console.log(msg)
      utl.socket.emit('123456', msg);
      if(utl.buttonStatus.addHero){
       setTimeout(()=>{
@@ -174,6 +176,7 @@ let outPos = new Laya.Vector3();
        heros:rots,
        target
      }
+     console.log(msg)
      utl.socket.emit('123456', msg);
    }
    // sendMsg(rots){
