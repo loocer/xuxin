@@ -28,7 +28,7 @@
             "outputPath": ""
         },
         "enableEngineNative": false,
-        "useIsolateContext": false,
+        "useIsolateContext": true,
         "userConfirmedUseIsolateContext": false,
         "userConfirmedBundleSwitch": false,
         "packNpmManually": false,
@@ -40,7 +40,7 @@
         "useCompilerPlugins": false
     },
     "compileType": "game",
-    "libVersion": "2.8.3",
+    "libVersion": "game",
     "appid": "wx04d43b1abdf1117a",
     "projectname": "layaWXTest",
     "condition": {

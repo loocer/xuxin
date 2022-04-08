@@ -12,10 +12,10 @@ class Main{
       this.rooms.push(room)
    }
    work(){
-      setInterval(()=>{
+      setTimeout(()=>{
          this.update()
          this.pushMsg()
-        
+         this.work()
       },200)
    //    setInterval(()=>{
         

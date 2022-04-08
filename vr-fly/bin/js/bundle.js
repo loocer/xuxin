@@ -1516,45 +1516,26 @@
    			}
    			for (let rot of player.rots) {
    				if (utl.entityMap.has(rot.id)) {
-   					// if (rot.start) {
-   					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
-   					// 	let x = ~~(rot.start.x / 500 * 400)
-   					// 	let y = ~~(rot.start.y / 500 * 400)
-   					// 	utl.mapSp.graphics.drawCircle(x, 400 - y, 5, "#00ffff");
-   					// 	// utl.graph.grid[rot.start.x][rot.start.y].weight = 0
-   					// }
-   					// else  {
-   						// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
    						let x = ~~(rot.end.x / 500 * 400);
    						let y = ~~(rot.end.y / 500 * 400);
    						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
-   					// } 
-   					// let tweenObj = rot.start	
-   					// tweenObj.x = -tweenObj.x
-   					// tweenObj.id = rot.id
-   					// queryList.push({
-   					// 	id:rot.id,
-   					// 	start:rot.start,
-   					// 	end:rot.end
-   					// })
    					if(
    						rot.start.x ==rot.end.x 
      						&&rot.start.y ==rot.end.y ){
 
    					}else{
-   						// timeFrame.get(rot.id).queryId = rot.start.queryId
-   						if(timeFrame.get(rot.id).list.length>10){
-   							timeFrame.get(rot.id).list = [{
-   								start:rot.start,
-   								end:rot.end
-   							}];
-   						}else{
-   							timeFrame.get(rot.id).list.push({
-   								start:rot.start,
-   								end:rot.end
-   							});
-   						}
+   						// if(timeFrame.get(rot.id).list.length>10){
+   						// 	timeFrame.get(rot.id).list = [{
+   						// 		start:rot.start,
+   						// 		end:rot.end
+   						// 	}]
+   						// }else{
+   						// 	timeFrame.get(rot.id).list.push({
+   						// 		start:rot.start,
+   						// 		end:rot.end
+   						// 	})
+   						// }
    					}
    					utl.heroMap.get(rot.id).rot = rot;
    					
@@ -1600,14 +1581,8 @@
    					// material1.albedoColor.z=.2
    					utl.newScene.addChild(map2);
    					utl.entityMap.set(rot.id, map2);
-   					// if (rot.start) {
-   					// 	utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.start.x, 3, rot.start.y)
-   					// 	let x = ~~(rot.start.x / 500 * 400)
-   					// 	let y = ~~(rot.start.y / 500 * 400)
-   					// 	utl.mapSp.graphics.drawCircle(x, 400 - y,5, "#00ffff");
    						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
-   					// }
-   					// else{
+
    					timeFrame.set(rot.id,{
    						flag:true,
    						// queryId:rot.start.queryId,
@@ -1615,43 +1590,18 @@
    							start:rot.start,
    							end:rot.end
    					}]});	
-   					// if(
-   					// 	rot.start.x ==rot.end.x 
-     			// 			&&rot.start.y ==rot.end.y ){
-
-   					// }else{
-   					// 	timeFrame.get(rot.id).list.push({
-   					// 		start:rot.start,
-   					// 		end:rot.end
-   					// 	})
-   						
-   					// }
-   						// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3, rot.end.y)
    						let x = ~~(rot.end.x / 500 * 400);
    						let y = ~~(rot.end.y / 500 * 400);
    						utl.mapSp.graphics.drawCircle(x, 400 - y,5, utl.pColor[rot.initPs]);
-   						// let tweenObj = rot.start	
-   						// tweenObj.id = rot.id
-   						// Laya.Tween.to(tweenObj,{x:-rot.end.x,y:rot.end.y,update:new Laya.Handler(this,updateMove,[tweenObj])},600,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[tweenObj]),0);
-   						// utl.graph.grid[rot.end.x][rot.end.y].weight = 0
-   					// } 
+   						
    				}
    				utl.entityMap.get(rot.id).time = time;
-   				if(timeFrame.get(rot.id).list.length==1){
-   					// console.log(timeFrame.get(rot.id))
-   					// if(
-   					// 	timeFrame.get(rot.id)[0].start.x ==timeFrame.get(rot.id)[0].end.x 
-     			// 			&&timeFrame.get(rot.id)[0].start.y ==timeFrame.get(rot.id)[0].end.y ){
-
-   					// }else{
-   						engMain(rot.id);
-   					// }
-   					
-   				}
+   				// if(timeFrame.get(rot.id).list.length==1){
+   				// 		engMain(rot.id)
+   				// }
    				let p = utl.entityMap.get(rot.id).transform.position;
    				let sp = utl.heroMap.get(rot.id).sp;
-   				// utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-   			 //    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+   			
 
 
    			    let bleed = utl.heroMap.get(rot.id).rot.bleed/utl.allBleed;
@@ -1660,6 +1610,8 @@
    			    sp.graphics.clear();
    			    sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
    			    sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[rot.initPs]);
+
+   				utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y);
    			}
    		}
    		queryString();
@@ -1799,7 +1751,7 @@
    	
    }
    function tweend(obj){
-
+   	
    	if(!timeFrame.get(obj.id).flag){
    		return
    	}
@@ -4781,7 +4733,7 @@
    GameConfig.screenMode = "none";
    GameConfig.alignV = "top";
    GameConfig.alignH = "left";
-   GameConfig.startScene = "test/level.scene";
+   GameConfig.startScene = "test/load.scene";
    GameConfig.sceneRoot = "";
    GameConfig.debug = false;
    GameConfig.stat = false;
