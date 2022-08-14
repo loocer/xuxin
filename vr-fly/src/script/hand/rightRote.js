@@ -1,4 +1,4 @@
- import utl from "../utl.js"
+import utl from "../utl.js"
 export default class rightRote{
     constructor(){
             this.scaleTime = 100;
@@ -9,10 +9,19 @@ export default class rightRote{
             this.moveX = 0
             this.moveY = 0
 
-            this.tx= Laya.stage.width  -400
-            this.twidth = 150
-            this.theight = 150
-            this.ty = Laya.stage.height - 200;
+            this.tx= Laya.stage.width  -700
+            this.twidth = 200
+            this.theight = 200
+            this.ty = Laya.stage.height - 400;
+        }
+        draw(loadingElse) {
+          console.log(1234556)
+          let leftHand = loadingElse.get('contrl')
+          let leftHandImg = new Laya.Image(leftHand);
+          leftHandImg.height = 200
+          leftHandImg.width = 200
+          leftHandImg.pos(this.tx, Laya.stage.height - 400);
+          Laya.stage.addChild(leftHandImg);
         }
        scaleBig(e)
         {        
@@ -29,6 +38,7 @@ export default class rightRote{
         {    
           if(this.tx<x&&x<this.tx+this.twidth&&this.ty<y&&y<this.ty+this.theight
             ){
+            console.log(y,this.ty,this.ty+this.theight)
             return true
           }else{
             return false
@@ -51,37 +61,7 @@ export default class rightRote{
           return rotate
         }
         leftFormatMovePosition(px,py) {
-         
-          // utl.ani.play("hello");
-          // let pobj = {}
-          // let tempx = 0
-          // let tempy = 0
-          // pobj.x1 = px //点击
-          // pobj.x2 =this.tx + this.twidth/2
-          // pobj.y1 = py
-          // pobj.y2 = this.ty + this.theight/2
-          // if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
-          //   tempx = 1
-          // }else{
-          //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-          // }
-          // if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
-          //   tempx = -1
-          // }else{
-          //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-          // }
-          // if((py - this.ty - this.theight/2) / (this.theight/2) >1){
-          //    tempy = 1
-          // }else{
-          //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-          // }
-          // if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
-          //    tempy = -1
-          // }else{
-          //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-          // }
-          // utl.takeSpeed.x = -tempy*20
-          // utl.takeSpeed.y = -tempx*20
+          utl.tachSpeed.z = -60
         }
 
 }

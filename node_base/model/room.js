@@ -113,6 +113,16 @@ class Room {
          }
       }
    }
+   work(io){
+      setTimeout(()=>{
+         this.update()
+         this.pushMsg(io)
+         this.work()
+      },200)
+   //    setInterval(()=>{
+        
+   //   },300)
+   }
    pushMsg(io) {
       // let glist =[]
       // for(let graid of this.graph.grid){

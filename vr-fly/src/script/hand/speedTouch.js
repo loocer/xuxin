@@ -14,6 +14,7 @@ let outPos = new Laya.Vector3();
      this.point = new Laya.Vector2();
      this.startP = null
      this.evList = this.eventInt()
+     this.isChangeCam = true//第一次是否是在迷你地图
      Laya.stage.addChild(this.sp);
    }
    eventInt(){
@@ -89,8 +90,8 @@ let outPos = new Laya.Vector3();
      this.changePointBack()
    }
 
-   changeCamerBack(){
-       let p = this.startPoint
+   changeCamerBack(df){
+       let p = df||this.startPoint
        let x = p.x / 400 * 500
        let y = p.y / 400 * 500
        utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y)
@@ -215,15 +216,39 @@ let outPos = new Laya.Vector3();
      if (this.status == 1) {
        this.endPoint = p
        let p1 = this.startPoint
+
+
+       if (
+         0 < p.x &&
+         p.x< 400 &&
+         p.y < 400&&
+         p.y > 0
+         ){
+           this.changeCamerBack(p)
+         }
        if (
          Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
          Math.abs(this.startPoint.y - this.endPoint.y) <20
        ) {
 
        } else {
-         this.sp.graphics.clear()
-         this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
-         this.selectAll(p)
+           if (
+         0 < p.x &&
+         p.x< 400 &&
+         p.y < 400&&
+         p.y > 0
+         ){
+           
+         }else{
+           this.sp.graphics.clear()
+           this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
+           this.selectAll(p)
+         }
+           
+         
+
+
+         
        }
 
      }
@@ -242,7 +267,7 @@ let outPos = new Laya.Vector3();
      if (outs.length !== 0) {
 
        for (let i = 0; i < outs.length; i++) {
-         if (outs[i].collider.owner.name == "plane") {
+         if (outs[i].collider.owner.name == "Plane") {
            return new Laya.Vector3(outs[0].point.x, outs[0].point.y, outs[0].point.z)
          }
        }
@@ -346,10 +371,10 @@ let outPos = new Laya.Vector3();
             let p = en.transform.position
             let bleed = netRot.bleed/utl.allBleed
             utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-            sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+            sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-30) / Laya.stage.clientScaleY);
             sp.graphics.clear()
-            sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-            sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[netRot.initPs]);
+            sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+            sp.graphics.drawRect(30, 0, 30*bleed, 10, utl.pColor[netRot.initPs]);
          }
      }
  }

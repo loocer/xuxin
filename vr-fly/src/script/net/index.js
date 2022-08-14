@@ -185,10 +185,10 @@ export const socketMain = () => {
 
 				let bleed = utl.heroMap.get(rot.id).rot.bleed / utl.allBleed
 				utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-				sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 50) / Laya.stage.clientScaleY);
+				sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
 				sp.graphics.clear()
-				sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-				sp.graphics.drawRect(0, 0, 80 * bleed, 10, utl.pColor[rot.initPs]);
+				sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+				sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[rot.initPs]);
 
 				// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y)
 			}
@@ -325,10 +325,10 @@ function updateMove(value) {
 
 	let bleed = utl.heroMap.get(value.id).rot.bleed / utl.allBleed
 	utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-	sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 50) / Laya.stage.clientScaleY);
+	sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
 	sp.graphics.clear()
-	sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-	sp.graphics.drawRect(0, 0, 80 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
+	sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+	sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
 	// sp.scaleX = sp.scaleY =  0.125 * p.z + 0.75;
 
 	// let obj = value.val

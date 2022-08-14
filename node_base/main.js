@@ -12,16 +12,19 @@ class Main{
       this.rooms.push(room)
    }
    work(){
-      setTimeout(()=>{
-         this.update()
-         this.pushMsg()
-         this.work()
-      },200)
+      for(let room of this.rooms){
+         room.work(this.io)
+      }
+      // setTimeout(()=>{
+      //    this.update()
+      //    this.pushMsg()
+      //    this.work()
+      // },200)
    //    setInterval(()=>{
         
    //   },300)
    }
-   pushMsg(){
+   pushMsg(io){
        for(let room of this.rooms){
             room.pushMsg(this.io)
        }

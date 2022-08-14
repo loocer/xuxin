@@ -1,6 +1,6 @@
 (function () {
-   'use strict';
-   var io = require('../io.js')
+   'use strict'; 
+   var io = require('../io')
    var utl = {
        id:Date.parse(new  Date())+'',
        entityMap:new Map(),
@@ -523,6 +523,7 @@
         this.point = new Laya.Vector2();
         this.startP = null;
         this.evList = this.eventInt();
+        this.isChangeCam = true;//第一次是否是在迷你地图
         Laya.stage.addChild(this.sp);
       }
       eventInt(){
@@ -553,10 +554,12 @@
          return eventList
       }
       addMsg(){
+
        let msg = {
           playerId: utl.playerId,
           actionName:'addHero',
         };
+        console.log(msg);
         utl.socket.emit('123456', msg);
         if(utl.buttonStatus.addHero){
          setTimeout(()=>{
@@ -596,8 +599,8 @@
         this.changePointBack();
       }
 
-      changeCamerBack(){
-          let p = this.startPoint;
+      changeCamerBack(df){
+          let p = df||this.startPoint;
           let x = p.x / 400 * 500;
           let y = p.y / 400 * 500;
           utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y);
@@ -683,6 +686,7 @@
           heros:rots,
           target
         };
+        console.log(msg);
         utl.socket.emit('123456', msg);
       }
       // sendMsg(rots){
@@ -721,15 +725,39 @@
         if (this.status == 1) {
           this.endPoint = p;
           let p1 = this.startPoint;
+
+
+          if (
+            0 < p.x &&
+            p.x< 400 &&
+            p.y < 400&&
+            p.y > 0
+            ){
+              this.changeCamerBack(p);
+            }
           if (
             Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
             Math.abs(this.startPoint.y - this.endPoint.y) <20
           ) {
 
           } else {
-            this.sp.graphics.clear();
-            this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
-            this.selectAll(p);
+              if (
+            0 < p.x &&
+            p.x< 400 &&
+            p.y < 400&&
+            p.y > 0
+            ){
+              
+            }else{
+              this.sp.graphics.clear();
+              this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
+              this.selectAll(p);
+            }
+              
+            
+
+
+            
           }
 
         }
@@ -748,7 +776,7 @@
         if (outs.length !== 0) {
 
           for (let i = 0; i < outs.length; i++) {
-            if (outs[i].collider.owner.name == "plane") {
+            if (outs[i].collider.owner.name == "Plane") {
               return new Laya.Vector3(outs[0].point.x, outs[0].point.y, outs[0].point.z)
             }
           }
@@ -852,10 +880,10 @@
                let p = en.transform.position;
                let bleed = netRot.bleed/utl.allBleed;
                utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-               sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+               sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-30) / Laya.stage.clientScaleY);
                sp.graphics.clear();
-               sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-               sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[netRot.initPs]);
+               sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+               sp.graphics.drawRect(30, 0, 30*bleed, 10, utl.pColor[netRot.initPs]);
             }
         }
     }
@@ -1438,21 +1466,23 @@
 
    let websocket = null;
    let timeFrame = new Map();
+
    function createGraph() {
    	let list = [];
    	for (let i = 0; i < 500; i++) {
-   	    let list1 = [];
-   	    for (let o = 0; o < 500; o++) {
-   	        list1.push(1);
-   	    }
-   	    list.push(list1);
+   		let list1 = [];
+   		for (let o = 0; o < 500; o++) {
+   			list1.push(1);
+   		}
+   		list.push(list1);
    	}
 
    	utl.graph = new Astar.Graph(list);
    }
-   function resetGraph(){
-   	for(let obj of utl.graph.grid){
-   		for(let indexObj of obj){
+
+   function resetGraph() {
+   	for (let obj of utl.graph.grid) {
+   		for (let indexObj of obj) {
    			indexObj.weight = 1;
    		}
    	}
@@ -1504,162 +1534,168 @@
    	// utl.socket = io('ws://192.168.11.37:3000');
    	utl.socket = io('wss://xuxin.love:3000');
    	utl.socket.on('123456', (s) => {
+   		
    		time++;
    		resetGraph();
    		tempRotMap.clear();
    		utl.mapSp.graphics.clear();
    		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
    		for (let player of s.list) {
-   			if(player.playerId==utl.playerId){
+   			if (player.playerId == utl.playerId) {
    				ryMoveGroup = player.ryMoveGroup;
-   				utl.info.text =  player.killNum;
+   				utl.info.text = player.killNum;
    			}
    			for (let rot of player.rots) {
    				if (utl.entityMap.has(rot.id)) {
-   						let x = ~~(rot.end.x / 500 * 400);
-   						let y = ~~(rot.end.y / 500 * 400);
-   						utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
-   						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
-   					if(
-   						rot.start.x ==rot.end.x 
-     						&&rot.start.y ==rot.end.y ){
+   					let x = ~~(rot.end.x / 500 * 400);
+   					let y = ~~(rot.end.y / 500 * 400);
+   					utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
+   					utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
+   					if (
+   						rot.start.x == rot.end.x &&
+   						rot.start.y == rot.end.y) {
 
-   					}else{
-   						// if(timeFrame.get(rot.id).list.length>10){
-   						// 	timeFrame.get(rot.id).list = [{
-   						// 		start:rot.start,
-   						// 		end:rot.end
-   						// 	}]
-   						// }else{
-   						// 	timeFrame.get(rot.id).list.push({
-   						// 		start:rot.start,
-   						// 		end:rot.end
-   						// 	})
-   						// }
+   					} else {
+   						if (timeFrame.get(rot.id).list.length > 5) {
+   							timeFrame.get(rot.id).list = [{
+   								start: rot.start,
+   								end: rot.end
+   							}];
+   						} else {
+   							timeFrame.get(rot.id).list.push({
+   								start: rot.start,
+   								end: rot.end
+   							});
+   						}
    					}
    					utl.heroMap.get(rot.id).rot = rot;
-   					
+
    				} else {
 
    					let map2 = utl.models.get('cube').clone();
    					map2.getChildByName('on').active = false;
-   					if(rot.initPs=='p2'){
+   					if (rot.initPs == 'p2') {
    						let material = map2._children[1].meshRenderer.material;
-   						material.albedoColorA=1;
-   						material.albedoColorB=0.9;
-   						material.albedoColorG=0.1;
-   						material.albedoColorR=0.1;
+   						material.albedoColorA = 1;
+   						material.albedoColorB = 0.9;
+   						material.albedoColorG = 0.1;
+   						material.albedoColorR = 0.1;
    					}
-   					if(rot.initPs=='p1'){
+   					if (rot.initPs == 'p1') {
    						let material = map2._children[1].meshRenderer.material;
-   						material.albedoColorA=1;
-   						material.albedoColorB=0.5;
-   						material.albedoColorG=0.5;
-   						material.albedoColorR=0.1;
+   						material.albedoColorA = 1;
+   						material.albedoColorB = 0.5;
+   						material.albedoColorG = 0.5;
+   						material.albedoColorR = 0.1;
    					}
    					let materialmmm = map2._children[0].meshRenderer.material;
-   						materialmmm.albedoColorA=1;
-   						materialmmm.albedoColorB=0.9;
-   						materialmmm.albedoColorG=0.9;
-   						materialmmm.albedoColorR=0.9;
+   					materialmmm.albedoColorA = 1;
+   					materialmmm.albedoColorB = 0.9;
+   					materialmmm.albedoColorG = 0.9;
+   					materialmmm.albedoColorR = 0.9;
    					let sp = new Laya.Sprite();
-   				    Laya.stage.addChild(sp);
-   				    sp.visible = false;
-   				    sp.graphics.drawRect(0, 0, 80, 10, "#00ef6b");
-   					utl.heroMap.set(rot.id,{sp,rot});
+   					Laya.stage.addChild(sp);
+   					sp.visible = false;
+   					sp.graphics.drawRect(0, 0, 80, 10, "#00ef6b");
+   					utl.heroMap.set(rot.id, {
+   						sp,
+   						rot
+   					});
 
 
-   					
-   // albedoColor
-   // w: 1
-   // x: 0.8851529
-   // y: 0.9
-   // z: 0.9716981
+
+   					// albedoColor
+   					// w: 1
+   					// x: 0.8851529
+   					// y: 0.9
+   					// z: 0.9716981
    					// material1.albedoColor.w=1
    					// material1.albedoColor.x=.2
    					// material1.albedoColor.y=0.2
    					// material1.albedoColor.z=.2
    					utl.newScene.addChild(map2);
    					utl.entityMap.set(rot.id, map2);
-   						utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
+   					utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
 
-   					timeFrame.set(rot.id,{
-   						flag:true,
+   					timeFrame.set(rot.id, {
+   						flag: true,
    						// queryId:rot.start.queryId,
-   						list:[{
-   							start:rot.start,
-   							end:rot.end
-   					}]});	
-   						let x = ~~(rot.end.x / 500 * 400);
-   						let y = ~~(rot.end.y / 500 * 400);
-   						utl.mapSp.graphics.drawCircle(x, 400 - y,5, utl.pColor[rot.initPs]);
-   						
+   						list: [{
+   							start: rot.start,
+   							end: rot.end
+   						}]
+   					});
+   					let x = ~~(rot.end.x / 500 * 400);
+   					let y = ~~(rot.end.y / 500 * 400);
+   					utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
+
    				}
    				utl.entityMap.get(rot.id).time = time;
-   				// if(timeFrame.get(rot.id).list.length==1){
-   				// 		engMain(rot.id)
-   				// }
+   				if (timeFrame.get(rot.id).list.length == 1) {
+   					engMain(rot.id);
+   				}
    				let p = utl.entityMap.get(rot.id).transform.position;
    				let sp = utl.heroMap.get(rot.id).sp;
-   			
 
 
-   			    let bleed = utl.heroMap.get(rot.id).rot.bleed/utl.allBleed;
-   			    utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
-   			    sp.pos((outPos$1.x-40) / Laya.stage.clientScaleX, (outPos$1.y-50) / Laya.stage.clientScaleY);
-   			    sp.graphics.clear();
-   			    sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-   			    sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[rot.initPs]);
 
-   				utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y);
+   				let bleed = utl.heroMap.get(rot.id).rot.bleed / utl.allBleed;
+   				utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
+   				sp.pos((outPos$1.x - 40) / Laya.stage.clientScaleX, (outPos$1.y - 30) / Laya.stage.clientScaleY);
+   				sp.graphics.clear();
+   				sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+   				sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[rot.initPs]);
+
+   				// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y)
    			}
    		}
    		queryString();
    		checkAndClear(time);
    	});
    	// utl.socket.on('123456-moveGroup', (s) => {
-   		
+
    	// 	resetGraph()
    	// 	utl.mapSp.graphics.clear()
    	// 	utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
    	// 	let result = []
    	// 	let {x,y} = s.target
    	// 	let queryId = (new Date()).valueOf();
-    //        for(let r of s.heros){ 
-    //        	timeFrame.get(r.id).flag = false
+   	//        for(let r of s.heros){ 
+   	//        	timeFrame.get(r.id).flag = false
    	// 		timeFrame.get(r.id).list = []
-    //         	let start = utl.graph.grid[r.x][r.y]
-    //         	let end = utl.graph.grid[~~-x][~~y]
-    //         	result = Astar.astar.search(utl.graph, start, end);
-    //        	let ps = []
-    //        	ps.push({
-    //        	 	x:start.x,
-    //             	y:start.y,
-    //            })
-    //         	for(let objd of result){
-    //           		ps.push({
-    //            	 	x:objd.x,
-    //             		y:objd.y,
-    //           		})
-    //         	}
-    //          r.result = ps
-    //          timeFrame.get(r.id).flag = true
-    //       }
-    //         let msg = {
+   	//         	let start = utl.graph.grid[r.x][r.y]
+   	//         	let end = utl.graph.grid[~~-x][~~y]
+   	//         	result = Astar.astar.search(utl.graph, start, end);
+   	//        	let ps = []
+   	//        	ps.push({
+   	//        	 	x:start.x,
+   	//             	y:start.y,
+   	//            })
+   	//         	for(let objd of result){
+   	//           		ps.push({
+   	//            	 	x:objd.x,
+   	//             		y:objd.y,
+   	//           		})
+   	//         	}
+   	//          r.result = ps
+   	//          timeFrame.get(r.id).flag = true
+   	//       }
+   	//         let msg = {
    	//        userId: 'zzw',
    	//        actionName:'moveGroup',
    	//        heros:s.heros
    	//      }
-   	     
+
    	//      utl.socket.emit('123456', msg);
    	// });
    	utl.socket.on('event', function(data) {});
    	utl.socket.on('disconnect', function() {});
    	//------------------------------web-------------------
    };
-   function checkAndClear(time){
-   	for(let id of utl.entityMap.keys()){
-   		if(utl.entityMap.get(id).time<time-3){
+
+   function checkAndClear(time) {
+   	for (let id of utl.entityMap.keys()) {
+   		if (utl.entityMap.get(id).time < time - 3) {
    			utl.entityMap.get(id).destroy();
    			utl.heroMap.get(id).sp.destroy();
    			utl.entityMap.delete(id);
@@ -1667,103 +1703,113 @@
    		}
    	}
    }
-   function queryString(){
-   	if(!ryMoveGroup){
+
+   function queryString() {
+   	if (!ryMoveGroup) {
    		return
    	}
    	let result = [];
-   	let {x,y} = ryMoveGroup.target;
-   	
-   	for(let r of ryMoveGroup.heros){ 
+   	let {
+   		x,
+   		y
+   	} = ryMoveGroup.target;
+
+   	for (let r of ryMoveGroup.heros) {
    		utl.graph.grid[r.x][r.y].weight = 1;
    	}
-       for(let r of ryMoveGroup.heros){ 
-       	timeFrame.get(r.id).flag = false;
+   	for (let r of ryMoveGroup.heros) {
+   		timeFrame.get(r.id).flag = false;
    		timeFrame.get(r.id).list = [];
-        	let start = utl.graph.grid[r.x][r.y];
-        	let end = utl.graph.grid[~~-x][~~y];
-        	result = Astar.astar.search(utl.graph, start, end);
-       	let ps = [];
-       	ps.push({
-       	 	x:start.x,
-            	y:start.y,
-           });
-        	for(let objd of result){
-          		ps.push({
-           	 	x:objd.x,
-            		y:objd.y,
-          		});
-        	}
-         r.result = ps;
-         timeFrame.get(r.id).flag = true;
-      }
-        let msg = {
-          playerId: utl.playerId,
-          actionName:'moveGroup',
-          heros:ryMoveGroup.heros
-        };
-        console.log(msg);
-        utl.socket.emit('123456', msg);
+   		let start = utl.graph.grid[r.x][r.y];
+   		let end = utl.graph.grid[~~-x][~~y];
+   		result = Astar.astar.search(utl.graph, start, end);
+   		let ps = [];
+   		ps.push({
+   			x: start.x,
+   			y: start.y,
+   		});
+   		for (let objd of result) {
+   			ps.push({
+   				x: objd.x,
+   				y: objd.y,
+   			});
+   		}
+   		r.result = ps;
+   		timeFrame.get(r.id).flag = true;
+   	}
+   	let msg = {
+   		playerId: utl.playerId,
+   		actionName: 'moveGroup',
+   		heros: ryMoveGroup.heros
+   	};
+   	utl.socket.emit('123456', msg);
    }
-   function engMain(id){
+
+   function engMain(id) {
    	let flag = timeFrame.get(id).flag;
-   	if(!flag){
+   	if (!flag) {
    		return
    	}
    	let list = timeFrame.get(id).list;
    	let obj = list[0];
    	let frameObj = {
-   		id:id,
-   		x:obj.start.x,
-   		y:obj.start.y,
+   		id: id,
+   		x: obj.start.x,
+   		y: obj.start.y,
    		list
    	};
    	// timeFrame.get(id).queryId = obj.start.queryId
    	list.shift();
-   	Laya.Tween.to(frameObj,{x:obj.end.x,y:obj.end.y,update:new Laya.Handler(this,updateMove,[frameObj])},300,Laya.Ease.linearNone,Laya.Handler.create(this,tweend,[frameObj]),0);
+   	Laya.Tween.to(frameObj, {
+   		x: obj.end.x,
+   		y: obj.end.y,
+   		update: new Laya.Handler(this, updateMove, [frameObj])
+   	}, 300, Laya.Ease.linearNone, Laya.Handler.create(this, tweend, [frameObj]), 0);
    }
-   function updateMove(value){
-   	if(!utl.entityMap.has(value.id)){
+
+   function updateMove(value) {
+   	if (!utl.entityMap.has(value.id)) {
    		return
    	}
-   	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3,value.y);
+   	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3, value.y);
 
    	let p = utl.entityMap.get(value.id).transform.position;
    	let sp = utl.heroMap.get(value.id).sp;
    	// utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-    //    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+   	//    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
 
 
-       let bleed = utl.heroMap.get(value.id).rot.bleed/utl.allBleed;
-       utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
-       sp.pos((outPos$1.x-40) / Laya.stage.clientScaleX, (outPos$1.y-50) / Laya.stage.clientScaleY);
-       sp.graphics.clear();
-       sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-       sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
+   	let bleed = utl.heroMap.get(value.id).rot.bleed / utl.allBleed;
+   	utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
+   	sp.pos((outPos$1.x - 40) / Laya.stage.clientScaleX, (outPos$1.y - 30) / Laya.stage.clientScaleY);
+   	sp.graphics.clear();
+   	sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+   	sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
    	// sp.scaleX = sp.scaleY =  0.125 * p.z + 0.75;
 
    	// let obj = value.val
    	// if(obj.speed>0)
-   		
+
    	// 	let box = utl.boxs.get(obj.id)
    	// 	box.transform.translate(new Laya.Vector3(0,-obj.speed/10,0),true)
    	// }
-   	
+
    }
-   function tweend(obj){
-   	
-   	if(!timeFrame.get(obj.id).flag){
+
+   function tweend(obj) {
+
+   	if (!timeFrame.get(obj.id).flag) {
    		return
    	}
    	let list = timeFrame.get(obj.id).list;
    	// if(timeFrame.get(obj.id).queryId==list[0].start.queryId){
-   		
-   		if(list.length>0){
-   			engMain(obj.id);
-   		}
+
+   	if (list.length > 0) {
+   		engMain(obj.id);
+   	}
    	// }
-   	
-   	
+
+
    }
 
    /**
@@ -4238,8 +4284,8 @@
 
    	// // })
    	// return
-   	utl.socket = io('ws://192.168.0.105:3000');
-   	// utl.socket = io('wss://xuxin.love:3000');
+   	// utl.socket = io('ws://192.168.0.105:3000');
+   	utl.socket = io('wss://xuxin.love:3000');
    	utl.socket.on('123456-observer', (s) => {
    		// resetGraph()
    		utl.mapSp.graphics.clear();

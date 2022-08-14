@@ -50,11 +50,22 @@
        //     x:0,
        //     y:0
        // },
-       // takeSpeed:{
-       // 	z:0,
-       // 	x:0,
-       // 	y:0
-       // },
+       flySpeed:-.1,
+       tachSpeed:{
+           z:0,//
+       	x:0,
+       	y:0
+       },
+       takeSpeed:{
+       	z:0,//
+       	x:0,
+       	y:0
+       },
+       tempSpeed:{
+       	z:0,//
+       	x:0,
+       	y:0
+       },
        // roteLeftFlag:false,
        // roteRightFlag:false,
        heroMap:new Map(),
@@ -65,9 +76,7 @@
        // updates:[],
        // firs:[],
        loadingElse:[
-            ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
-            ['addsStop','https://xuxin.love/img/redcode/icon/add-stop.png'],
-            ['addsStart','https://xuxin.love/img/redcode/icon/add-start.png'],
+            ['contrl','res/controll.png'],
            // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
            // ['fire','https://xuxin.love/img/fly/fires.png'],
            // ['left','https://xuxin.love/img/fly/left.png'],
@@ -100,6 +109,560 @@
            return ret;
        }
    };
+
+   class newTwo {
+     constructor() {
+       this.scaleTime = 100;
+       this.width = Laya.stage.width / 2;
+       this.height = Laya.stage.height;
+       this.x = 0;
+       this.y = 0;
+       this.moveX = 0;
+       this.moveY = 0;
+
+       this.tx = 300;
+       this.twidth = 450;
+       this.theight = 450;
+       this.ty = Laya.stage.height - 600;
+     }
+     draw(loadingElse) {
+       let leftHand = loadingElse.get('contrl');
+       let leftHandImg = new Laya.Image(leftHand);
+       leftHandImg.height = 450;
+       leftHandImg.width = 450;
+       leftHandImg.pos(300, Laya.stage.height - 600);
+       Laya.stage.addChild(leftHandImg);
+     }
+     scaleBig(e) {
+       utl.takeSpeed.z = 0;
+       console.log('MOUSE_UP');
+       utl.tachRightFlag = false;
+       // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
+     }
+     outEvent() {
+       utl.tachRightFlag = false;
+     }
+
+     scaleSmall(x, y) {
+       if (0 < x && x < this.tx + this.twidth + 200 && y > this.ty - 80 && y < this.ty + this.theight + 80
+       ) {
+         return true
+       } else {
+         return false
+       }
+       //缩小至0.8的缓动效果
+       // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
+     }
+     getRoteImg(pobj) {
+       let rotate = 0;
+       if (pobj.x1 == pobj.x2) {
+         rotate = 0;
+       }
+       if (pobj.x1 > pobj.x2) {
+         let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+         rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
+       } else if (pobj.x1 < pobj.x2) {
+         let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+         rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
+       }
+       return rotate
+     }
+     leftFormatMovePosition(px, py) {
+
+       // utl.ani.play("hello");
+       let pobj = {};
+       let tempx = 0;
+       let tempy = 0;
+       pobj.x1 = px; //点击
+       pobj.x2 = this.tx + this.twidth / 2;
+       pobj.y1 = py;
+       pobj.y2 = this.ty + this.theight / 2;
+       if ((px - this.tx - this.twidth / 2) / (this.twidth / 2) > 1) {
+         tempx = 1;
+       } else {
+         tempx = (px - this.tx - this.twidth / 2) / (this.twidth / 2);
+       }
+       if ((px - this.tx - this.twidth / 2) / (this.twidth / 2) < -1) {
+         tempx = -1;
+       } else {
+         tempx = (px - this.tx - this.twidth / 2) / (this.twidth / 2);
+       }
+       if ((py - this.ty - this.theight / 2) / (this.theight / 2) > 1) {
+         tempy = 1;
+       } else {
+         tempy = (py - this.ty - this.theight / 2) / (this.theight / 2);
+       }
+       if ((py - this.ty - this.theight / 2) / (this.theight / 2) < -1) {
+         tempy = -1;
+       } else {
+         tempy = (py - this.ty - this.theight / 2) / (this.theight / 2);
+       }
+       // utl.tachSpeed.x = -tempy * 180
+       // utl.tachSpeed.y = -tempx * 90
+       // if (utl.tachSpeed.x > 180) {
+       //   utl.tachSpeed.x = 180
+       // }
+       // if (utl.tachSpeed.x < -180) {
+       //   utl.tachSpeed.x = -180
+       // }
+       // if (utl.tachSpeed.y > 90) {
+       //   utl.tachSpeed.y = 90
+       // }
+       // if (utl.tachSpeed.y < -90) {
+       //   utl.tachSpeed.y = -90
+       // }
+       // let frameObj = {
+       //   x:utl.tachSpeed.x,
+       //   y:utl.tachSpeed.y
+       // }
+       Laya.Tween.to(utl.tachSpeed, {
+         x: -tempy * 180,
+         y:-tempx * 90,
+         update: new Laya.Handler(this, null, [utl.tachSpeed])
+       }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
+       // let pobj = {}
+       // pobj.x1 = px //点击
+       // pobj.x2 =this.tx + this.twidth/2
+       // pobj.y1 = py
+       // pobj.y2 = this.ty + this.theight/2
+       // let inv = new Laya.Vector3(pobj.x1 - pobj.x2,0,pobj.y1 - pobj.y2)
+       // let out = new Laya.Vector3()
+       // Laya.Vector3.normalize(inv, out)
+       // console.log(inv,out)
+       // if(utl.sendTime==utl.messgeTime){
+       //    console.log('-------6666666-----',utl.cube.transform.rotationEuler)
+       //   utl.sendTime++
+       //   utl.rote = this.getRoteImg(pobj) 
+       //   let x = utl.netBox.x+out.z
+       //   let z = utl.netBox.z-out.x
+       //   utl.sendMessage = [{
+       //     id:utl.id,
+       //     position:{x:utl.netBox.x,
+       //       z:utl.netBox.z},
+       //     tar:{x,z},
+       //     sendTime:utl.sendTime,
+       //     type:'move',
+       //     move:out,
+       //     rotationEuler:utl.cube.transform.rotationEuler,
+       //     rote:this.getRoteImg(pobj) 
+       //   }]
+
+       // }
+     }
+
+   }
+
+   class fire{
+       constructor(){
+               this.scaleTime = 100;
+               this.width = 150;
+               this.height = 150;
+               this.x = Laya.stage.width-250;
+               this.y = Laya.stage.height - 250;
+               this.moveX = 0;
+               this.moveY = 0;
+
+               this.tx=Laya.stage.width/4;
+               this.twidth = 400;
+               this.theight = 400;
+               this.ty = Laya.stage.height - 500;
+           }
+          scaleBig(e)
+           {        
+               utl.takeSpeed.z = 0;
+               console.log('MOUSE_UP');
+               utl.tachRightFlag = false;
+               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
+           }
+           outEvent(){
+             utl.tachRightFlag = false;
+           }
+         
+          scaleSmall(x,y)
+           {    
+             if(x<this.width+this.x&&
+               x>this.x&&
+               y>this.y&&
+               y<this.y+this.height
+               ){
+               return true
+             }else{
+               // return false
+             }
+               //缩小至0.8的缓动效果
+               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
+           }
+           getRoteImg(pobj) {
+             let rotate = 0;
+             if (pobj.x1 == pobj.x2){
+               rotate=0;
+             }
+             if (pobj.x1 > pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
+             } else if (pobj.x1 < pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
+             }
+             return rotate
+           }
+           leftFormatMovePosition(px,py) {
+             utl.fireOnOff = true;
+           }
+
+   }
+
+   class Bullet extends Laya.Script3D { 
+   	constructor() {
+   		super();
+   		this.tempy = 0;
+   		this.box = null;
+   		this.time = 0;
+   		this.speed = new Laya.Vector3();
+   		
+   	}
+   	onAwake() {
+   		
+   		//得到3D对象
+   		this.box = this.owner;
+   		utl.firs.push(this);
+   		// this.findIt()
+   	}
+   	findIt(){
+   		let bV3 = new Laya.Vector3();
+           	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
+   			let speed = new Laya.Vector3();
+   			Laya.Vector3.normalize(bV3,speed);
+   			// Laya.Vector3.scale(speed, .1, this.speed);
+
+   			let speedLanth = Laya.Vector3.scalarLength(this.speed); 
+   			// // let temp = new Laya.Vector3(0,0,utl.speedMove
+   			let lspeed = (utl.speedMove + .1).toFixed(2);
+   			// // let scale = (utl.speedMove + lspeed)/lspeed
+   			// // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
+   			Laya.Vector3.scale(speed, .1, this.speed);
+   			utl.info.text = Laya.Vector3.scalarLength(this.speed) - utl.speedMove+","+utl.speedMove+','+Laya.Vector3.scalarLength(this.speed);
+   			utl.firs.push(this);
+   	}
+   	_load(){
+   		this.box = this.owner;
+   		let bV3 = new Laya.Vector3();
+           	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
+   			let speed = new Laya.Vector3();
+   			Laya.Vector3.normalize(bV3,speed);
+   			Laya.Vector3.scale(speed, .01, this.speed);
+   			// let speedLanth = Laya.Vector3.scalarLength(this.speed) 
+   			// // // let temp = new Laya.Vector3(0,0,utl.speedMove
+   			// let lspeed = (utl.speedMove + speedLanth)/speedLanth
+   			// // // let scale = (utl.speedMove + lspeed)/lspeed
+   			// // // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
+   			// Laya.Vector3.scale(this.speed, lspeed, this.speed);
+   			
+   			// console.log(Laya.Vector3.scalarLength(this.speed))
+   			// Laya.timer.loop(30,this,this.onUpdatef);
+   	}
+   	// onAwake() {
+   	// 	this.box = this.owner;
+   	// 	if(utl.c1&&utl.c2){
+   	// 		let bV3 = new Laya.Vector3();
+    //        	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
+   	// 		let speed = new Laya.Vector3();
+   	// 		Laya.Vector3.normalize(bV3,speed);
+   	// 		Laya.Vector3.scale(speed, .15, this.speed);
+   	// 		// let speedLanth = Laya.Vector3.scalarLength(this.speed) 
+   	// 		// // // let temp = new Laya.Vector3(0,0,utl.speedMove
+   	// 		// let lspeed = (utl.speedMove + speedLanth)/speedLanth
+   	// 		// // // let scale = (utl.speedMove + lspeed)/lspeed
+   	// 		// // // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
+   	// 		// Laya.Vector3.scale(this.speed, lspeed, this.speed);
+   			
+   	// 		// console.log(Laya.Vector3.scalarLength(this.speed))
+   	// 		Laya.timer.loop(30,this,this.onUpdatef);
+   	// 	}
+           
+   	// }
+   	toTiome(){
+   		this.time++; 
+   		if(!this.box.destroyed){
+   			// let vx = utl.box.transform.position.x - this.box.transform.position.x 
+   			// let vy = utl.box.transform.position.y - this.box.transform.position.y 
+   			// let vz = utl.box.transform.position.z - this.box.transform.position.z
+   			// let ry = utl.getAngle(vx,vz)
+   			// this.box.transform.rotate(new Laya.Vector3(0,-this.tempy* Math.PI / 180,0), true);
+   			// this.box.transform.rotate(new Laya.Vector3(0,ry* Math.PI / 180,0), true);
+   			// this.tempy = ry
+   			 // this.box.transform.translate(this.speed,false)
+   			 let bmain =this.box.getChildByName('Cube');
+   			 if(this.box){
+               	
+               	this.box.transform.translate(new Laya.Vector3(0,-this.startSpeed,0),true);
+   			 	bmain.transform.translate(new Laya.Vector3(0,-1,0),true);
+   			 }
+   			 
+   			 if(this.time>200 ){
+   			 	this.box.destroy();
+   			 }
+   		}
+   	}
+   	onStart() {}
+
+   	onTriggerEnter()
+   	{
+   	    this.box.removeSelf();
+   		console.log("bu--onTriggerEnter");
+   	}
+   	onTriggerStay()
+   	{
+   		console.log("bu--onTriggerStay");
+   	}
+   	onTriggerExit()
+   	{
+   		console.log("bu--onTriggerExit");
+   	}
+   	onEnable() {
+   	} 
+   	onDisable() {
+   	}
+   }
+
+   class newTwo$1{
+       constructor(){
+               this.x = 0;
+               this.y = 0;
+
+               this.tx= Laya.stage.width - 600;
+               
+               this.twidth = 200;
+               this.theight = 200;
+               this.ty =Laya.stage.height - 400;
+               this.tempX = 0;
+               this.tempY = 0;
+           }
+          scaleBig(e)
+           {        
+               utl.takeSpeed.z = 0;
+               console.log('MOUSE_UP');
+               utl.tachRightFlag = false;
+               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
+           }
+           outEvent(){
+             utl.tachRightFlag = false;
+           }
+          onFire(){
+                 let aum =utl.bullet.clone();
+                 let script = aum.addComponent(Bullet);
+                 utl.newScene.addChild(aum);
+           }
+          scaleSmall(x,y)
+           {    
+             if(this.tx-0<x&&x<this.tx+this.twidth+0&&y>this.ty-0&&y<this.ty+this.theight+0
+               ){
+                utl.fireOnOff = true;
+               return true
+             }else{
+               return false
+             }
+               //缩小至0.8的缓动效果
+               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
+           }
+           getRoteImg(pobj) {
+             let rotate = 0;
+             if (pobj.x1 == pobj.x2){
+               rotate=0;
+             }
+             if (pobj.x1 > pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
+             } else if (pobj.x1 < pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
+             }
+             return rotate
+           }
+           leftFormatMovePosition(px,py) {
+             let pobj = {};
+             let tempx = 0;
+             let tempy = 0;
+             pobj.x1 = px; //点击
+             pobj.x2 =this.tx + this.twidth/2;
+             pobj.y1 = py;
+             pobj.y2 = this.ty + this.theight/2;
+             if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
+               tempx = 1;
+             }else{
+                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
+             }
+             if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
+               tempx = -1;
+             }else{
+                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
+             }
+             if((py - this.ty - this.theight/2) / (this.theight/2) >1){
+                tempy = 1;
+             }else{
+               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
+             }
+             if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
+                tempy = -1;
+             }else{
+               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
+             }
+             let rx = tempy*5;
+             let ry = tempx*5;
+             utl.roteGun.x  = rx;
+             utl.roteGun.y = -ry;
+               // let shipcar = utl.bullet.getChildByName('ship')
+               // let obj = shipcar.getChildByName('Cube')
+
+               // obj.transform.rotate(new Laya.Vector3(0,-this.tempX* Math.PI / 180,0),true);
+               // obj.transform.rotate(new Laya.Vector3(0,0,-this.tempY* Math.PI / 180),true);
+               // obj.transform.rotate(new Laya.Vector3(0,rx* Math.PI / 180,0),true);
+               // obj.transform.rotate(new Laya.Vector3(0,0,ry* Math.PI / 180),true);
+
+               // this.tempX = rx
+               // this.tempY = ry
+               // utl.fireOnOff = true
+              
+
+           }
+
+   }
+
+   class leftRote{
+       constructor(){
+               this.scaleTime = 100;
+               this.width = Laya.stage.width/2; 
+               this.height = Laya.stage.height;
+               this.x = 0;
+               this.y = 0;
+               this.moveX = 0;
+               this.moveY = 0;
+
+               this.tx= Laya.stage.width  -400;
+               this.twidth = 200;
+               this.theight = 200;
+               this.ty = Laya.stage.height - 400;
+           }
+           draw(loadingElse) {
+             console.log(1234556);
+             let leftHand = loadingElse.get('contrl');
+             let leftHandImg = new Laya.Image(leftHand);
+             leftHandImg.height = 200;
+             leftHandImg.width = 200;
+             leftHandImg.pos(Laya.stage.width-400, Laya.stage.height - 400);
+             Laya.stage.addChild(leftHandImg);
+           }
+          scaleBig(e)
+           {        
+               utl.takeSpeed.z = 0;
+               console.log('MOUSE_UP');
+               utl.tachRightFlag = false;
+               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
+           }
+           outEvent(){
+             utl.tachRightFlag = false;
+           }
+         
+          scaleSmall(x,y)
+           {    
+             if(this.tx<x&&x<this.tx+this.twidth&&this.ty<y&&y<this.ty+this.theight
+               ){
+               console.log(y,this.ty,this.ty+this.theight);
+               return true
+             }else{
+               return false
+             }
+               //缩小至0.8的缓动效果
+               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
+           }
+           getRoteImg(pobj) {
+             let rotate = 0;
+             if (pobj.x1 == pobj.x2){
+               rotate=0;
+             }
+             if (pobj.x1 > pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
+             } else if (pobj.x1 < pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
+             }
+             return rotate
+           }
+           leftFormatMovePosition(px,py) {
+             utl.tachSpeed.z = 60;
+           }
+
+   }
+
+   class rightRote{
+       constructor(){
+               this.scaleTime = 100;
+               this.width = Laya.stage.width/2; 
+               this.height = Laya.stage.height;
+               this.x = 0;
+               this.y = 0;
+               this.moveX = 0;
+               this.moveY = 0;
+
+               this.tx= Laya.stage.width  -700;
+               this.twidth = 200;
+               this.theight = 200;
+               this.ty = Laya.stage.height - 400;
+           }
+           draw(loadingElse) {
+             console.log(1234556);
+             let leftHand = loadingElse.get('contrl');
+             let leftHandImg = new Laya.Image(leftHand);
+             leftHandImg.height = 200;
+             leftHandImg.width = 200;
+             leftHandImg.pos(this.tx, Laya.stage.height - 400);
+             Laya.stage.addChild(leftHandImg);
+           }
+          scaleBig(e)
+           {        
+               utl.takeSpeed.z = 0;
+               console.log('MOUSE_UP');
+               utl.tachRightFlag = false;
+               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
+           }
+           outEvent(){
+             utl.tachRightFlag = false;
+           }
+         
+          scaleSmall(x,y)
+           {    
+             if(this.tx<x&&x<this.tx+this.twidth&&this.ty<y&&y<this.ty+this.theight
+               ){
+               console.log(y,this.ty,this.ty+this.theight);
+               return true
+             }else{
+               return false
+             }
+               //缩小至0.8的缓动效果
+               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
+           }
+           getRoteImg(pobj) {
+             let rotate = 0;
+             if (pobj.x1 == pobj.x2){
+               rotate=0;
+             }
+             if (pobj.x1 > pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
+             } else if (pobj.x1 < pobj.x2) {
+               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
+               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
+             }
+             return rotate
+           }
+           leftFormatMovePosition(px,py) {
+             utl.tachSpeed.z = -60;
+           }
+
+   }
+
+   42["123456-observer",{"glist":[{"x":1,"y":1},{"x":1,"y":2},{"x":2,"y":1},{"x":2,"y":2},{"x":3,"y":1},{"x":3,"y":3},{"x":230,"y":1},{"x":231,"y":1},{"x":232,"y":1},{"x":240,"y":0},{"x":241,"y":0},{"x":241,"y":1},{"x":249,"y":1},{"x":249,"y":2},{"x":250,"y":1},{"x":251,"y":1},{"x":252,"y":1},{"x":253,"y":1},{"x":254,"y":1}]}];
 
    // javascript-astar 0.4.1
    // http://github.com/bgrins/javascript-astar
@@ -509,931 +1072,6 @@
    // };
    // });
 
-   let rots = [];
-   let outPos = new Laya.Vector3();
-    class newtach {
-      constructor() {
-        this.status = 0;
-        this.x = 0;
-        this.y = 0;
-        this.move = null;
-        this.startPoint = null;
-        this.endPoint = null;
-        this.sp = new Laya.Sprite();
-        this.point = new Laya.Vector2();
-        this.startP = null;
-        this.evList = this.eventInt();
-        Laya.stage.addChild(this.sp);
-      }
-      eventInt(){
-        let that = this;
-         let eventList = [{
-            checkPotion:{
-              x:200,
-              y:Laya.stage.height - 200,
-              width:150,
-              height:150
-            },
-            callBack:()=>{
-              return that.addpBack()
-            }
-         },
-         {
-            checkPotion:{
-              x:0,
-              y:0,
-              width:400,
-              height:400
-            },
-            callBack:()=>{
-              return that.changeCamerBack()
-            }
-         }
-         ];
-         return eventList
-      }
-      addMsg(){
-
-       let msg = {
-          playerId: utl.playerId,
-          actionName:'addHero',
-        };
-        console.log(msg);
-        utl.socket.emit('123456', msg);
-        if(utl.buttonStatus.addHero){
-         setTimeout(()=>{
-           this.addMsg();
-         },1000);
-        }
-        
-      }
-      addpBack(){
-       // buttonStatus
-       utl.buttonStatus.addHero=!utl.buttonStatus.addHero;
-       if(utl.buttonStatus.addHero){
-         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-start.png'; 
-         this.addMsg();
-       }else{
-         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-stop.png';
-       }
-       
-        
-
-      }
-      eventCheck(){
-        let {evList} = this;
-        for(let item of evList){
-          let checkPotion = item.checkPotion;
-          if (this.startPoint.x - this.endPoint.x < 10 &&
-          this.startPoint.y - this.endPoint.y < 10 &&
-          this.endPoint.x < checkPotion.x+checkPotion.width &&
-          this.endPoint.x > checkPotion.x &&
-          this.endPoint.y < checkPotion.y+checkPotion.height&&
-          this.endPoint.y > checkPotion.y
-          ){
-            item.callBack();
-            return
-          }
-        }
-        this.changePointBack();
-      }
-
-      changeCamerBack(){
-          let p = this.startPoint;
-          let x = p.x / 400 * 500;
-          let y = p.y / 400 * 500;
-          utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y);
-          this.updateView();
-      }
-      changePointBack(){
-          let p = this.startPoint;
-          let p2 = this.trsV2ToV3(p);
-          if (
-            p2.x < 0 &&
-            p2.z > 0 &&
-            p2.x > -500 &&
-            p2.z < 500) {
-            if (
-              Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
-              Math.abs(this.startPoint.y - this.endPoint.y) < 10
-            ) {
-              let x = ~~p2.x;
-              let y = ~~p2.z;
-              this.sendMsg(rots,{x,y});
-              // let heros = []
-              // for (let hero of utl.entityMap.keys()) {
-              //   heros.push({
-              //     id: hero,
-              //     coordinate: {
-              //       x: -x,
-              //       y
-              //     }
-              //   })
-              // }
-
-
-
-              //----------------------foo1
-              // let result = []
-              // for(let r of rots){ 
-              //   let rp = utl.entityMap.get(r.id)
-              //   let potion = rp.transform.position
-              //   let start = utl.graph.grid[-potion.x][potion.z]
-              //   let end = utl.graph.grid[-x][y]
-              //   result = Astar.astar.search(utl.graph, start, end);
-              //   let ps = []
-              //   for(let objd of result){
-              //     ps.push({
-              //       x:objd.x,
-              //       y:objd.y
-              //     })
-              //   }
-              //    r.result = ps
-              // }
-              // this.sendMsg(rots)
-
-
-
-
-              // let listoo = []
-              // for(let fuck of result){
-              //    let pobj = utl.showbox.clone()
-              //    pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y)
-              //    utl.newScene.addChild(pobj)
-              //    listoo.push(pobj)
-              // }
-              // setTimeout(()=>{
-              //   for(let ogh of listoo){
-              //     ogh.removeSelf();
-              //   }
-              // },3000)
-              
-              // let msg = {
-              //   userId: 'zzw',
-              //   actionName:'moveGroup',
-              //   heros:rots
-              // }
-              // utl.socket.emit('123456', msg);
-            }
-          }
-      }
-      sendMsg(rots,target){
-        
-        let msg = {
-          playerId: utl.playerId,
-          actionName:'ry-moveGroup',
-          heros:rots,
-          target
-        };
-        console.log(msg);
-        utl.socket.emit('123456', msg);
-      }
-      // sendMsg(rots){
-        
-      //   let msg = {
-      //     userId: 'zzw',
-      //     actionName:'moveGroup',
-      //     heros:rots
-      //   }
-      //   utl.socket.emit('123456', msg);
-      // }
-      reset() {
-         if (!this.startPoint) {
-           return
-         }
-         if (!this.endPoint) {
-           return
-         }
-         if (
-              Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
-              Math.abs(this.startPoint.y - this.endPoint.y) < 20
-         ){
-           this.eventCheck();
-       
-        }
-        this.startPoint = null;
-        this.endPoint = null;
-      }
-      drawSelect(p) {
-        if (this.status == 0) {
-          this.startPoint = p;
-          this.status = 1;
-          this.startP = this.trsV2ToV3(p);
-          return
-        }
-        if (this.status == 1) {
-          this.endPoint = p;
-          let p1 = this.startPoint;
-          if (
-            Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
-            Math.abs(this.startPoint.y - this.endPoint.y) <20
-          ) {
-
-          } else {
-            this.sp.graphics.clear();
-            this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
-            this.selectAll(p);
-          }
-
-        }
-
-      }
-      trsV2ToV3(p) {
-
-        // let point =  touch.position
-        this._ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));
-        let outs = [];
-        //产生射线
-        utl.camera.viewportPointToRay(p, this._ray);
-        //拿到射线碰撞的物体
-        utl.newScene.physicsSimulation.rayCastAll(this._ray, outs);
-        //如果碰撞到物体
-        if (outs.length !== 0) {
-
-          for (let i = 0; i < outs.length; i++) {
-            if (outs[i].collider.owner.name == "plane") {
-              return new Laya.Vector3(outs[0].point.x, outs[0].point.y, outs[0].point.z)
-            }
-          }
-          //在射线击中的位置添加一个立方体
-
-        }
-      }
-      selectAll(p22) {
-
-        let p1 = this.startP;
-        let p2 = this.trsV2ToV3(p22);
-        if (!p1) {
-          return
-        }
-        let absx1x = p1.x;
-        let absx2x = p2.x;
-        let absx1z = p1.z;
-        let absx2z = p2.z;
-        let msx = absx1x > absx2x ? absx1x : absx2x;
-        let msz = absx1z > absx2z ? absx1z : absx2z;
-        let mix = absx1x < absx2x ? absx1x : absx2x;
-        let miz = absx1z < absx2z ? absx1z : absx2z;
-        rots = [];
-        for (let key of utl.entityMap.keys()) {
-         let en = utl.entityMap.get(key);
-          let pos = en.transform.position;
-          let sp = utl.heroMap.get(key).sp;
-          let fx = pos.x;
-          let fz = pos.z;
-          if (fx < msx &&
-            fx > mix &&
-            fz < msz &&
-            fz > miz) {
-            rots.push({id: key});
-            if(utl.heroMap.get(key).rot.playerId==utl.playerId){
-              en.getChildByName('on').active = true;
-              en.getChildByName('off').active = false;
-             
-            }
-             sp.visible = true;
-               // utl.camera.viewport.project(pos, utl.camera.projectionViewMatrix, outPos);
-               // sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
-          } else {
-            en.getChildByName('on').active = false;
-            en.getChildByName('off').active = true;
-            sp.visible = false;
-          }
-
-        }
-        this.updateView();
-      }
-      leftFormatMovePosition(out, tnum) {
-        let xx = 0;
-        let zz = 0;
-        if (out) {
-          xx = out.x.toFixed(1);
-          zz = out.y.toFixed(1);
-        } else {
-          xx = 0;
-          zz = 0;
-        }
-        if (tnum == 0) {
-          this.sp.graphics.clear();
-          this.status = 0;
-          this.reset();
-
-
-          return
-        }
-        if (this.status == tnum) {
-          let x = (this.x - xx).toFixed(1) / 10;
-          let z = -(this.z - zz).toFixed(1) / 10;
-          this.move = [x, z];
-        } else {
-          this.x = xx;
-          this.z = zz;
-          this.move = [0, 0];
-        }
-        if (tnum == 2) {
-          this.sp.graphics.clear();
-          
-          utl.camera.transform.translate(new Laya.Vector3(this.move[0], this.move[1], 0), true);
-          if (utl.camera.transform.position.x > 0 ||
-            utl.camera.transform.position.x < -500 ||
-            utl.camera.transform.position.z < 0 ||
-            utl.camera.transform.position.z > 500
-          ) {
-            utl.camera.transform.translate(new Laya.Vector3(-this.move[0], -this.move[1], 0), true);
-          }
-        }
-        this.updateView();
-        this.status = tnum;
-        this.x = xx;
-        this.z = zz;
-      }
-       updateView(){
-           for (let key of utl.entityMap.keys()) {
-             let en = utl.entityMap.get(key);
-               let sp = utl.heroMap.get(key).sp;
-               let netRot = utl.heroMap.get(key).rot;
-               let p = en.transform.position;
-               let bleed = netRot.bleed/utl.allBleed;
-               utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-               sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
-               sp.graphics.clear();
-               sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-               sp.graphics.drawRect(0, 0, 80*bleed, 10, utl.pColor[netRot.initPs]);
-            }
-        }
-    }
-
-   class newTwo{
-       constructor(){
-               this.scaleTime = 100;
-               this.width = Laya.stage.width/2; 
-               this.height = Laya.stage.height;
-               this.x = 0;
-               this.y = 0;
-               this.moveX = 0;
-               this.moveY = 0;
-
-               this.tx= 300;
-               this.twidth = 450;
-               this.theight = 450;
-               this.ty = Laya.stage.height-600;
-           }
-          scaleBig(e)
-           {        
-               utl.takeSpeed.z = 0;
-               console.log('MOUSE_UP');
-               utl.tachRightFlag = false;
-               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
-           }
-           outEvent(){
-             utl.tachRightFlag = false;
-           }
-         
-          scaleSmall(x,y)
-           {    
-             if(0<x&&x<this.tx+this.twidth+200&&y>this.ty-80&&y<this.ty+this.theight+80
-               ){
-               return true
-             }else{
-               return false
-             }
-               //缩小至0.8的缓动效果
-               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
-           }
-           getRoteImg(pobj) {
-             let rotate = 0;
-             if (pobj.x1 == pobj.x2){
-               rotate=0;
-             }
-             if (pobj.x1 > pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
-             } else if (pobj.x1 < pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
-             }
-             return rotate
-           }
-           leftFormatMovePosition(px,py) {
-            
-             // utl.ani.play("hello");
-             let pobj = {};
-             let tempx = 0;
-             let tempy = 0;
-             pobj.x1 = px; //点击
-             pobj.x2 =this.tx + this.twidth/2;
-             pobj.y1 = py;
-             pobj.y2 = this.ty + this.theight/2;
-             if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
-               tempx = 1;
-             }else{
-                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
-             }
-             if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
-               tempx = -1;
-             }else{
-                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
-             }
-             if((py - this.ty - this.theight/2) / (this.theight/2) >1){
-                tempy = 1;
-             }else{
-               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
-             }
-             if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
-                tempy = -1;
-             }else{
-               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
-             }
-             utl.takeSpeed.x = -tempy*90;
-             utl.takeSpeed.y = -tempx*90;
-
-
-
-             // let pobj = {}
-             // pobj.x1 = px //点击
-             // pobj.x2 =this.tx + this.twidth/2
-             // pobj.y1 = py
-             // pobj.y2 = this.ty + this.theight/2
-             // let inv = new Laya.Vector3(pobj.x1 - pobj.x2,0,pobj.y1 - pobj.y2)
-             // let out = new Laya.Vector3()
-             // Laya.Vector3.normalize(inv, out)
-             // console.log(inv,out)
-             // if(utl.sendTime==utl.messgeTime){
-             //    console.log('-------6666666-----',utl.cube.transform.rotationEuler)
-             //   utl.sendTime++
-             //   utl.rote = this.getRoteImg(pobj) 
-             //   let x = utl.netBox.x+out.z
-             //   let z = utl.netBox.z-out.x
-             //   utl.sendMessage = [{
-             //     id:utl.id,
-             //     position:{x:utl.netBox.x,
-             //       z:utl.netBox.z},
-             //     tar:{x,z},
-             //     sendTime:utl.sendTime,
-             //     type:'move',
-             //     move:out,
-             //     rotationEuler:utl.cube.transform.rotationEuler,
-             //     rote:this.getRoteImg(pobj) 
-             //   }]
-               
-             // }
-           }
-
-   }
-
-   class fire{
-       constructor(){
-               this.scaleTime = 100;
-               this.width = 150;
-               this.height = 150;
-               this.x = Laya.stage.width-250;
-               this.y = Laya.stage.height - 250;
-               this.moveX = 0;
-               this.moveY = 0;
-
-               this.tx=Laya.stage.width/4;
-               this.twidth = 400;
-               this.theight = 400;
-               this.ty = Laya.stage.height - 500;
-           }
-          scaleBig(e)
-           {        
-               utl.takeSpeed.z = 0;
-               console.log('MOUSE_UP');
-               utl.tachRightFlag = false;
-               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
-           }
-           outEvent(){
-             utl.tachRightFlag = false;
-           }
-         
-          scaleSmall(x,y)
-           {    
-             if(x<this.width+this.x&&
-               x>this.x&&
-               y>this.y&&
-               y<this.y+this.height
-               ){
-               return true
-             }else{
-               // return false
-             }
-               //缩小至0.8的缓动效果
-               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
-           }
-           getRoteImg(pobj) {
-             let rotate = 0;
-             if (pobj.x1 == pobj.x2){
-               rotate=0;
-             }
-             if (pobj.x1 > pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
-             } else if (pobj.x1 < pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
-             }
-             return rotate
-           }
-           leftFormatMovePosition(px,py) {
-             utl.fireOnOff = true;
-           }
-
-   }
-
-   class Bullet extends Laya.Script3D { 
-   	constructor() {
-   		super();
-   		this.tempy = 0;
-   		this.box = null;
-   		this.time = 0;
-   		this.speed = new Laya.Vector3();
-   		
-   	}
-   	onAwake() {
-   		
-   		//得到3D对象
-   		this.box = this.owner;
-   		utl.firs.push(this);
-   		// this.findIt()
-   	}
-   	findIt(){
-   		let bV3 = new Laya.Vector3();
-           	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
-   			let speed = new Laya.Vector3();
-   			Laya.Vector3.normalize(bV3,speed);
-   			// Laya.Vector3.scale(speed, .1, this.speed);
-
-   			let speedLanth = Laya.Vector3.scalarLength(this.speed); 
-   			// // let temp = new Laya.Vector3(0,0,utl.speedMove
-   			let lspeed = (utl.speedMove + .1).toFixed(2);
-   			// // let scale = (utl.speedMove + lspeed)/lspeed
-   			// // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
-   			Laya.Vector3.scale(speed, .1, this.speed);
-   			utl.info.text = Laya.Vector3.scalarLength(this.speed) - utl.speedMove+","+utl.speedMove+','+Laya.Vector3.scalarLength(this.speed);
-   			utl.firs.push(this);
-   	}
-   	_load(){
-   		this.box = this.owner;
-   		let bV3 = new Laya.Vector3();
-           	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
-   			let speed = new Laya.Vector3();
-   			Laya.Vector3.normalize(bV3,speed);
-   			Laya.Vector3.scale(speed, .01, this.speed);
-   			// let speedLanth = Laya.Vector3.scalarLength(this.speed) 
-   			// // // let temp = new Laya.Vector3(0,0,utl.speedMove
-   			// let lspeed = (utl.speedMove + speedLanth)/speedLanth
-   			// // // let scale = (utl.speedMove + lspeed)/lspeed
-   			// // // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
-   			// Laya.Vector3.scale(this.speed, lspeed, this.speed);
-   			
-   			// console.log(Laya.Vector3.scalarLength(this.speed))
-   			// Laya.timer.loop(30,this,this.onUpdatef);
-   	}
-   	// onAwake() {
-   	// 	this.box = this.owner;
-   	// 	if(utl.c1&&utl.c2){
-   	// 		let bV3 = new Laya.Vector3();
-    //        	Laya.Vector3.subtract(utl.c2.transform.position, utl.c1.transform.position, bV3);
-   	// 		let speed = new Laya.Vector3();
-   	// 		Laya.Vector3.normalize(bV3,speed);
-   	// 		Laya.Vector3.scale(speed, .15, this.speed);
-   	// 		// let speedLanth = Laya.Vector3.scalarLength(this.speed) 
-   	// 		// // // let temp = new Laya.Vector3(0,0,utl.speedMove
-   	// 		// let lspeed = (utl.speedMove + speedLanth)/speedLanth
-   	// 		// // // let scale = (utl.speedMove + lspeed)/lspeed
-   	// 		// // // this.speed =   new Laya.Vector3(speed.x,speed.y,speed.z+utl.speedMove);
-   	// 		// Laya.Vector3.scale(this.speed, lspeed, this.speed);
-   			
-   	// 		// console.log(Laya.Vector3.scalarLength(this.speed))
-   	// 		Laya.timer.loop(30,this,this.onUpdatef);
-   	// 	}
-           
-   	// }
-   	toTiome(){
-   		this.time++; 
-   		if(!this.box.destroyed){
-   			// let vx = utl.box.transform.position.x - this.box.transform.position.x 
-   			// let vy = utl.box.transform.position.y - this.box.transform.position.y 
-   			// let vz = utl.box.transform.position.z - this.box.transform.position.z
-   			// let ry = utl.getAngle(vx,vz)
-   			// this.box.transform.rotate(new Laya.Vector3(0,-this.tempy* Math.PI / 180,0), true);
-   			// this.box.transform.rotate(new Laya.Vector3(0,ry* Math.PI / 180,0), true);
-   			// this.tempy = ry
-   			 // this.box.transform.translate(this.speed,false)
-   			 let bmain =this.box.getChildByName('Cube');
-   			 if(this.box){
-               	
-               	this.box.transform.translate(new Laya.Vector3(0,-this.startSpeed,0),true);
-   			 	bmain.transform.translate(new Laya.Vector3(0,-1,0),true);
-   			 }
-   			 
-   			 if(this.time>200 ){
-   			 	this.box.destroy();
-   			 }
-   		}
-   	}
-   	onStart() {}
-
-   	onTriggerEnter()
-   	{
-   	    this.box.removeSelf();
-   		console.log("bu--onTriggerEnter");
-   	}
-   	onTriggerStay()
-   	{
-   		console.log("bu--onTriggerStay");
-   	}
-   	onTriggerExit()
-   	{
-   		console.log("bu--onTriggerExit");
-   	}
-   	onEnable() {
-   	} 
-   	onDisable() {
-   	}
-   }
-
-   class newTwo$1{
-       constructor(){
-               this.x = 0;
-               this.y = 0;
-
-               this.tx= Laya.stage.width - 600;
-               
-               this.twidth = 200;
-               this.theight = 200;
-               this.ty =Laya.stage.height - 400;
-               this.tempX = 0;
-               this.tempY = 0;
-           }
-          scaleBig(e)
-           {        
-               utl.takeSpeed.z = 0;
-               console.log('MOUSE_UP');
-               utl.tachRightFlag = false;
-               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
-           }
-           outEvent(){
-             utl.tachRightFlag = false;
-           }
-          onFire(){
-                 let aum =utl.bullet.clone();
-                 let script = aum.addComponent(Bullet);
-                 utl.newScene.addChild(aum);
-           }
-          scaleSmall(x,y)
-           {    
-             if(this.tx-0<x&&x<this.tx+this.twidth+0&&y>this.ty-0&&y<this.ty+this.theight+0
-               ){
-                utl.fireOnOff = true;
-               return true
-             }else{
-               return false
-             }
-               //缩小至0.8的缓动效果
-               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
-           }
-           getRoteImg(pobj) {
-             let rotate = 0;
-             if (pobj.x1 == pobj.x2){
-               rotate=0;
-             }
-             if (pobj.x1 > pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
-             } else if (pobj.x1 < pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
-             }
-             return rotate
-           }
-           leftFormatMovePosition(px,py) {
-             let pobj = {};
-             let tempx = 0;
-             let tempy = 0;
-             pobj.x1 = px; //点击
-             pobj.x2 =this.tx + this.twidth/2;
-             pobj.y1 = py;
-             pobj.y2 = this.ty + this.theight/2;
-             if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
-               tempx = 1;
-             }else{
-                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
-             }
-             if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
-               tempx = -1;
-             }else{
-                tempx = (px - this.tx - this.twidth/2) / (this.twidth/2); 
-             }
-             if((py - this.ty - this.theight/2) / (this.theight/2) >1){
-                tempy = 1;
-             }else{
-               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
-             }
-             if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
-                tempy = -1;
-             }else{
-               tempy = (py - this.ty - this.theight/2) / (this.theight/2); 
-             }
-             let rx = tempy*5;
-             let ry = tempx*5;
-             utl.roteGun.x  = rx;
-             utl.roteGun.y = -ry;
-               // let shipcar = utl.bullet.getChildByName('ship')
-               // let obj = shipcar.getChildByName('Cube')
-
-               // obj.transform.rotate(new Laya.Vector3(0,-this.tempX* Math.PI / 180,0),true);
-               // obj.transform.rotate(new Laya.Vector3(0,0,-this.tempY* Math.PI / 180),true);
-               // obj.transform.rotate(new Laya.Vector3(0,rx* Math.PI / 180,0),true);
-               // obj.transform.rotate(new Laya.Vector3(0,0,ry* Math.PI / 180),true);
-
-               // this.tempX = rx
-               // this.tempY = ry
-               // utl.fireOnOff = true
-              
-
-           }
-
-   }
-
-   class leftRote{
-       constructor(){
-               this.scaleTime = 100;
-               this.width = Laya.stage.width/2; 
-               this.height = Laya.stage.height;
-               this.x = 0;
-               this.y = 0;
-               this.moveX = 0;
-               this.moveY = 0;
-
-               this.tx= Laya.stage.width  -700;
-               this.twidth = 150;
-               this.theight = 150;
-               this.ty = Laya.stage.height - 200;
-           }
-          scaleBig(e)
-           {        
-               utl.takeSpeed.z = 0;
-               console.log('MOUSE_UP');
-               utl.tachRightFlag = false;
-               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
-           }
-           outEvent(){
-             utl.tachRightFlag = false;
-           }
-         
-          scaleSmall(x,y)
-           {    
-             if(this.tx<x&&x<this.tx+this.twidth&&this.ty<y&&y<this.ty+this.theight
-               ){
-               console.log(y,this.ty,this.ty+this.theight);
-               return true
-             }else{
-               return false
-             }
-               //缩小至0.8的缓动效果
-               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
-           }
-           getRoteImg(pobj) {
-             let rotate = 0;
-             if (pobj.x1 == pobj.x2){
-               rotate=0;
-             }
-             if (pobj.x1 > pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
-             } else if (pobj.x1 < pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
-             }
-             return rotate
-           }
-           leftFormatMovePosition(px,py) {
-            
-             // utl.ani.play("hello");
-             // let pobj = {}
-             // let tempx = 0
-             // let tempy = 0
-             // pobj.x1 = px //点击
-             // pobj.x2 =this.tx + this.twidth/2
-             // pobj.y1 = py
-             // pobj.y2 = this.ty + this.theight/2
-             // if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
-             //   tempx = 1
-             // }else{
-             //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-             // }
-             // if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
-             //   tempx = -1
-             // }else{
-             //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-             // }
-             // if((py - this.ty - this.theight/2) / (this.theight/2) >1){
-             //    tempy = 1
-             // }else{
-             //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-             // }
-             // if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
-             //    tempy = -1
-             // }else{
-             //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-             // }
-             // utl.takeSpeed.x = -tempy*20
-             // utl.takeSpeed.y = -tempx*20
-           }
-
-   }
-
-   class rightRote{
-       constructor(){
-               this.scaleTime = 100;
-               this.width = Laya.stage.width/2; 
-               this.height = Laya.stage.height;
-               this.x = 0;
-               this.y = 0;
-               this.moveX = 0;
-               this.moveY = 0;
-
-               this.tx= Laya.stage.width  -400;
-               this.twidth = 150;
-               this.theight = 150;
-               this.ty = Laya.stage.height - 200;
-           }
-          scaleBig(e)
-           {        
-               utl.takeSpeed.z = 0;
-               console.log('MOUSE_UP');
-               utl.tachRightFlag = false;
-               // Laya.Tween.to(this,{scaleX:1,scaleY:1},this.scaleTime);
-           }
-           outEvent(){
-             utl.tachRightFlag = false;
-           }
-         
-          scaleSmall(x,y)
-           {    
-             if(this.tx<x&&x<this.tx+this.twidth&&this.ty<y&&y<this.ty+this.theight
-               ){
-               return true
-             }else{
-               return false
-             }
-               //缩小至0.8的缓动效果
-               // Laya.Tween.to(this,{scaleX:0.8,scaleY:0.8},this.scaleTime);
-           }
-           getRoteImg(pobj) {
-             let rotate = 0;
-             if (pobj.x1 == pobj.x2){
-               rotate=0;
-             }
-             if (pobj.x1 > pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 90;
-             } else if (pobj.x1 < pobj.x2) {
-               let atanrotate = (pobj.y1 - pobj.y2) / (pobj.x1 - pobj.x2);
-               rotate = ~~(Math.atan(atanrotate) / Math.PI * 180) + 270;
-             }
-             return rotate
-           }
-           leftFormatMovePosition(px,py) {
-            
-             // utl.ani.play("hello");
-             // let pobj = {}
-             // let tempx = 0
-             // let tempy = 0
-             // pobj.x1 = px //点击
-             // pobj.x2 =this.tx + this.twidth/2
-             // pobj.y1 = py
-             // pobj.y2 = this.ty + this.theight/2
-             // if((px - this.tx - this.twidth/2) / (this.twidth/2) >1){
-             //   tempx = 1
-             // }else{
-             //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-             // }
-             // if((px - this.tx - this.twidth/2) / (this.twidth/2) <-1){
-             //   tempx = -1
-             // }else{
-             //    tempx = (px - this.tx - this.twidth/2) / (this.twidth/2) 
-             // }
-             // if((py - this.ty - this.theight/2) / (this.theight/2) >1){
-             //    tempy = 1
-             // }else{
-             //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-             // }
-             // if((py - this.ty - this.theight/2) / (this.theight/2) <-1){
-             //    tempy = -1
-             // }else{
-             //   tempy = (py - this.ty - this.theight/2) / (this.theight/2) 
-             // }
-             // utl.takeSpeed.x = -tempy*20
-             // utl.takeSpeed.y = -tempx*20
-           }
-
-   }
-
-   42["123456-observer",{"glist":[{"x":1,"y":1},{"x":1,"y":2},{"x":2,"y":1},{"x":2,"y":2},{"x":3,"y":1},{"x":3,"y":3},{"x":230,"y":1},{"x":231,"y":1},{"x":232,"y":1},{"x":240,"y":0},{"x":241,"y":0},{"x":241,"y":1},{"x":249,"y":1},{"x":249,"y":2},{"x":250,"y":1},{"x":251,"y":1},{"x":252,"y":1},{"x":253,"y":1},{"x":254,"y":1}]}];
-
    let address = 'http://172.16.25.101:3000';
 
    let Event = Laya.Event;
@@ -1489,7 +1127,7 @@
 
 
    let ryMoveGroup = null;
-   let outPos$1 = new Laya.Vector3();
+   let outPos = new Laya.Vector3();
    let tempRotMap = new Map();
    let time = 0;
    const socketMain = () => {
@@ -1615,11 +1253,11 @@
 
 
    				let bleed = utl.heroMap.get(rot.id).rot.bleed / utl.allBleed;
-   				utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
-   				sp.pos((outPos$1.x - 40) / Laya.stage.clientScaleX, (outPos$1.y - 50) / Laya.stage.clientScaleY);
+   				utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+   				sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
    				sp.graphics.clear();
-   				sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-   				sp.graphics.drawRect(0, 0, 80 * bleed, 10, utl.pColor[rot.initPs]);
+   				sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+   				sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[rot.initPs]);
 
    				// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y)
    			}
@@ -1755,11 +1393,11 @@
 
 
    	let bleed = utl.heroMap.get(value.id).rot.bleed / utl.allBleed;
-   	utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
-   	sp.pos((outPos$1.x - 40) / Laya.stage.clientScaleX, (outPos$1.y - 50) / Laya.stage.clientScaleY);
+   	utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+   	sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
    	sp.graphics.clear();
-   	sp.graphics.drawRect(0, 0, 80, 10, "#ffffff");
-   	sp.graphics.drawRect(0, 0, 80 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
+   	sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+   	sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
    	// sp.scaleX = sp.scaleY =  0.125 * p.z + 0.75;
 
    	// let obj = value.val
@@ -1792,156 +1430,159 @@
     * 相比脚本方式，继承式页面类，可以直接使用页面定义的属性（通过IDE内var属性定义），比如this.tipLbll，this.scoreLbl，具有代码提示效果
     * 建议：如果是页面级的逻辑，需要频繁访问页面内多个元素，使用继承式写法，如果是独立小模块，功能单一，建议用脚本方式实现，比如子弹脚本。
     */
-     // import {getServiceAddress} from "../net/index"
-     let temp =0,spled = {x:0,y:0,z:0},dfew=0;
-     let flagod = false;
-     let fireFlag = false;
-     let touchs = [
-       ['newTouch',{flag:false,Tclass:newtach}],
-       // ['newTor',{flag:false,Tclass:newTor}],
+   // import {getServiceAddress} from "../net/index"
+   let temp = 0, spled = { x: 0, y: 0, z: 0 }, dfew = 0;
+   let flagod = false;
+   let fireFlag = false;
+   let touchs = [
+       // ['newTouch',{flag:false,Tclass:newTouch}],
+       ['newTor', { flag: false, Tclass: newTwo }],
        // ['fire',{flag:false,Tclass:fire}],
        // ['rightTouch',{flag:false,Tclass:rightTouch}],
-       // ['leftRote',{flag:false,Tclass:leftRote}],
-       // ['rightRote',{flag:false,Tclass:rightRote}]
-     ];
+       ['leftRote', { flag: false, Tclass: leftRote }],
+       ['rightRote', { flag: false, Tclass: rightRote }]
+   ];
+   window.dfg = -60;
+   let flag = true;
 
-   let flag = true;  
-
-   function updateMove$1(obj){
-       utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
+   // function updateMove(obj) {
+   //     utl.box.transform.translate(new Laya.Vector3(utl.speedMove / 5, 0, 0), true)
+   // }
+   function updateMove$1(value) {
+       utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = value.x;
+       utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = value.sx;
+       utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = value.sy;
    }
-   function tweend$1(){
-
-       let tweenObj= {
-           x:0
-       }; 
-       Laya.Tween.to(
-                   tweenObj,
-                   {x:10,
-                   update:new Laya.Handler(this,updateMove$1,[tweenObj])},
-                   50,
-                   Laya.Ease.linearNone,
-                   Laya.Handler.create(this,tweend$1,[tweenObj]),
-               0);
-       // flag = true
-   }
-
+   let frameTimes = [];
    class GameUI extends Laya.Scene {
        constructor() {
            super();
            this.isTwoTouch = false;
            this.twoFirst = true;
-           this.fucntkTemp =0;
-           this.temprx=0;
-           this.tempry=0;
-           this.temprz=0;
+           this.fucntkTemp = 0;
+           this.temprx = 0;
+           this.tempry = 0;
+           this.temprz = 0;
            this.spled = 0;
-           this.spledy=0;
-           this.loadScene("test/TestScene.scene");
+           this.spledy = 0;
+           this.loadScene("test/game1.scene");
            this.newScene = Laya.stage.addChild(new Laya.Scene3D());
            this.loadingElse = new Map(utl.loadingElse);
+           this.plerPosition = new Laya.Vector3(0, 0, 0);
+           this.townPosition = new Laya.Vector3(0, 40, 0);
+           this.onW = new Laya.Vector3(0, 0, 0, 0);
 
 
            utl.newScene = this.newScene;
            this.initTouch();
-            // this.addMouseEvent();
+           // this.addMouseEvent();
            this.info = new Laya.Text();
            this.info.text = 'kill num:';
            this.info.fontSize = 50;
            this.info.color = "#FFFFFF";
            this.info.size(Laya.stage.width, Laya.stage.height);
-           this.info.pos(50,50);
-           Laya.stage.addChild(this.info);  
-           utl.info =  this.info;
+           this.info.pos(50, 50);
+           Laya.stage.addChild(this.info);
+           utl.info = this.info;
            this.drawUi();
            temp = this;
 
            // this.newScene.addChild(utl.models.get('light'));  
-           var directionLight = this.newScene.addChild(new Laya.DirectionLight());
-           directionLight.color = new Laya.Vector3(0.3, 0.3, 0.1);
-           directionLight.transform.worldMatrix.setForward(new Laya.Vector3(-1, -1, -1));
+           // var directionLight = this.newScene.addChild(new Laya.DirectionLight());
+           // directionLight.color = new Laya.Vector3(0.3, 0.3, 0.1);
+           // directionLight.transform.worldMatrix.setForward(new Laya.Vector3(-1, -1, -1));
 
-           socketMain();
-          
+           // socketMain()
 
-          
-           Laya.timer.loop(5,this,this.onUpdate);
-           
+
+
+           Laya.timer.loop(50, this, this.flying);
+           Laya.timer.loop(50, this, this.update);
 
            // let map2 = utl.models.get('cube')
            // map2.getChildByName('on').active = false
            // console.log(map2)
            // this.newScene.addChild(map2);
            // utl.entityMap.set('cube',map2)
-          
-           let camera = utl.models.get('camera');
+
+           let light = utl.models.get('light');
            // // camera.active=false
            // camera.clearColor = new Laya.Vector4(0, 0, 0, 1);
 
-           utl.camera = camera;
-           this.newScene.addChild(camera);
-           if(utl.playerId=='player-2'){
-               utl.camera.transform.position = new Laya.Vector3(-500, 30, 0);
+           utl.light = light;
+           this.newScene.addChild(light);
+
+
+
+           let town = utl.models.get('town');
+           this.newScene.addChild(town);
+           utl.town = town;
+           window.town = town;
+           utl.town.transform.position = this.townPosition;
+
+
+           let pler = utl.models.get('pler');
+           utl.pler = pler;
+           window.pler = pler;
+           this.newScene.addChild(pler);
+           utl.pler.transform.position = this.plerPosition;
+
+           let kui = utl.models.get('kui');
+           utl.kui = kui;
+           this.newScene.addChild(kui);
+
+           let plane = utl.models.get('plane');
+           utl.plane = plane;
+           window.pan = plane;
+           this.newScene.addChild(plane);
+           let pas = plane.getChildByName('pas');
+           for (let i = 1; i < 6; i++) {
+               let tp = plane.getChildByName('p' + i);
+
+               tp.addChild(pas.clone());
            }
 
-
-           let  terrain= utl.models.get('plane');
-           this.newScene.addChild(terrain);
-
-
-           let box = utl.models.get('box');
-           console.log(box,'-00000000000000000');
-           utl.box = box;
-           this.newScene.addChild(box);
-          
        }
-       addMouseEvent(){
-           
+       addMouseEvent() {
+
            //鼠标事件监听
-           this.sp.on(Laya.Event.CLICK,this, this.onMouseDown);
+           this.sp.on(Laya.Event.CLICK, this, this.onMouseDown);
        }
        onMouseDown() {
            // let point = new Laya.Vector2();
            // point.x = Laya.MouseManager.instance.mouseX;
            // point.y = Laya.MouseManager.instance.mouseY;
-          console.log(6666666666);
+           console.log(6666666666);
 
        }
-       drawUi(){
+       drawUi() {
            this.sp = new Laya.Sprite();
            Laya.stage.addChild(this.sp);
            this.sp.graphics.drawRect(0, 0, 400, 400, "#00000066");
            utl.mapSp = this.sp;
            this.addMouseEvent();
            let adds = this.loadingElse.get('addsStop');
-           let addsImg = new  Laya.Image(adds);
+           let addsImg = new Laya.Image(adds);
            addsImg.height = 150;
-           addsImg.width =150;
+           addsImg.width = 150;
            addsImg.pos(200, Laya.stage.height - 200);
            utl.addsImg = addsImg;
            Laya.stage.addChild(addsImg);
-            utl.showbox = new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1, 1));
-           var material = new Laya.BlinnPhongMaterial();
-           material.albedoColor=new Laya.Vector3(5,5,5);
-           material.diffuseColor=new Laya.Vector3(5,5,5);
-           utl.showbox.meshRenderer.material = material;
 
-           // let rightHandself = this.loadingElse.get('right')
+
+           // let rightHandself = this.loadingElse.get('addsStop')
            // let rightHandselfImg = new  Laya.Image(rightHandself);
            // rightHandselfImg.height = 150
            // rightHandselfImg.width =150
            // rightHandselfImg.pos(Laya.stage.width - 400, Laya.stage.height - 200);
            // Laya.stage.addChild(rightHandselfImg);
 
+           for (let touch of touchs) {
+               touch[1].object.draw(this.loadingElse);
+           }
 
 
 
-           // let leftHand = this.loadingElse.get('cotrll')
-           // let leftHandImg = new  Laya.Image(leftHand);
-           // leftHandImg.height = 450
-           // leftHandImg.width =450
-           // leftHandImg.pos(300, Laya.stage.height - 600);
-           // Laya.stage.addChild(leftHandImg);
 
 
            // let rightHand = this.loadingElse.get('fire')
@@ -1975,73 +1616,110 @@
            // addSpeedImg.pos(Laya.stage.width - 150, Laya.stage.height - 350);
            // Laya.stage.addChild(addSpeedImg);
            //-----------add and less speed
-           
+
        }
-       initTouch(){
-           for(let touch of touchs){
-               touch[1].event = new touch[1].Tclass();
+       initTouch() {
+           for (let touch of touchs) {
+               touch[1].object = new touch[1].Tclass();
            }
        }
-       onFire(){
-           if(utl.fireOnOff){
+       onFire() {
+           if (utl.fireOnOff) {
                utl.msType = 'FIRE';
                // let ship = utl.box.getChildByName('shipmain')
                // let shipcar = ship.getChildByName('ship')
                // let aum =utl.bullet.clone();
-               
+
                // // let ball =new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1,1));
                // let script = aum.addComponent(Bullet);
                // this.newScene.addChild(aum)
            }
-           
-       }
-       
-       flying(touchCount){
 
-           // this.info.text = touchCount
-         
-           for(let obj of touchs){
+       }
+       update() {
+           if (frameTimes.length > 0) {
+               let time = frameTimes.shift();
+
+               this.plerPosition.x = time.x;
+               this.plerPosition.y = time.y;
+               this.plerPosition.z = time.z;
+               this.townPosition.x = time.x;
+               this.townPosition.z = time.z;
+               utl.pler.transform.position = this.plerPosition;
+               utl.town.transform.position = this.townPosition;
+               utl.pler.transform.localRotationEulerX = time.rx;
+               utl.pler.transform.localRotationEulerY = time.ry;
+               utl.pler.transform.localRotationEulerZ = time.rz;
+
+               // let sx = utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX
+               // let sy = utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY
+
+               // let nowx = utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX
+
+
+               utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx;
+               utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = time.sx*2;
+               utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = time.sy;
+               // utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx/2
+
+
+               // let frameObj = {
+               //     x: nowx,
+               //     sx,
+               //     sy
+               // }
+               // Laya.Tween.to(frameObj, {
+               //     x: time.sx,
+               //     sx:time.sx*2,
+               //     sy:time.sy,
+               //     update: new Laya.Handler(this, updateMove, [frameObj])
+               // }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [frameObj]), 0);
+           }
+
+       }
+       flying() {
+           for (let obj of touchs) {
                obj[1].flag = false;
-           }   
-           // let touchCount = this.scene.input.touchCount();
-           if (1 === touchCount){
+           }
+           let touchCount = this.newScene.input.touchCount();
+           if (1 === touchCount) {
                //判断是否为两指触控，撤去一根手指后引发的touchCount===1
                // if(this.isTwoTouch){
                //     return;
                // }
                let touch = this.newScene.input.getTouch(0);
-               for(let obj of touchs){
-                   if(obj[1].event.scaleSmall(touch.position.x,touch.position.y)){
+               for (let obj of touchs) {
+                   if (obj[1].object.scaleSmall(touch.position.x, touch.position.y)) {
                        obj[1].flag = true;
-                       obj[1].event.leftFormatMovePosition(touch.position.x,touch.position.y);
-                   }else{
+                       obj[1].object.leftFormatMovePosition(touch.position.x, touch.position.y);
+                   } else {
                        obj[1].flag = false;
                    }
                }
-               
+
            }
-           else if (2 === touchCount){
+           else if (2 === touchCount) {
                // this.isTwoTouch = true;
                //获取两个触碰点
                let touch = this.newScene.input.getTouch(0);
                let touch2 = this.newScene.input.getTouch(1);
-               for(let obj of touchs){
-                   if(obj[1].event.scaleSmall(touch.position.x,touch.position.y)){
+               for (let obj of touchs) {
+                   if (obj[1].object.scaleSmall(touch.position.x, touch.position.y)) {
                        obj[1].flag = true;
-                       obj[1].event.leftFormatMovePosition(touch.position.x,touch.position.y);
+                       obj[1].object.leftFormatMovePosition(touch.position.x, touch.position.y);
                    }
-                   if(obj[1].event.scaleSmall(touch2.position.x,touch2.position.y)){
+                   if (obj[1].object.scaleSmall(touch2.position.x, touch2.position.y)) {
                        obj[1].flag = true;
-                       obj[1].event.leftFormatMovePosition(touch2.position.x,touch2.position.y);
+                       obj[1].object.leftFormatMovePosition(touch2.position.x, touch2.position.y);
                    }
-                   if(!obj[1].event.scaleSmall(touch.position.x,touch.position.y)&&!obj[1].event.scaleSmall(touch2.position.x,touch2.position.y)){
+                   if (!obj[1].object.scaleSmall(touch.position.x, touch.position.y) && !obj[1].object.scaleSmall(touch2.position.x, touch2.position.y)) {
                        obj[1].flag = false;
                    }
-               }   
-                   
-                  
+               }
+
+
            }
-           else if (0 === touchCount){
+           else if (0 === touchCount) {
                // this.text.text = "触控点归零";
                // this.first = true;
                // this.twoFirst = true;
@@ -2051,161 +1729,217 @@
                // utl.takeSpeed.x = 0
                // utl.takeSpeed.y = 0
            }
-           // let touchsMap = new Map(touchs)
-           // if(!touchsMap.get('newTor').flag){
-           //     utl.takeSpeed.x = 0
-           //     utl.takeSpeed.y = 0
+           let touchsMap = new Map(touchs);
+           if (!touchsMap.get('leftRote').flag && !touchsMap.get('rightRote').flag) {
+               utl.tachSpeed.z = 0;
+           }
+           if (!touchsMap.get('newTor').flag) {
+               // utl.tachSpeed.x = 0
+               // utl.tachSpeed.y = 0
+               Laya.Tween.to(utl.tachSpeed, {
+                   y:0,
+                   update: new Laya.Handler(this, null, [utl.tachSpeed])
+                 }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
+           }
+           // if(!fireFlag){
+           // utl.fireOnOff = touchsMap.get('rightTouch').flag
+           // utl.roteLeftFlag = touchsMap.get('leftRote').flag
+           // utl.roteRightFlag = touchsMap.get('rightRote').flag
            // }
-           // if(!touchsMap.get('rightTouch').flag){
-           //     utl.roteGun.x = 0
-           //     utl.roteGun.y = 0
-           // }
-           // // if(!fireFlag){
-           //     utl.fireOnOff = touchsMap.get('rightTouch').flag
-           //     utl.roteLeftFlag = touchsMap.get('leftRote').flag
-           //     utl.roteRightFlag = touchsMap.get('rightRote').flag
-           // // }
            // this.info.text = flagod+','+touchCount
+           this.flyUpdate();
 
        }
-       gunMove(){
-            let ship = utl.box.getChildByName('camermain');
-            let acObj = ship.getChildByName('ac');
+       flyUpdate() {
+           this.getTakeSpeed();
+           utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = -utl.takeSpeed.x / 6;
+           utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerZ = utl.takeSpeed.y / 2;
+           let serviceX = Math.abs(utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerZ);
+           let serviceY = Math.abs(utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX);
 
-           
+           let speed = 0;
+           if (serviceX > serviceY) {
+               speed = (45 - serviceX) / 45 * utl.flySpeed + 1 / 2 * utl.flySpeed;
+           } else {
+               speed = (30 - serviceY) / 30 * utl.flySpeed + 1 / 2 * utl.flySpeed;
+           }
 
-            if(utl.roteGun.x!=utl.roteGunTemp.x){
-                    if(Math.abs(utl.roteGun.x-utl.roteGunTemp.x)>.1){
-                       utl.roteGunTemp.x = utl.roteGun.x>utl.roteGunTemp.x?utl.roteGunTemp.x+.1:utl.roteGunTemp.x-.1;
-                   }else{
-                       if(utl.roteGun.x==0){
-                           utl.roteGunTemp.x = 0;
-                       }
-                       
-                   }
+
+
+           // utl.kui.transform.rotate(new Laya.Vector3(0, 0, -utl.takeSpeed.y * Math.PI / 180 / 50), true)
+           // utl.kui.transform.rotate(new Laya.Vector3(0, -utl.tempSpeed.z * Math.PI / 180 / 50, 0), true)
+           // utl.kui.transform.rotate(new Laya.Vector3(utl.takeSpeed.x * Math.PI / 180 / 50, 0, 0), true)
+
+
+           // utl.kui.transform.rotate(new Laya.Vector3(-utl.takeSpeed.x * Math.PI / 180 / 50, 0, 0), true)//上下
+           // utl.kui.transform.rotate(new Laya.Vector3(0, utl.takeSpeed.z * Math.PI / 180 / 50, 0), true)
+           utl.kui.transform.rotate(new Laya.Vector3(0, 0, utl.takeSpeed.y * Math.PI / 180 / 50), true);
+           utl.kui.transform.translate(new Laya.Vector3(0, speed, 0), true);
+           let op = utl.kui.transform.position;
+           op.y += utl.takeSpeed.x / 900;
+           utl.kui.transform.position = op;
+           let vl = utl.kui.transform.rotationEuler;
+           // console.log(vl)
+           // utl.kui.transform.rotationEuler = new Laya.Vector3(window.dfg, vl.y, vl.z)
+
+
+           // if(){
+
+           // }
+
+           // if(Math.abs(utl.takeSpeed.y)>Math.abs(utl.takeSpeed.x)){
+           //     utl.kui.transform.rotate(new Laya.Vector3(0, 30 * Math.PI / 180 / 50, 0), true)
+           // }else if(Math.abs(utl.takeSpeed.y)<Math.abs(utl.takeSpeed.x)){
+           //     utl.kui.transform.rotate(new Laya.Vector3(0, -30 * Math.PI / 180 / 50, 0), true)
+           // }
+           // utl.tempSpeed = utl.takeSpeed
+           // console.log(utl.kui.transform.rotationEuler.y)
+           this.downSpeed();
+           this.getFrame();
+           // console.log(utl.kui.transform.rotationEuler.x,utl.kui.transform.rotationEuler.y,utl.kui.transform.rotationEuler.z)
+       }
+       getTakeSpeed() {
+           // if (utl.tachSpeed.x < utl.takeSpeed.x) {
+           //     utl.takeSpeed.x -= 5
+           // }
+           // if (utl.tachSpeed.x > utl.takeSpeed.x) {
+           //     utl.takeSpeed.x += 5
+           // }
+           // if (utl.tachSpeed.y < utl.takeSpeed.y) {
+           //     utl.takeSpeed.y -= 5
+           // }
+           // if (utl.tachSpeed.y > utl.takeSpeed.y) {
+           //     utl.takeSpeed.y += 5
+           // }
+           utl.takeSpeed.x = utl.tachSpeed.x;
+           utl.takeSpeed.y = utl.tachSpeed.y;
+       }
+       getFrame() {
+           let { x, y, z } = utl.kui.transform.position;
+           let rx = utl.kui.transform.localRotationEulerX;
+           let ry = utl.kui.transform.localRotationEulerY;
+           let rz = utl.kui.transform.localRotationEulerZ;
+           let sx = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX;
+           let sy = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerZ;
+           frameTimes.push({ x, y, z, rx, ry, rz, sx, sy });
+       }
+       downSpeed() {
+           // if(utl.takeSpeed.z.toFixed(1)==.01){
+           //     utl.takeSpeed.y=0
+           // }
+           // if(utl.takeSpeed.z.toFixed(1)==.01){
+           //     utl.takeSpeed.y=0
+           // }
+           // if(utl.takeSpeed.z.toFixed(1)==.01){
+           //     utl.takeSpeed.y=0
+           // }
+           let touchCount = this.newScene.input.touchCount();
+           if (touchCount == 0) {
+               // let l = utl.kui.getChildByName('Cube').getChildByName('left')
+               // let r = utl.kui.getChildByName('Cube').getChildByName('right')
+
+               // let vl = utl.kui.transform.rotationEuler
+               // utl.kui.transform.rotationEuler = new Laya.Vector3(-90, vl.y, vl.z)
+               //  = this.onW 
+               // utl.takeSpeed.y = 0
+               // utl.takeSpeed.x = 0
+               // utl.takeSpeed.z = 0
+               // if(utl.tachSpeed.x<0){ 
+               //     utl.tachSpeed.x+=5
+               // }
+               // if(utl.tachSpeed.x>0){
+               //     utl.tachSpeed.x-=5
+               // }
+               // if(utl.tachSpeed.y<0){ 
+               //     utl.tachSpeed.y+=5
+               // }
+               // if(utl.tachSpeed.y>0){
+               //     utl.tachSpeed.y-=5
+               // }
+               if (utl.tachSpeed.z < 0) {
+                   utl.tachSpeed.z += 5;
                }
-               if(utl.roteGun.y!=utl.roteGunTemp.y){
-                   if(Math.abs(utl.roteGun.y-utl.roteGunTemp.y)>.1){
-                       utl.roteGunTemp.y = utl.roteGun.y>utl.roteGunTemp.y?utl.roteGunTemp.y+.1:utl.roteGunTemp.y-.1;
-                   }else{
-                       if(utl.roteGun.y==0){
-                           utl.roteGunTemp.y = 0;
-                       }
-                      
-                   }
+               if (utl.tachSpeed.z > 0) {
+                   utl.tachSpeed.z -= 5;
                }
-               let x = utl.roteGunTemp.x;       
-               let y = utl.roteGunTemp.y;
-
-            
 
 
-           acObj.transform.rotate(new Laya.Vector3(0,0,-utl.roteGunback.y* Math.PI / 180),true);
-           acObj.transform.rotate(new Laya.Vector3(0,-utl.roteGunback.x* Math.PI / 180,0),true);
-         
-           acObj.transform.rotate(new Laya.Vector3(0,x* Math.PI / 180,0),true);
-           acObj.transform.rotate(new Laya.Vector3(0,0,y* Math.PI / 180),true);
+               // let td =  Math.abs(utl.kui.transform.rotationEuler.x+90)
+               //  if(utl.kui.transform.rotationEuler.x<-89){ 
+               //     let vl = utl.kui.transform.rotationEuler
+               //     utl.kui.transform.rotationEuler = new Laya.Vector3(vl.x+td/10, vl.y, vl.z)
+               // }
+               // if(utl.kui.transform.rotationEuler.x>-91){ 
+               //     let vl = utl.kui.transform.rotationEuler
+               //     utl.kui.transform.rotationEuler = new Laya.Vector3(vl.x-td/10, vl.y, vl.z)
+               // }
 
-          
+
+
+
+
+           }
+       }
+       gunMove() {
+           let ship = utl.box.getChildByName('camermain');
+           let acObj = ship.getChildByName('ac');
+
+
+
+           if (utl.roteGun.x != utl.roteGunTemp.x) {
+               if (Math.abs(utl.roteGun.x - utl.roteGunTemp.x) > .1) {
+                   utl.roteGunTemp.x = utl.roteGun.x > utl.roteGunTemp.x ? utl.roteGunTemp.x + .1 : utl.roteGunTemp.x - .1;
+               } else {
+                   if (utl.roteGun.x == 0) {
+                       utl.roteGunTemp.x = 0;
+                   }
+
+               }
+           }
+           if (utl.roteGun.y != utl.roteGunTemp.y) {
+               if (Math.abs(utl.roteGun.y - utl.roteGunTemp.y) > .1) {
+                   utl.roteGunTemp.y = utl.roteGun.y > utl.roteGunTemp.y ? utl.roteGunTemp.y + .1 : utl.roteGunTemp.y - .1;
+               } else {
+                   if (utl.roteGun.y == 0) {
+                       utl.roteGunTemp.y = 0;
+                   }
+
+               }
+           }
+           let x = utl.roteGunTemp.x;
+           let y = utl.roteGunTemp.y;
+
+
+
+
+           acObj.transform.rotate(new Laya.Vector3(0, 0, -utl.roteGunback.y * Math.PI / 180), true);
+           acObj.transform.rotate(new Laya.Vector3(0, -utl.roteGunback.x * Math.PI / 180, 0), true);
+
+           acObj.transform.rotate(new Laya.Vector3(0, x * Math.PI / 180, 0), true);
+           acObj.transform.rotate(new Laya.Vector3(0, 0, y * Math.PI / 180), true);
+
+
 
            utl.roteGunback.x = x;
            utl.roteGunback.y = y;
        }
-       checkFire(){
-            let bmain =utl.bullet.getChildByName('ship');
+       checkFire() {
+           let bmain = utl.bullet.getChildByName('ship');
            let bcube = bmain.getChildByName('Cube');
            let from = bcube.getChildByName('e1').transform.position;
            let to = bcube.getChildByName('e2').transform.position;
            this.newScene.physicsSimulation.raycastFromTo(from, to, utl.hitResult);
-           if( utl.hitResult.collider&&utl.hitResult.collider.owner.name=='baga'){
+           if (utl.hitResult.collider && utl.hitResult.collider.owner.name == 'baga') {
                // utl.hitResult.collider.owner.active=false 
                // console.log(utl.hitResult.normal) 
                // utl.hitResult.collider.owner.meshRenderer.sharedMaterial.albedoColor = new Laya.Vector4(1.0, 1.0, 1.0, 1.0);
                // console.log(1111)
            }
-          
+
            // console.log(utl.hitResult.collider)
        }
-       checkMovetoGround(){
-            let p = utl.box.transform.position;
-            let x = p.x;
-            let z = p.z;
-            let y = p.y;
-            if(p.x>utl.bestGround){
-                x = utl.bestGround;
-            }
-            if(p.x<-utl.bestGround){
-                x = -utl.bestGround;
-            }
-            if(p.z>utl.bestGround){
-                z = utl.bestGround;
-            }
-            if(p.z<-utl.bestGround){
-                z = -utl.bestGround;
-            }
-            if(p.y>utl.bestGround){
-                y = utl.bestGround;
-            }
-            utl.box.transform.position = new Laya.Vector3(x,y,z);
-       }
-       onUpdate() {
-           let touchCount = this.newScene.input.touchCount();
-           let touch = this.newScene.input.getTouch(0);
-           let touch1 = this.newScene.input.getTouch(1);
-
-           // if(touchCount==1){
-           //     if(touch.position.x<400&&touch.position.y<400){
-           //         console.log(touch.position)
-           //         return 
-           //     }
-           // }
-           if(touchCount==0){
-            
-               touchs[0][1].event.leftFormatMovePosition(null,0); 
-
-           }
-           if(touchCount==1){
-               let point =  touch.position;
-               touchs[0][1].event.drawSelect({x:point.x,y:point.y},touchCount); 
-
-           }
-           if(touchCount>1){
-                let point =  touch.position;
-               touchs[0][1].event.leftFormatMovePosition(point,touchCount); 
-            }   
-           // if(touchCount>1){
-           //     // console.log(touch,touchCount)
-           //     let x = (touch.position.x + touch1.position.x) / 2
-           //     let y = (touch.position.y + touch1.position.y) / 2
-           //     let z = (touch.position.z + touch1.position.z) / 2
-           //     let point =  new Laya.Vector3(x, y, z) 
-           //      // let point =  touch.position
-           //     this._ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));
-           //     this.outs = [];
-           //         //产生射线
-           //     utl.camera.viewportPointToRay(point,this._ray);
-           //         //拿到射线碰撞的物体
-           //     this.newScene.physicsSimulation.rayCastAll(this._ray,this.outs);
-           //         //如果碰撞到物体
-           //     if (this.outs.length !== 0)
-           //     {
-
-           //             for (let i = 0; i <  this.outs.length; i++){
-           //                 if(this.outs[i].collider.owner.name=="plane"){
-           //                     touchs[0][1].event.leftFormatMovePosition(this.outs,touchCount)    
-           //                 }
-           //             }
-           //                 //在射线击中的位置添加一个立方体
-                         
-           //     }
 
 
-           // }
-           // else{
-           //    touchs[0][1].event.leftFormatMovePosition(null,0)  
-           // }
-          
-       } 
    }
 
    /**
@@ -2554,21 +2288,18 @@
 
    const loadFile =  [
    	[
-   		['light','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Light.lh'],
-           ['cube','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Cube.lh'],
-           ['camera','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Camera.lh'],
-           // ['terrain','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Terrain.lh'],
-           ['plane','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Plane.lh'],
-           ['box','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/box.lh'],
+   		['light','res/LayaScene_fly/Conventional/light.lh'],
+           ['town','res/LayaScene_fly/Conventional/town.lh'],
+           ['pler','res/LayaScene_fly/Conventional/pler.lh'],
+           ['kui','res/LayaScene_fly/Conventional/kui.lh'],
+           ['plane','res/LayaScene_fly/Conventional/dimian.lh'],
    	],
-       [
-   		['light','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Light.lh'],
-           ['cube','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Cube.lh'],
-           ['camera','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Camera.lh'],
-           // ['terrain','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Terrain.lh'],
-           ['plane','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/Plane.lh'],
-           ['box','https://xuxin.love/img/redcode/LayaScene_SampleScene/Conventional/box.lh'],
-   	]
+       // [
+   	// 	['light','https://xuxin.love/img/mogu/LayaScene_SampleScene/Conventional/Light.lh'],
+       //     ['cube','https://xuxin.love/img/mogu/LayaScene_SampleScene/Conventional/Cube.lh'],
+       //     ['camera','https://xuxin.love/img/mogu/LayaScene_SampleScene/Conventional/Camera.lh'],
+       //     ['camera','https://xuxin.love/img/mogu/LayaScene_SampleScene/Conventional/map.lh'],
+   	// ]
    ];
 
    /**
@@ -2753,6 +2484,385 @@
        }
        
    }
+
+   let rots = [];
+   let outPos$1 = new Laya.Vector3();
+    class newtach {
+      constructor() {
+        this.status = 0;
+        this.x = 0;
+        this.y = 0;
+        this.move = null;
+        this.startPoint = null;
+        this.endPoint = null;
+        this.sp = new Laya.Sprite();
+        this.point = new Laya.Vector2();
+        this.startP = null;
+        this.evList = this.eventInt();
+        this.isChangeCam = true;//第一次是否是在迷你地图
+        Laya.stage.addChild(this.sp);
+      }
+      eventInt(){
+        let that = this;
+         let eventList = [{
+            checkPotion:{
+              x:200,
+              y:Laya.stage.height - 200,
+              width:150,
+              height:150
+            },
+            callBack:()=>{
+              return that.addpBack()
+            }
+         },
+         {
+            checkPotion:{
+              x:0,
+              y:0,
+              width:400,
+              height:400
+            },
+            callBack:()=>{
+              return that.changeCamerBack()
+            }
+         }
+         ];
+         return eventList
+      }
+      addMsg(){
+
+       let msg = {
+          playerId: utl.playerId,
+          actionName:'addHero',
+        };
+        console.log(msg);
+        utl.socket.emit('123456', msg);
+        if(utl.buttonStatus.addHero){
+         setTimeout(()=>{
+           this.addMsg();
+         },1000);
+        }
+        
+      }
+      addpBack(){
+       // buttonStatus
+       utl.buttonStatus.addHero=!utl.buttonStatus.addHero;
+       if(utl.buttonStatus.addHero){
+         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-start.png'; 
+         this.addMsg();
+       }else{
+         utl.addsImg.skin = 'https://xuxin.love/img/redcode/icon/add-stop.png';
+       }
+       
+        
+
+      }
+      eventCheck(){
+        let {evList} = this;
+        for(let item of evList){
+          let checkPotion = item.checkPotion;
+          if (this.startPoint.x - this.endPoint.x < 10 &&
+          this.startPoint.y - this.endPoint.y < 10 &&
+          this.endPoint.x < checkPotion.x+checkPotion.width &&
+          this.endPoint.x > checkPotion.x &&
+          this.endPoint.y < checkPotion.y+checkPotion.height&&
+          this.endPoint.y > checkPotion.y
+          ){
+            item.callBack();
+            return
+          }
+        }
+        this.changePointBack();
+      }
+
+      changeCamerBack(df){
+          let p = df||this.startPoint;
+          let x = p.x / 400 * 500;
+          let y = p.y / 400 * 500;
+          utl.camera.transform.position = new Laya.Vector3(-x, 30, 500 - y);
+          this.updateView();
+      }
+      changePointBack(){
+          let p = this.startPoint;
+          let p2 = this.trsV2ToV3(p);
+          if (
+            p2.x < 0 &&
+            p2.z > 0 &&
+            p2.x > -500 &&
+            p2.z < 500) {
+            if (
+              Math.abs(this.startPoint.x - this.endPoint.x) < 10 &&
+              Math.abs(this.startPoint.y - this.endPoint.y) < 10
+            ) {
+              let x = ~~p2.x;
+              let y = ~~p2.z;
+              this.sendMsg(rots,{x,y});
+              // let heros = []
+              // for (let hero of utl.entityMap.keys()) {
+              //   heros.push({
+              //     id: hero,
+              //     coordinate: {
+              //       x: -x,
+              //       y
+              //     }
+              //   })
+              // }
+
+
+
+              //----------------------foo1
+              // let result = []
+              // for(let r of rots){ 
+              //   let rp = utl.entityMap.get(r.id)
+              //   let potion = rp.transform.position
+              //   let start = utl.graph.grid[-potion.x][potion.z]
+              //   let end = utl.graph.grid[-x][y]
+              //   result = Astar.astar.search(utl.graph, start, end);
+              //   let ps = []
+              //   for(let objd of result){
+              //     ps.push({
+              //       x:objd.x,
+              //       y:objd.y
+              //     })
+              //   }
+              //    r.result = ps
+              // }
+              // this.sendMsg(rots)
+
+
+
+
+              // let listoo = []
+              // for(let fuck of result){
+              //    let pobj = utl.showbox.clone()
+              //    pobj.transform.position = new Laya.Vector3(-fuck.x, 3, fuck.y)
+              //    utl.newScene.addChild(pobj)
+              //    listoo.push(pobj)
+              // }
+              // setTimeout(()=>{
+              //   for(let ogh of listoo){
+              //     ogh.removeSelf();
+              //   }
+              // },3000)
+              
+              // let msg = {
+              //   userId: 'zzw',
+              //   actionName:'moveGroup',
+              //   heros:rots
+              // }
+              // utl.socket.emit('123456', msg);
+            }
+          }
+      }
+      sendMsg(rots,target){
+        
+        let msg = {
+          playerId: utl.playerId,
+          actionName:'ry-moveGroup',
+          heros:rots,
+          target
+        };
+        console.log(msg);
+        utl.socket.emit('123456', msg);
+      }
+      // sendMsg(rots){
+        
+      //   let msg = {
+      //     userId: 'zzw',
+      //     actionName:'moveGroup',
+      //     heros:rots
+      //   }
+      //   utl.socket.emit('123456', msg);
+      // }
+      reset() {
+         if (!this.startPoint) {
+           return
+         }
+         if (!this.endPoint) {
+           return
+         }
+         if (
+              Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+              Math.abs(this.startPoint.y - this.endPoint.y) < 20
+         ){
+           this.eventCheck();
+       
+        }
+        this.startPoint = null;
+        this.endPoint = null;
+      }
+      drawSelect(p) {
+        if (this.status == 0) {
+          this.startPoint = p;
+          this.status = 1;
+          this.startP = this.trsV2ToV3(p);
+          return
+        }
+        if (this.status == 1) {
+          this.endPoint = p;
+          let p1 = this.startPoint;
+
+
+          if (
+            0 < p.x &&
+            p.x< 400 &&
+            p.y < 400&&
+            p.y > 0
+            ){
+              this.changeCamerBack(p);
+            }
+          if (
+            Math.abs(this.startPoint.x - this.endPoint.x) < 20 &&
+            Math.abs(this.startPoint.y - this.endPoint.y) <20
+          ) {
+
+          } else {
+              if (
+            0 < p.x &&
+            p.x< 400 &&
+            p.y < 400&&
+            p.y > 0
+            ){
+              
+            }else{
+              this.sp.graphics.clear();
+              this.sp.graphics.drawLines(p1.x, p1.y, [0, 0, p.x - p1.x, 0, p.x - p1.x, p.y - p1.y, 0, p.y - p1.y, 0, 0], "#ff0000", 5);
+              this.selectAll(p);
+            }
+              
+            
+
+
+            
+          }
+
+        }
+
+      }
+      trsV2ToV3(p) {
+
+        // let point =  touch.position
+        this._ray = new Laya.Ray(new Laya.Vector3(0, 0, 0), new Laya.Vector3(0, 0, 0));
+        let outs = [];
+        //产生射线
+        utl.camera.viewportPointToRay(p, this._ray);
+        //拿到射线碰撞的物体
+        utl.newScene.physicsSimulation.rayCastAll(this._ray, outs);
+        //如果碰撞到物体
+        if (outs.length !== 0) {
+
+          for (let i = 0; i < outs.length; i++) {
+            if (outs[i].collider.owner.name == "Plane") {
+              return new Laya.Vector3(outs[0].point.x, outs[0].point.y, outs[0].point.z)
+            }
+          }
+          //在射线击中的位置添加一个立方体
+
+        }
+      }
+      selectAll(p22) {
+
+        let p1 = this.startP;
+        let p2 = this.trsV2ToV3(p22);
+        if (!p1) {
+          return
+        }
+        let absx1x = p1.x;
+        let absx2x = p2.x;
+        let absx1z = p1.z;
+        let absx2z = p2.z;
+        let msx = absx1x > absx2x ? absx1x : absx2x;
+        let msz = absx1z > absx2z ? absx1z : absx2z;
+        let mix = absx1x < absx2x ? absx1x : absx2x;
+        let miz = absx1z < absx2z ? absx1z : absx2z;
+        rots = [];
+        for (let key of utl.entityMap.keys()) {
+         let en = utl.entityMap.get(key);
+          let pos = en.transform.position;
+          let sp = utl.heroMap.get(key).sp;
+          let fx = pos.x;
+          let fz = pos.z;
+          if (fx < msx &&
+            fx > mix &&
+            fz < msz &&
+            fz > miz) {
+            rots.push({id: key});
+            if(utl.heroMap.get(key).rot.playerId==utl.playerId){
+              en.getChildByName('on').active = true;
+              en.getChildByName('off').active = false;
+             
+            }
+             sp.visible = true;
+               // utl.camera.viewport.project(pos, utl.camera.projectionViewMatrix, outPos);
+               // sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
+          } else {
+            en.getChildByName('on').active = false;
+            en.getChildByName('off').active = true;
+            sp.visible = false;
+          }
+
+        }
+        this.updateView();
+      }
+      leftFormatMovePosition(out, tnum) {
+        let xx = 0;
+        let zz = 0;
+        if (out) {
+          xx = out.x.toFixed(1);
+          zz = out.y.toFixed(1);
+        } else {
+          xx = 0;
+          zz = 0;
+        }
+        if (tnum == 0) {
+          this.sp.graphics.clear();
+          this.status = 0;
+          this.reset();
+
+
+          return
+        }
+        if (this.status == tnum) {
+          let x = (this.x - xx).toFixed(1) / 10;
+          let z = -(this.z - zz).toFixed(1) / 10;
+          this.move = [x, z];
+        } else {
+          this.x = xx;
+          this.z = zz;
+          this.move = [0, 0];
+        }
+        if (tnum == 2) {
+          this.sp.graphics.clear();
+          
+          utl.camera.transform.translate(new Laya.Vector3(this.move[0], this.move[1], 0), true);
+          if (utl.camera.transform.position.x > 0 ||
+            utl.camera.transform.position.x < -500 ||
+            utl.camera.transform.position.z < 0 ||
+            utl.camera.transform.position.z > 500
+          ) {
+            utl.camera.transform.translate(new Laya.Vector3(-this.move[0], -this.move[1], 0), true);
+          }
+        }
+        this.updateView();
+        this.status = tnum;
+        this.x = xx;
+        this.z = zz;
+      }
+       updateView(){
+           for (let key of utl.entityMap.keys()) {
+             let en = utl.entityMap.get(key);
+               let sp = utl.heroMap.get(key).sp;
+               let netRot = utl.heroMap.get(key).rot;
+               let p = en.transform.position;
+               let bleed = netRot.bleed/utl.allBleed;
+               utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
+               sp.pos((outPos$1.x-40) / Laya.stage.clientScaleX, (outPos$1.y-30) / Laya.stage.clientScaleY);
+               sp.graphics.clear();
+               sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
+               sp.graphics.drawRect(30, 0, 30*bleed, 10, utl.pColor[netRot.initPs]);
+            }
+        }
+    }
 
    /**
     * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
@@ -4338,7 +4448,7 @@
    function updateMove$2(obj){
       utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
    }
-   function tweend$2(){
+   function tweend$1(){
 
       let tweenObj= {
           x:0
@@ -4349,7 +4459,7 @@
                   update:new Laya.Handler(this,updateMove$2,[tweenObj])},
                   50,
                   Laya.Ease.linearNone,
-                  Laya.Handler.create(this,tweend$2,[tweenObj]),
+                  Laya.Handler.create(this,tweend$1,[tweenObj]),
               0);
       // flag = true
    }

@@ -47,11 +47,22 @@ export default  {
     //     x:0,
     //     y:0
     // },
-    // takeSpeed:{
-    // 	z:0,
-    // 	x:0,
-    // 	y:0
-    // },
+    flySpeed:-.1,
+    tachSpeed:{
+        z:0,//
+    	x:0,
+    	y:0
+    },
+    takeSpeed:{
+    	z:0,//
+    	x:0,
+    	y:0
+    },
+    tempSpeed:{
+    	z:0,//
+    	x:0,
+    	y:0
+    },
     // roteLeftFlag:false,
     // roteRightFlag:false,
     heroMap:new Map(),
@@ -62,9 +73,7 @@ export default  {
     // updates:[],
     // firs:[],
     loadingElse:[
-         ['adds','https://xuxin.love/img/redcode/icon/adds.png'],
-         ['addsStop','https://xuxin.love/img/redcode/icon/add-stop.png'],
-         ['addsStart','https://xuxin.love/img/redcode/icon/add-start.png'],
+         ['contrl','res/controll.png'],
         // ['tdf','https://xuxin.love/img/fly/u=3199317496,3290195022&fm=26&gp=0.jpg'],
         // ['fire','https://xuxin.love/img/fly/fires.png'],
         // ['left','https://xuxin.love/img/fly/left.png'],
