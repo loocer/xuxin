@@ -4,12 +4,13 @@ class Main{
    constructor(io){
      this.rooms = []
      this.io = io
+     this.createRoom()
      this.work()
    }
    createRoom(){
       let room = new Room(this.io)
-      room.addPlayer()
       this.rooms.push(room)
+      boxs.set(room.id,room)
    }
    work(){
       for(let room of this.rooms){

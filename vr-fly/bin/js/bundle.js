@@ -3,7 +3,7 @@
 
    var utl = {
        id:Date.parse(new  Date())+'',
-       entityMap:new Map(),
+       frameTimesMap:new Map(),
        playerId:'zzw',
        allBleed:100,
        pColor:{
@@ -664,414 +664,6 @@
 
    42["123456-observer",{"glist":[{"x":1,"y":1},{"x":1,"y":2},{"x":2,"y":1},{"x":2,"y":2},{"x":3,"y":1},{"x":3,"y":3},{"x":230,"y":1},{"x":231,"y":1},{"x":232,"y":1},{"x":240,"y":0},{"x":241,"y":0},{"x":241,"y":1},{"x":249,"y":1},{"x":249,"y":2},{"x":250,"y":1},{"x":251,"y":1},{"x":252,"y":1},{"x":253,"y":1},{"x":254,"y":1}]}];
 
-   // javascript-astar 0.4.1
-   // http://github.com/bgrins/javascript-astar
-   // Freely distributable under the MIT License.
-   // Implements the astar search algorithm in javascript using a Binary Heap.
-   // Includes Binary Heap (with modifications) from Marijn Haverbeke.
-   // http://eloquentjavascript.net/appendix2.html
-   // (function(definition) {
-   //   /* global module, define */
-   //   if (typeof module === 'object' && typeof module.exports === 'object') {
-   //     module.exports = definition();
-   //   } else if (typeof define === 'function' && define.amd) {
-   //     define([], definition);
-   //   } else {
-   //     var exports = definition();
-   //     window.astar = exports.astar;
-   //     window.Graph = exports.Graph;
-   //   }
-   // })(function() {
-
-   function pathTo(node) {
-     var curr = node;
-     var path = [];
-     while (curr.parent) {
-       path.unshift(curr);
-       curr = curr.parent;
-     }
-     return path;
-   }
-
-   function getHeap() {
-     return new BinaryHeap(function(node) {
-       return node.f;
-     });
-   }
-
-   var astar = {
-     /**
-     * Perform an A* Search on a graph given a start and end node.
-     * @param {Graph} graph
-     * @param {GridNode} start
-     * @param {GridNode} end
-     * @param {Object} [options]
-     * @param {bool} [options.closest] Specifies whether to return the
-                path to the closest node if the target is unreachable.
-     * @param {Function} [options.heuristic] Heuristic function (see
-     *          astar.heuristics).
-     */
-     search: function(graph, start, end, options) {
-       graph.cleanDirty();
-       options = options || {};
-       var heuristic = options.heuristic || astar.heuristics.manhattan;
-       var closest = options.closest || false;
-
-       var openHeap = getHeap();
-       var closestNode = start; // set the start node to be the closest if required
-
-       start.h = heuristic(start, end);
-       graph.markDirty(start);
-
-       openHeap.push(start);
-
-       while (openHeap.size() > 0) {
-
-         // Grab the lowest f(x) to process next.  Heap keeps this sorted for us.
-         var currentNode = openHeap.pop();
-
-         // End case -- result has been found, return the traced path.
-         if (currentNode === end) {
-           return pathTo(currentNode);
-         }
-
-         // Normal case -- move currentNode from open to closed, process each of its neighbors.
-         currentNode.closed = true;
-
-         // Find all neighbors for the current node.
-         var neighbors = graph.neighbors(currentNode);
-
-         for (var i = 0, il = neighbors.length; i < il; ++i) {
-           var neighbor = neighbors[i];
-
-           if (neighbor.closed || neighbor.isWall()) {
-             // Not a valid node to process, skip to next neighbor.
-             continue;
-           }
-
-           // The g score is the shortest distance from start to current node.
-           // We need to check if the path we have arrived at this neighbor is the shortest one we have seen yet.
-           var gScore = currentNode.g + neighbor.getCost(currentNode);
-           var beenVisited = neighbor.visited;
-
-           if (!beenVisited || gScore < neighbor.g) {
-
-             // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
-             neighbor.visited = true;
-             neighbor.parent = currentNode;
-             neighbor.h = neighbor.h || heuristic(neighbor, end);
-             neighbor.g = gScore;
-             neighbor.f = neighbor.g + neighbor.h;
-             graph.markDirty(neighbor);
-             if (closest) {
-               // If the neighbour is closer than the current closestNode or if it's equally close but has
-               // a cheaper path than the current closest node then it becomes the closest node
-               if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
-                 closestNode = neighbor;
-               }
-             }
-
-             if (!beenVisited) {
-               // Pushing to heap will put it in proper place based on the 'f' value.
-               openHeap.push(neighbor);
-             } else {
-               // Already seen the node, but since it has been rescored we need to reorder it in the heap
-               openHeap.rescoreElement(neighbor);
-             }
-           }
-         }
-       }
-
-       if (closest) {
-         return pathTo(closestNode);
-       }
-
-       // No result was found - empty array signifies failure to find path.
-       return [];
-     },
-     // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
-     heuristics: {
-       manhattan: function(pos0, pos1) {
-         var d1 = Math.abs(pos1.x - pos0.x);
-         var d2 = Math.abs(pos1.y - pos0.y);
-         return d1 + d2;
-       },
-       diagonal: function(pos0, pos1) {
-         var D = 1;
-         var D2 = Math.sqrt(2);
-         var d1 = Math.abs(pos1.x - pos0.x);
-         var d2 = Math.abs(pos1.y - pos0.y);
-         return (D * (d1 + d2)) + ((D2 - (2 * D)) * Math.min(d1, d2));
-       }
-     },
-     cleanNode: function(node) {
-       node.f = 0;
-       node.g = 0;
-       node.h = 0;
-       node.visited = false;
-       node.closed = false;
-       node.parent = null;
-     }
-   };
-
-   /**
-    * A graph memory structure
-    * @param {Array} gridIn 2D array of input weights
-    * @param {Object} [options]
-    * @param {bool} [options.diagonal] Specifies whether diagonal moves are allowed
-    */
-   function Graph(gridIn, options) {
-     options = options || {};
-     this.nodes = [];
-     this.diagonal = !!options.diagonal;
-     this.grid = [];
-     for (var x = 0; x < gridIn.length; x++) {
-       this.grid[x] = [];
-
-       for (var y = 0, row = gridIn[x]; y < row.length; y++) {
-         var node = new GridNode(x, y, row[y]);
-         this.grid[x][y] = node;
-         this.nodes.push(node);
-       }
-     }
-     this.init();
-   }
-
-   Graph.prototype.init = function() {
-     this.dirtyNodes = [];
-     for (var i = 0; i < this.nodes.length; i++) {
-       astar.cleanNode(this.nodes[i]);
-     }
-   };
-
-   Graph.prototype.cleanDirty = function() {
-     for (var i = 0; i < this.dirtyNodes.length; i++) {
-       astar.cleanNode(this.dirtyNodes[i]);
-     }
-     this.dirtyNodes = [];
-   };
-
-   Graph.prototype.markDirty = function(node) {
-     this.dirtyNodes.push(node);
-   };
-
-   Graph.prototype.neighbors = function(node) {
-     var ret = [];
-     var x = node.x;
-     var y = node.y;
-     var grid = this.grid;
-
-     // West
-     if (grid[x - 1] && grid[x - 1][y]) {
-       ret.push(grid[x - 1][y]);
-     }
-
-     // East
-     if (grid[x + 1] && grid[x + 1][y]) {
-       ret.push(grid[x + 1][y]);
-     }
-
-     // South
-     if (grid[x] && grid[x][y - 1]) {
-       ret.push(grid[x][y - 1]);
-     }
-
-     // North
-     if (grid[x] && grid[x][y + 1]) {
-       ret.push(grid[x][y + 1]);
-     }
-
-     if (this.diagonal) {
-       // Southwest
-       if (grid[x - 1] && grid[x - 1][y - 1]) {
-         ret.push(grid[x - 1][y - 1]);
-       }
-
-       // Southeast
-       if (grid[x + 1] && grid[x + 1][y - 1]) {
-         ret.push(grid[x + 1][y - 1]);
-       }
-
-       // Northwest
-       if (grid[x - 1] && grid[x - 1][y + 1]) {
-         ret.push(grid[x - 1][y + 1]);
-       }
-
-       // Northeast
-       if (grid[x + 1] && grid[x + 1][y + 1]) {
-         ret.push(grid[x + 1][y + 1]);
-       }
-     }
-
-     return ret;
-   };
-
-   Graph.prototype.toString = function() {
-     var graphString = [];
-     var nodes = this.grid;
-     for (var x = 0; x < nodes.length; x++) {
-       var rowDebug = [];
-       var row = nodes[x];
-       for (var y = 0; y < row.length; y++) {
-         rowDebug.push(row[y].weight);
-       }
-       graphString.push(rowDebug.join(" "));
-     }
-     return graphString.join("\n");
-   };
-
-   function GridNode(x, y, weight) {
-     this.x = x;
-     this.y = y;
-     this.weight = weight;
-   }
-
-   GridNode.prototype.toString = function() {
-     return "[" + this.x + " " + this.y + "]";
-   };
-
-   GridNode.prototype.getCost = function(fromNeighbor) {
-     // Take diagonal weight into consideration.
-     if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
-       return this.weight * 1.41421;
-     }
-     return this.weight;
-   };
-
-   GridNode.prototype.isWall = function() {
-     return this.weight === 0;
-   };
-
-   function BinaryHeap(scoreFunction) {
-     this.content = [];
-     this.scoreFunction = scoreFunction;
-   }
-
-   BinaryHeap.prototype = {
-     push: function(element) {
-       // Add the new element to the end of the array.
-       this.content.push(element);
-
-       // Allow it to sink down.
-       this.sinkDown(this.content.length - 1);
-     },
-     pop: function() {
-       // Store the first element so we can return it later.
-       var result = this.content[0];
-       // Get the element at the end of the array.
-       var end = this.content.pop();
-       // If there are any elements left, put the end element at the
-       // start, and let it bubble up.
-       if (this.content.length > 0) {
-         this.content[0] = end;
-         this.bubbleUp(0);
-       }
-       return result;
-     },
-     remove: function(node) {
-       var i = this.content.indexOf(node);
-
-       // When it is found, the process seen in 'pop' is repeated
-       // to fill up the hole.
-       var end = this.content.pop();
-
-       if (i !== this.content.length - 1) {
-         this.content[i] = end;
-
-         if (this.scoreFunction(end) < this.scoreFunction(node)) {
-           this.sinkDown(i);
-         } else {
-           this.bubbleUp(i);
-         }
-       }
-     },
-     size: function() {
-       return this.content.length;
-     },
-     rescoreElement: function(node) {
-       this.sinkDown(this.content.indexOf(node));
-     },
-     sinkDown: function(n) {
-       // Fetch the element that has to be sunk.
-       var element = this.content[n];
-
-       // When at 0, an element can not sink any further.
-       while (n > 0) {
-
-         // Compute the parent element's index, and fetch it.
-         var parentN = ((n + 1) >> 1) - 1;
-         var parent = this.content[parentN];
-         // Swap the elements if the parent is greater.
-         if (this.scoreFunction(element) < this.scoreFunction(parent)) {
-           this.content[parentN] = element;
-           this.content[n] = parent;
-           // Update 'n' to continue at the new position.
-           n = parentN;
-         }
-         // Found a parent that is less, no need to sink any further.
-         else {
-           break;
-         }
-       }
-     },
-     bubbleUp: function(n) {
-       // Look up the target element and its score.
-       var length = this.content.length;
-       var element = this.content[n];
-       var elemScore = this.scoreFunction(element);
-
-       while (true) {
-         // Compute the indices of the child elements.
-         var child2N = (n + 1) << 1;
-         var child1N = child2N - 1;
-         // This is used to store the new position of the element, if any.
-         var swap = null;
-         var child1Score;
-         // If the first child exists (is inside the array)...
-         if (child1N < length) {
-           // Look it up and compute its score.
-           var child1 = this.content[child1N];
-           child1Score = this.scoreFunction(child1);
-
-           // If the score is less than our element's, we need to swap.
-           if (child1Score < elemScore) {
-             swap = child1N;
-           }
-         }
-
-         // Do the same checks for the other child.
-         if (child2N < length) {
-           var child2 = this.content[child2N];
-           var child2Score = this.scoreFunction(child2);
-           if (child2Score < (swap === null ? elemScore : child1Score)) {
-             swap = child2N;
-           }
-         }
-
-         // If the element needs to be moved, swap it, and continue.
-         if (swap !== null) {
-           this.content[n] = this.content[swap];
-           this.content[swap] = element;
-           n = swap;
-         }
-         // Otherwise, we are done.
-         else {
-           break;
-         }
-       }
-     }
-   };
-
-   const Astar = {
-     astar: astar,
-     Graph: Graph
-   };
-   // module.exports={
-   //   astar: astar,
-   //   Graph: Graph
-   // };
-   // });
-
    let address = 'http://172.16.25.101:3000';
 
    let Event = Laya.Event;
@@ -1079,27 +671,6 @@
 
    let websocket = null;
    let timeFrame = new Map();
-
-   function createGraph() {
-   	let list = [];
-   	for (let i = 0; i < 500; i++) {
-   		let list1 = [];
-   		for (let o = 0; o < 500; o++) {
-   			list1.push(1);
-   		}
-   		list.push(list1);
-   	}
-
-   	utl.graph = new Astar.Graph(list);
-   }
-
-   function resetGraph() {
-   	for (let obj of utl.graph.grid) {
-   		for (let indexObj of obj) {
-   			indexObj.weight = 1;
-   		}
-   	}
-   }
 
 
    const getServiceAddress = () => {
@@ -1125,13 +696,7 @@
 
    };
 
-
-   let ryMoveGroup = null;
-   let outPos = new Laya.Vector3();
-   let tempRotMap = new Map();
-   let time = 0;
    const socketMain = () => {
-   	createGraph();
    	// const socket = new WebSocket('ws://xuxin.love:3000');
    	// // wx.connectSocket({
    	// //   url: 'ws://xuxin.love:3000'
@@ -1145,285 +710,24 @@
    	// return
    	// utl.socket = io('ws://192.168.0.105:3000');
    	// utl.socket = io('ws://192.168.11.37:3000');
-   	utl.socket = io('wss://xuxin.love:3000');
+   	utl.socket = io('ws://192.168.0.106:3000');
    	utl.socket.on('123456', (s) => {
-   		
-   		time++;
-   		resetGraph();
-   		tempRotMap.clear();
-   		utl.mapSp.graphics.clear();
-   		utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
-   		for (let player of s.list) {
-   			if (player.playerId == utl.playerId) {
-   				ryMoveGroup = player.ryMoveGroup;
-   				utl.info.text = player.killNum;
-   			}
-   			for (let rot of player.rots) {
-   				if (utl.entityMap.has(rot.id)) {
-   					let x = ~~(rot.end.x / 500 * 400);
-   					let y = ~~(rot.end.y / 500 * 400);
-   					utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
-   					utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
-   					if (
-   						rot.start.x == rot.end.x &&
-   						rot.start.y == rot.end.y) {
-
-   					} else {
-   						if (timeFrame.get(rot.id).list.length > 5) {
-   							timeFrame.get(rot.id).list = [{
-   								start: rot.start,
-   								end: rot.end
-   							}];
-   						} else {
-   							timeFrame.get(rot.id).list.push({
-   								start: rot.start,
-   								end: rot.end
-   							});
-   						}
-   					}
-   					utl.heroMap.get(rot.id).rot = rot;
-
-   				} else {
-
-   					let map2 = utl.models.get('cube').clone();
-   					map2.getChildByName('on').active = false;
-   					if (rot.initPs == 'p2') {
-   						let material = map2._children[1].meshRenderer.material;
-   						material.albedoColorA = 1;
-   						material.albedoColorB = 0.9;
-   						material.albedoColorG = 0.1;
-   						material.albedoColorR = 0.1;
-   					}
-   					if (rot.initPs == 'p1') {
-   						let material = map2._children[1].meshRenderer.material;
-   						material.albedoColorA = 1;
-   						material.albedoColorB = 0.5;
-   						material.albedoColorG = 0.5;
-   						material.albedoColorR = 0.1;
-   					}
-   					let materialmmm = map2._children[0].meshRenderer.material;
-   					materialmmm.albedoColorA = 1;
-   					materialmmm.albedoColorB = 0.9;
-   					materialmmm.albedoColorG = 0.9;
-   					materialmmm.albedoColorR = 0.9;
-   					let sp = new Laya.Sprite();
-   					Laya.stage.addChild(sp);
-   					sp.visible = false;
-   					sp.graphics.drawRect(0, 0, 80, 10, "#00ef6b");
-   					utl.heroMap.set(rot.id, {
-   						sp,
-   						rot
-   					});
-
-
-
-   					// albedoColor
-   					// w: 1
-   					// x: 0.8851529
-   					// y: 0.9
-   					// z: 0.9716981
-   					// material1.albedoColor.w=1
-   					// material1.albedoColor.x=.2
-   					// material1.albedoColor.y=0.2
-   					// material1.albedoColor.z=.2
-   					utl.newScene.addChild(map2);
-   					utl.entityMap.set(rot.id, map2);
-   					utl.graph.grid[rot.start.x][rot.start.y].weight = 0;
-
-   					timeFrame.set(rot.id, {
-   						flag: true,
-   						// queryId:rot.start.queryId,
-   						list: [{
-   							start: rot.start,
-   							end: rot.end
-   						}]
-   					});
-   					let x = ~~(rot.end.x / 500 * 400);
-   					let y = ~~(rot.end.y / 500 * 400);
-   					utl.mapSp.graphics.drawCircle(x, 400 - y, 5, utl.pColor[rot.initPs]);
-
-   				}
-   				utl.entityMap.get(rot.id).time = time;
-   				if (timeFrame.get(rot.id).list.length == 1) {
-   					engMain(rot.id);
-   				}
-   				let p = utl.entityMap.get(rot.id).transform.position;
-   				let sp = utl.heroMap.get(rot.id).sp;
-
-
-
-   				let bleed = utl.heroMap.get(rot.id).rot.bleed / utl.allBleed;
-   				utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-   				sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
-   				sp.graphics.clear();
-   				sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
-   				sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[rot.initPs]);
-
-   				// utl.entityMap.get(rot.id).transform.position = new Laya.Vector3(-rot.end.x, 3,rot.end.y)
+   		if(s.list.length==0){
+   			return
+   		}
+   		for(let obj of s.list){
+   			if(utl.frameTimesMap.has(obj.id)){
+   				utl.frameTimesMap.get(obj.id).push(...obj.list);
+   			}else{
+   				utl.frameTimesMap.set(obj.id,obj.list);
    			}
    		}
-   		queryString();
-   		checkAndClear(time);
+   		
    	});
-   	// utl.socket.on('123456-moveGroup', (s) => {
-
-   	// 	resetGraph()
-   	// 	utl.mapSp.graphics.clear()
-   	// 	utl.mapSp.graphics.drawRect(0, 0, 400, 400, "#00000066");
-   	// 	let result = []
-   	// 	let {x,y} = s.target
-   	// 	let queryId = (new Date()).valueOf();
-   	//        for(let r of s.heros){ 
-   	//        	timeFrame.get(r.id).flag = false
-   	// 		timeFrame.get(r.id).list = []
-   	//         	let start = utl.graph.grid[r.x][r.y]
-   	//         	let end = utl.graph.grid[~~-x][~~y]
-   	//         	result = Astar.astar.search(utl.graph, start, end);
-   	//        	let ps = []
-   	//        	ps.push({
-   	//        	 	x:start.x,
-   	//             	y:start.y,
-   	//            })
-   	//         	for(let objd of result){
-   	//           		ps.push({
-   	//            	 	x:objd.x,
-   	//             		y:objd.y,
-   	//           		})
-   	//         	}
-   	//          r.result = ps
-   	//          timeFrame.get(r.id).flag = true
-   	//       }
-   	//         let msg = {
-   	//        userId: 'zzw',
-   	//        actionName:'moveGroup',
-   	//        heros:s.heros
-   	//      }
-
-   	//      utl.socket.emit('123456', msg);
-   	// });
    	utl.socket.on('event', function(data) {});
    	utl.socket.on('disconnect', function() {});
    	//------------------------------web-------------------
    };
-
-   function checkAndClear(time) {
-   	for (let id of utl.entityMap.keys()) {
-   		if (utl.entityMap.get(id).time < time - 3) {
-   			utl.entityMap.get(id).destroy();
-   			utl.heroMap.get(id).sp.destroy();
-   			utl.entityMap.delete(id);
-   			utl.heroMap.delete(id);
-   		}
-   	}
-   }
-
-   function queryString() {
-   	if (!ryMoveGroup) {
-   		return
-   	}
-   	let result = [];
-   	let {
-   		x,
-   		y
-   	} = ryMoveGroup.target;
-
-   	for (let r of ryMoveGroup.heros) {
-   		utl.graph.grid[r.x][r.y].weight = 1;
-   	}
-   	for (let r of ryMoveGroup.heros) {
-   		timeFrame.get(r.id).flag = false;
-   		timeFrame.get(r.id).list = [];
-   		let start = utl.graph.grid[r.x][r.y];
-   		let end = utl.graph.grid[~~-x][~~y];
-   		result = Astar.astar.search(utl.graph, start, end);
-   		let ps = [];
-   		ps.push({
-   			x: start.x,
-   			y: start.y,
-   		});
-   		for (let objd of result) {
-   			ps.push({
-   				x: objd.x,
-   				y: objd.y,
-   			});
-   		}
-   		r.result = ps;
-   		timeFrame.get(r.id).flag = true;
-   	}
-   	let msg = {
-   		playerId: utl.playerId,
-   		actionName: 'moveGroup',
-   		heros: ryMoveGroup.heros
-   	};
-   	utl.socket.emit('123456', msg);
-   }
-
-   function engMain(id) {
-   	let flag = timeFrame.get(id).flag;
-   	if (!flag) {
-   		return
-   	}
-   	let list = timeFrame.get(id).list;
-   	let obj = list[0];
-   	let frameObj = {
-   		id: id,
-   		x: obj.start.x,
-   		y: obj.start.y,
-   		list
-   	};
-   	// timeFrame.get(id).queryId = obj.start.queryId
-   	list.shift();
-   	Laya.Tween.to(frameObj, {
-   		x: obj.end.x,
-   		y: obj.end.y,
-   		update: new Laya.Handler(this, updateMove, [frameObj])
-   	}, 300, Laya.Ease.linearNone, Laya.Handler.create(this, tweend, [frameObj]), 0);
-   }
-
-   function updateMove(value) {
-   	if (!utl.entityMap.has(value.id)) {
-   		return
-   	}
-   	utl.entityMap.get(value.id).transform.position = new Laya.Vector3(-value.x, 3, value.y);
-
-   	let p = utl.entityMap.get(value.id).transform.position;
-   	let sp = utl.heroMap.get(value.id).sp;
-   	// utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-   	//    sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-50) / Laya.stage.clientScaleY);
-
-
-   	let bleed = utl.heroMap.get(value.id).rot.bleed / utl.allBleed;
-   	utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
-   	sp.pos((outPos.x - 40) / Laya.stage.clientScaleX, (outPos.y - 30) / Laya.stage.clientScaleY);
-   	sp.graphics.clear();
-   	sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
-   	sp.graphics.drawRect(30, 0, 30 * bleed, 10, utl.pColor[utl.heroMap.get(value.id).rot.initPs]);
-   	// sp.scaleX = sp.scaleY =  0.125 * p.z + 0.75;
-
-   	// let obj = value.val
-   	// if(obj.speed>0)
-
-   	// 	let box = utl.boxs.get(obj.id)
-   	// 	box.transform.translate(new Laya.Vector3(0,-obj.speed/10,0),true)
-   	// }
-
-   }
-
-   function tweend(obj) {
-
-   	if (!timeFrame.get(obj.id).flag) {
-   		return
-   	}
-   	let list = timeFrame.get(obj.id).list;
-   	// if(timeFrame.get(obj.id).queryId==list[0].start.queryId){
-
-   	if (list.length > 0) {
-   		engMain(obj.id);
-   	}
-   	// }
-
-
-   }
 
    /**
     * 本示例采用非脚本的方式实现，而使用继承页面基类，实现页面逻辑。在IDE里面设置场景的Runtime属性即可和场景进行关联
@@ -1448,7 +752,7 @@
    // function updateMove(obj) {
    //     utl.box.transform.translate(new Laya.Vector3(utl.speedMove / 5, 0, 0), true)
    // }
-   function updateMove$1(value) {
+   function updateMove(value) {
        utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = value.x;
        utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = value.sx;
        utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = value.sy;
@@ -1471,7 +775,7 @@
            this.plerPosition = new Laya.Vector3(0, 0, 0);
            this.townPosition = new Laya.Vector3(0, 40, 0);
            this.onW = new Laya.Vector3(0, 0, 0, 0);
-
+           socketMain();
 
            utl.newScene = this.newScene;
            this.initTouch();
@@ -1637,8 +941,9 @@
 
        }
        update() {
-           if (frameTimes.length > 0) {
-               let time = frameTimes.shift();
+           let list = utl.frameTimesMap.get(utl.id);
+           if (list&&list.length > 0) {
+               let time = list.shift();
 
                this.plerPosition.x = time.x;
                this.plerPosition.y = time.y;
@@ -1821,7 +1126,15 @@
            let rz = utl.kui.transform.localRotationEulerZ;
            let sx = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX;
            let sy = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerZ;
-           frameTimes.push({ x, y, z, rx, ry, rz, sx, sy });
+           // let str = JSON.stringify({
+           //     playerId:utl.id,
+           //     frame:{ x, y, z, rx, ry, rz, sx, sy }
+           // });
+           utl.socket.emit('123456',{
+               playerId:utl.id,
+               frame:{ x, y, z, rx, ry, rz, sx, sy }
+           });
+           // frameTimes.push({ x, y, z, rx, ry, rz, sx, sy })
        }
        downSpeed() {
            // if(utl.takeSpeed.z.toFixed(1)==.01){
@@ -2485,8 +1798,416 @@
        
    }
 
+   // javascript-astar 0.4.1
+   // http://github.com/bgrins/javascript-astar
+   // Freely distributable under the MIT License.
+   // Implements the astar search algorithm in javascript using a Binary Heap.
+   // Includes Binary Heap (with modifications) from Marijn Haverbeke.
+   // http://eloquentjavascript.net/appendix2.html
+   // (function(definition) {
+   //   /* global module, define */
+   //   if (typeof module === 'object' && typeof module.exports === 'object') {
+   //     module.exports = definition();
+   //   } else if (typeof define === 'function' && define.amd) {
+   //     define([], definition);
+   //   } else {
+   //     var exports = definition();
+   //     window.astar = exports.astar;
+   //     window.Graph = exports.Graph;
+   //   }
+   // })(function() {
+
+   function pathTo(node) {
+     var curr = node;
+     var path = [];
+     while (curr.parent) {
+       path.unshift(curr);
+       curr = curr.parent;
+     }
+     return path;
+   }
+
+   function getHeap() {
+     return new BinaryHeap(function(node) {
+       return node.f;
+     });
+   }
+
+   var astar = {
+     /**
+     * Perform an A* Search on a graph given a start and end node.
+     * @param {Graph} graph
+     * @param {GridNode} start
+     * @param {GridNode} end
+     * @param {Object} [options]
+     * @param {bool} [options.closest] Specifies whether to return the
+                path to the closest node if the target is unreachable.
+     * @param {Function} [options.heuristic] Heuristic function (see
+     *          astar.heuristics).
+     */
+     search: function(graph, start, end, options) {
+       graph.cleanDirty();
+       options = options || {};
+       var heuristic = options.heuristic || astar.heuristics.manhattan;
+       var closest = options.closest || false;
+
+       var openHeap = getHeap();
+       var closestNode = start; // set the start node to be the closest if required
+
+       start.h = heuristic(start, end);
+       graph.markDirty(start);
+
+       openHeap.push(start);
+
+       while (openHeap.size() > 0) {
+
+         // Grab the lowest f(x) to process next.  Heap keeps this sorted for us.
+         var currentNode = openHeap.pop();
+
+         // End case -- result has been found, return the traced path.
+         if (currentNode === end) {
+           return pathTo(currentNode);
+         }
+
+         // Normal case -- move currentNode from open to closed, process each of its neighbors.
+         currentNode.closed = true;
+
+         // Find all neighbors for the current node.
+         var neighbors = graph.neighbors(currentNode);
+
+         for (var i = 0, il = neighbors.length; i < il; ++i) {
+           var neighbor = neighbors[i];
+
+           if (neighbor.closed || neighbor.isWall()) {
+             // Not a valid node to process, skip to next neighbor.
+             continue;
+           }
+
+           // The g score is the shortest distance from start to current node.
+           // We need to check if the path we have arrived at this neighbor is the shortest one we have seen yet.
+           var gScore = currentNode.g + neighbor.getCost(currentNode);
+           var beenVisited = neighbor.visited;
+
+           if (!beenVisited || gScore < neighbor.g) {
+
+             // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
+             neighbor.visited = true;
+             neighbor.parent = currentNode;
+             neighbor.h = neighbor.h || heuristic(neighbor, end);
+             neighbor.g = gScore;
+             neighbor.f = neighbor.g + neighbor.h;
+             graph.markDirty(neighbor);
+             if (closest) {
+               // If the neighbour is closer than the current closestNode or if it's equally close but has
+               // a cheaper path than the current closest node then it becomes the closest node
+               if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
+                 closestNode = neighbor;
+               }
+             }
+
+             if (!beenVisited) {
+               // Pushing to heap will put it in proper place based on the 'f' value.
+               openHeap.push(neighbor);
+             } else {
+               // Already seen the node, but since it has been rescored we need to reorder it in the heap
+               openHeap.rescoreElement(neighbor);
+             }
+           }
+         }
+       }
+
+       if (closest) {
+         return pathTo(closestNode);
+       }
+
+       // No result was found - empty array signifies failure to find path.
+       return [];
+     },
+     // See list of heuristics: http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+     heuristics: {
+       manhattan: function(pos0, pos1) {
+         var d1 = Math.abs(pos1.x - pos0.x);
+         var d2 = Math.abs(pos1.y - pos0.y);
+         return d1 + d2;
+       },
+       diagonal: function(pos0, pos1) {
+         var D = 1;
+         var D2 = Math.sqrt(2);
+         var d1 = Math.abs(pos1.x - pos0.x);
+         var d2 = Math.abs(pos1.y - pos0.y);
+         return (D * (d1 + d2)) + ((D2 - (2 * D)) * Math.min(d1, d2));
+       }
+     },
+     cleanNode: function(node) {
+       node.f = 0;
+       node.g = 0;
+       node.h = 0;
+       node.visited = false;
+       node.closed = false;
+       node.parent = null;
+     }
+   };
+
+   /**
+    * A graph memory structure
+    * @param {Array} gridIn 2D array of input weights
+    * @param {Object} [options]
+    * @param {bool} [options.diagonal] Specifies whether diagonal moves are allowed
+    */
+   function Graph(gridIn, options) {
+     options = options || {};
+     this.nodes = [];
+     this.diagonal = !!options.diagonal;
+     this.grid = [];
+     for (var x = 0; x < gridIn.length; x++) {
+       this.grid[x] = [];
+
+       for (var y = 0, row = gridIn[x]; y < row.length; y++) {
+         var node = new GridNode(x, y, row[y]);
+         this.grid[x][y] = node;
+         this.nodes.push(node);
+       }
+     }
+     this.init();
+   }
+
+   Graph.prototype.init = function() {
+     this.dirtyNodes = [];
+     for (var i = 0; i < this.nodes.length; i++) {
+       astar.cleanNode(this.nodes[i]);
+     }
+   };
+
+   Graph.prototype.cleanDirty = function() {
+     for (var i = 0; i < this.dirtyNodes.length; i++) {
+       astar.cleanNode(this.dirtyNodes[i]);
+     }
+     this.dirtyNodes = [];
+   };
+
+   Graph.prototype.markDirty = function(node) {
+     this.dirtyNodes.push(node);
+   };
+
+   Graph.prototype.neighbors = function(node) {
+     var ret = [];
+     var x = node.x;
+     var y = node.y;
+     var grid = this.grid;
+
+     // West
+     if (grid[x - 1] && grid[x - 1][y]) {
+       ret.push(grid[x - 1][y]);
+     }
+
+     // East
+     if (grid[x + 1] && grid[x + 1][y]) {
+       ret.push(grid[x + 1][y]);
+     }
+
+     // South
+     if (grid[x] && grid[x][y - 1]) {
+       ret.push(grid[x][y - 1]);
+     }
+
+     // North
+     if (grid[x] && grid[x][y + 1]) {
+       ret.push(grid[x][y + 1]);
+     }
+
+     if (this.diagonal) {
+       // Southwest
+       if (grid[x - 1] && grid[x - 1][y - 1]) {
+         ret.push(grid[x - 1][y - 1]);
+       }
+
+       // Southeast
+       if (grid[x + 1] && grid[x + 1][y - 1]) {
+         ret.push(grid[x + 1][y - 1]);
+       }
+
+       // Northwest
+       if (grid[x - 1] && grid[x - 1][y + 1]) {
+         ret.push(grid[x - 1][y + 1]);
+       }
+
+       // Northeast
+       if (grid[x + 1] && grid[x + 1][y + 1]) {
+         ret.push(grid[x + 1][y + 1]);
+       }
+     }
+
+     return ret;
+   };
+
+   Graph.prototype.toString = function() {
+     var graphString = [];
+     var nodes = this.grid;
+     for (var x = 0; x < nodes.length; x++) {
+       var rowDebug = [];
+       var row = nodes[x];
+       for (var y = 0; y < row.length; y++) {
+         rowDebug.push(row[y].weight);
+       }
+       graphString.push(rowDebug.join(" "));
+     }
+     return graphString.join("\n");
+   };
+
+   function GridNode(x, y, weight) {
+     this.x = x;
+     this.y = y;
+     this.weight = weight;
+   }
+
+   GridNode.prototype.toString = function() {
+     return "[" + this.x + " " + this.y + "]";
+   };
+
+   GridNode.prototype.getCost = function(fromNeighbor) {
+     // Take diagonal weight into consideration.
+     if (fromNeighbor && fromNeighbor.x != this.x && fromNeighbor.y != this.y) {
+       return this.weight * 1.41421;
+     }
+     return this.weight;
+   };
+
+   GridNode.prototype.isWall = function() {
+     return this.weight === 0;
+   };
+
+   function BinaryHeap(scoreFunction) {
+     this.content = [];
+     this.scoreFunction = scoreFunction;
+   }
+
+   BinaryHeap.prototype = {
+     push: function(element) {
+       // Add the new element to the end of the array.
+       this.content.push(element);
+
+       // Allow it to sink down.
+       this.sinkDown(this.content.length - 1);
+     },
+     pop: function() {
+       // Store the first element so we can return it later.
+       var result = this.content[0];
+       // Get the element at the end of the array.
+       var end = this.content.pop();
+       // If there are any elements left, put the end element at the
+       // start, and let it bubble up.
+       if (this.content.length > 0) {
+         this.content[0] = end;
+         this.bubbleUp(0);
+       }
+       return result;
+     },
+     remove: function(node) {
+       var i = this.content.indexOf(node);
+
+       // When it is found, the process seen in 'pop' is repeated
+       // to fill up the hole.
+       var end = this.content.pop();
+
+       if (i !== this.content.length - 1) {
+         this.content[i] = end;
+
+         if (this.scoreFunction(end) < this.scoreFunction(node)) {
+           this.sinkDown(i);
+         } else {
+           this.bubbleUp(i);
+         }
+       }
+     },
+     size: function() {
+       return this.content.length;
+     },
+     rescoreElement: function(node) {
+       this.sinkDown(this.content.indexOf(node));
+     },
+     sinkDown: function(n) {
+       // Fetch the element that has to be sunk.
+       var element = this.content[n];
+
+       // When at 0, an element can not sink any further.
+       while (n > 0) {
+
+         // Compute the parent element's index, and fetch it.
+         var parentN = ((n + 1) >> 1) - 1;
+         var parent = this.content[parentN];
+         // Swap the elements if the parent is greater.
+         if (this.scoreFunction(element) < this.scoreFunction(parent)) {
+           this.content[parentN] = element;
+           this.content[n] = parent;
+           // Update 'n' to continue at the new position.
+           n = parentN;
+         }
+         // Found a parent that is less, no need to sink any further.
+         else {
+           break;
+         }
+       }
+     },
+     bubbleUp: function(n) {
+       // Look up the target element and its score.
+       var length = this.content.length;
+       var element = this.content[n];
+       var elemScore = this.scoreFunction(element);
+
+       while (true) {
+         // Compute the indices of the child elements.
+         var child2N = (n + 1) << 1;
+         var child1N = child2N - 1;
+         // This is used to store the new position of the element, if any.
+         var swap = null;
+         var child1Score;
+         // If the first child exists (is inside the array)...
+         if (child1N < length) {
+           // Look it up and compute its score.
+           var child1 = this.content[child1N];
+           child1Score = this.scoreFunction(child1);
+
+           // If the score is less than our element's, we need to swap.
+           if (child1Score < elemScore) {
+             swap = child1N;
+           }
+         }
+
+         // Do the same checks for the other child.
+         if (child2N < length) {
+           var child2 = this.content[child2N];
+           var child2Score = this.scoreFunction(child2);
+           if (child2Score < (swap === null ? elemScore : child1Score)) {
+             swap = child2N;
+           }
+         }
+
+         // If the element needs to be moved, swap it, and continue.
+         if (swap !== null) {
+           this.content[n] = this.content[swap];
+           this.content[swap] = element;
+           n = swap;
+         }
+         // Otherwise, we are done.
+         else {
+           break;
+         }
+       }
+     }
+   };
+
+   const Astar = {
+     astar: astar,
+     Graph: Graph
+   };
+   // module.exports={
+   //   astar: astar,
+   //   Graph: Graph
+   // };
+   // });
+
    let rots = [];
-   let outPos$1 = new Laya.Vector3();
+   let outPos = new Laya.Vector3();
     class newtach {
       constructor() {
         this.status = 0;
@@ -2855,8 +2576,8 @@
                let netRot = utl.heroMap.get(key).rot;
                let p = en.transform.position;
                let bleed = netRot.bleed/utl.allBleed;
-               utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos$1);
-               sp.pos((outPos$1.x-40) / Laya.stage.clientScaleX, (outPos$1.y-30) / Laya.stage.clientScaleY);
+               utl.camera.viewport.project(p, utl.camera.projectionViewMatrix, outPos);
+               sp.pos((outPos.x-40) / Laya.stage.clientScaleX, (outPos.y-30) / Laya.stage.clientScaleY);
                sp.graphics.clear();
                sp.graphics.drawRect(30, 0, 30, 10, "#ffffff");
                sp.graphics.drawRect(30, 0, 30*bleed, 10, utl.pColor[netRot.initPs]);
@@ -4308,7 +4029,7 @@
 
    let websocket$1 = null;
    let allBoy = [];
-   function createGraph$1() {
+   function createGraph() {
    	let list = [];
    	for (let i = 0; i < 500; i++) {
    	    let list1 = [];
@@ -4320,7 +4041,7 @@
 
    	utl.graph = new Astar$1.Graph(list);
    }
-   function resetGraph$1(){
+   function resetGraph(){
    	for(let obj of utl.graph.grid){
    		for(let indexObj of obj){
    			indexObj.weight = 1;
@@ -4445,10 +4166,10 @@
 
    let flag$1 = true;  
 
-   function updateMove$2(obj){
+   function updateMove$1(obj){
       utl.box.transform.translate(new Laya.Vector3(utl.speedMove/5,0,0),true);
    }
-   function tweend$1(){
+   function tweend(){
 
       let tweenObj= {
           x:0
@@ -4456,10 +4177,10 @@
       Laya.Tween.to(
                   tweenObj,
                   {x:10,
-                  update:new Laya.Handler(this,updateMove$2,[tweenObj])},
+                  update:new Laya.Handler(this,updateMove$1,[tweenObj])},
                   50,
                   Laya.Ease.linearNone,
-                  Laya.Handler.create(this,tweend$1,[tweenObj]),
+                  Laya.Handler.create(this,tweend,[tweenObj]),
               0);
       // flag = true
    }

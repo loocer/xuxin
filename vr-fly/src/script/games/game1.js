@@ -54,7 +54,7 @@ export default class GameUI extends Laya.Scene {
         this.plerPosition = new Laya.Vector3(0, 0, 0)
         this.townPosition = new Laya.Vector3(0, 40, 0)
         this.onW = new Laya.Vector3(0, 0, 0, 0)
-
+        socketMain()
 
         utl.newScene = this.newScene
         this.initTouch()
@@ -79,7 +79,7 @@ export default class GameUI extends Laya.Scene {
 
 
 
-        Laya.timer.loop(50, this, this.flying);
+        Laya.timer.loop(30, this, this.flying);
         Laya.timer.loop(50, this, this.update);
 
         // let map2 = utl.models.get('cube')
@@ -220,8 +220,9 @@ export default class GameUI extends Laya.Scene {
 
     }
     update() {
-        if (frameTimes.length > 0) {
-            let time = frameTimes.shift()
+        let list = utl.frameTimesMap.get(utl.id)
+        if (list&&list.length > 0) {
+            let time = list.shift()
 
             this.plerPosition.x = time.x
             this.plerPosition.y = time.y
@@ -404,7 +405,15 @@ export default class GameUI extends Laya.Scene {
         let rz = utl.kui.transform.localRotationEulerZ
         let sx = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX
         let sy = utl.kui.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerZ
-        frameTimes.push({ x, y, z, rx, ry, rz, sx, sy })
+        // let str = JSON.stringify({
+        //     playerId:utl.id,
+        //     frame:{ x, y, z, rx, ry, rz, sx, sy }
+        // });
+        utl.socket.emit('123456',{
+            playerId:utl.id,
+            frame:{ x, y, z, rx, ry, rz, sx, sy }
+        });
+        // frameTimes.push({ x, y, z, rx, ry, rz, sx, sy })
     }
     downSpeed() {
         // if(utl.takeSpeed.z.toFixed(1)==.01){

@@ -1,6 +1,6 @@
 export default  {
     id:Date.parse(new  Date())+'',
-    entityMap:new Map(),
+    frameTimesMap:new Map(),
     playerId:'zzw',
     allBleed:100,
     pColor:{
