@@ -28,7 +28,7 @@ class Room {
    work(io){
       setInterval(()=>{
          this.pushMsg(io)
-     },300)
+     },30)
    }
    pushMsg(io) {
       // let glist =[]

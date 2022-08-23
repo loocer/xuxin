@@ -8,12 +8,14 @@ class Player {
       this.killNum = 0
    }
    getPushMsg() {
-      let list = []
-      if(this.frame.length<10){
-         list = this.frame
-      }else{
-         list = this.frame.splice(0,10);
-      }
+      // let list = []
+      // if(this.frame.length<10){
+      //    list = this.frame
+      // }else{
+      //    list = this.frame.splice(0,10);
+      // }
+      let list = [...this.frame]
+      this.frame = []
       return {
          list,
          id:this.id

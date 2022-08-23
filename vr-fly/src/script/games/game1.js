@@ -51,7 +51,7 @@ export default class GameUI extends Laya.Scene {
         this.loadScene("test/game1.scene");
         this.newScene = Laya.stage.addChild(new Laya.Scene3D());
         this.loadingElse = new Map(utl.loadingElse)
-        this.plerPosition = new Laya.Vector3(0, 0, 0)
+       
         this.townPosition = new Laya.Vector3(0, 40, 0)
         this.onW = new Laya.Vector3(0, 0, 0, 0)
         socketMain()
@@ -80,7 +80,7 @@ export default class GameUI extends Laya.Scene {
 
 
         Laya.timer.loop(30, this, this.flying);
-        Laya.timer.loop(50, this, this.update);
+        Laya.timer.loop(30, this, this.update);
 
         // let map2 = utl.models.get('cube')
         // map2.getChildByName('on').active = false
@@ -104,11 +104,7 @@ export default class GameUI extends Laya.Scene {
         utl.town.transform.position = this.townPosition
 
 
-        let pler = utl.models.get('pler')
-        utl.pler = pler
-        window.pler = pler
-        this.newScene.addChild(pler);
-        utl.pler.transform.position = this.plerPosition
+        
 
         let kui = utl.models.get('kui')
         utl.kui = kui
@@ -219,7 +215,75 @@ export default class GameUI extends Laya.Scene {
         }
 
     }
+    updateOneFlay(id){
+        let list = utl.frameTimesMap.get(id)
+        let pler = utl.flyers.get(id) 
+        if (list&&list.length > 0) {
+            let time = list.shift()
+            let plerPosition = new Laya.Vector3( time.x, time.y, time.z)
+            // this.plerPosition.x = time.x
+            // this.plerPosition.y = time.y
+            // this.plerPosition.z = time.z
+           
+            pler.transform.position = plerPosition
+            pler.transform.localRotationEulerX = time.rx
+            pler.transform.localRotationEulerY = time.ry
+            pler.transform.localRotationEulerZ = time.rz
+
+            // let sx = utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX
+            // let sy = utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY
+
+            // let nowx = utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX
+
+
+            
+            pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = time.sx*2
+            pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = time.sy
+
+            if(id==utl.id){
+                this.townPosition.x = time.x
+                this.townPosition.z = time.z
+                utl.town.transform.position = this.townPosition
+                pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx
+            }
+
+            // utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx/2
+
+
+            // let frameObj = {
+            //     x: nowx,
+            //     sx,
+            //     sy
+            // }
+            // Laya.Tween.to(frameObj, {
+            //     x: time.sx,
+            //     sx:time.sx*2,
+            //     sy:time.sy,
+            //     update: new Laya.Handler(this, updateMove, [frameObj])
+            // }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [frameObj]), 0);
+        }
+    }
     update() {
+        
+        let fs = utl.flyers
+        let frams = utl.frameTimesMap
+
+        for(let key of frams.keys()){
+            if(fs.has(key)){
+                this.updateOneFlay(key)
+            }else{
+                let pler = utl.models.get('pler').clone()
+                this.newScene.addChild(pler);
+                fs.set(key,pler)
+                this.updateOneFlay(key)
+                if(utl.id!=key){
+                    pler.getChildByName('shipmain').getChildByName('g1').active = false
+                }else{
+                    window.did = pler.getChildByName('shipmain').getChildByName('g1')
+                }
+            }
+        }
+        return
         let list = utl.frameTimesMap.get(utl.id)
         if (list&&list.length > 0) {
             let time = list.shift()
