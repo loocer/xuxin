@@ -114,12 +114,12 @@ export default class GameUI extends Laya.Scene {
         utl.plane = plane
         window.pan = plane
         this.newScene.addChild(plane);
-        let pas = plane.getChildByName('pas')
-        for (let i = 1; i < 6; i++) {
-            let tp = plane.getChildByName('p' + i)
+        // let pas = plane.getChildByName('pas')
+        // for (let i = 1; i < 6; i++) {
+        //     let tp = plane.getChildByName('p' + i)
 
-            tp.addChild(pas.clone())
-        }
+        //     tp.addChild(pas.clone())
+        // }
 
     }
     addMouseEvent() {
@@ -218,9 +218,16 @@ export default class GameUI extends Laya.Scene {
     updateOneFlay(id){
         let list = utl.frameTimesMap.get(id)
         let pler = utl.flyers.get(id) 
+
+        if(utl.frameAddIndex+10<utl.frameGetIndex){
+            list = []
+            return
+        }
+
         if (list&&list.length > 0) {
             let time = list.shift()
             let plerPosition = new Laya.Vector3( time.x, time.y, time.z)
+            
             // this.plerPosition.x = time.x
             // this.plerPosition.y = time.y
             // this.plerPosition.z = time.z
@@ -241,8 +248,9 @@ export default class GameUI extends Laya.Scene {
             pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = time.sy
 
             if(id==utl.id){
-                this.townPosition.x = time.x
-                this.townPosition.z = time.z
+                // this.townPosition.x = time.x
+                // this.townPosition.z = time.z
+                this.townPosition = new Laya.Vector3( time.x, 36, time.z)
                 utl.town.transform.position = this.townPosition
                 pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx
             }
@@ -268,6 +276,19 @@ export default class GameUI extends Laya.Scene {
         let fs = utl.flyers
         let frams = utl.frameTimesMap
 
+        if(utl.frameAddIndex>utl.frameGetIndex+3){
+            utl.updateFlag = false
+        }
+        if(utl.updateFlag){
+            if(utl.frameAddIndex==utl.frameGetIndex+1){
+                utl.updateFlag = false
+            }
+        }
+        if(utl.frameAddIndex<=utl.frameGetIndex){
+            utl.updateFlag = true
+            return
+        }
+        utl.frameGetIndex++
         for(let key of frams.keys()){
             if(fs.has(key)){
                 this.updateOneFlay(key)
@@ -382,12 +403,12 @@ export default class GameUI extends Laya.Scene {
             utl.tachSpeed.z = 0
         }
         if (!touchsMap.get('newTor').flag) {
-            // utl.tachSpeed.x = 0
-            // utl.tachSpeed.y = 0
-            Laya.Tween.to(utl.tachSpeed, {
-                y:0,
-                update: new Laya.Handler(this, null, [utl.tachSpeed])
-              }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
+            utl.tachSpeed.x = 0
+            utl.tachSpeed.y = 0
+            // Laya.Tween.to(utl.tachSpeed, {
+            //     y:0,
+            //     update: new Laya.Handler(this, null, [utl.tachSpeed])
+            //   }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
         }
         // if(!fireFlag){
         // utl.fireOnOff = touchsMap.get('rightTouch').flag
@@ -447,20 +468,20 @@ export default class GameUI extends Laya.Scene {
         // console.log(utl.kui.transform.rotationEuler.x,utl.kui.transform.rotationEuler.y,utl.kui.transform.rotationEuler.z)
     }
     getTakeSpeed() {
-        // if (utl.tachSpeed.x < utl.takeSpeed.x) {
-        //     utl.takeSpeed.x -= 5
-        // }
-        // if (utl.tachSpeed.x > utl.takeSpeed.x) {
-        //     utl.takeSpeed.x += 5
-        // }
-        // if (utl.tachSpeed.y < utl.takeSpeed.y) {
-        //     utl.takeSpeed.y -= 5
-        // }
-        // if (utl.tachSpeed.y > utl.takeSpeed.y) {
-        //     utl.takeSpeed.y += 5
-        // }
-        utl.takeSpeed.x = utl.tachSpeed.x
-        utl.takeSpeed.y = utl.tachSpeed.y
+        if (utl.tachSpeed.x < utl.takeSpeed.x) {
+            utl.takeSpeed.x -= 2
+        }
+        if (utl.tachSpeed.x > utl.takeSpeed.x) {
+            utl.takeSpeed.x += 2
+        }
+        if (utl.tachSpeed.y < utl.takeSpeed.y) {
+            utl.takeSpeed.y -= 2
+        }
+        if (utl.tachSpeed.y > utl.takeSpeed.y) {
+            utl.takeSpeed.y += 2
+        }
+        // utl.takeSpeed.x = utl.tachSpeed.x
+        // utl.takeSpeed.y = utl.tachSpeed.y
     }
     getFrame() {
         let { x, y, z } = utl.kui.transform.position
@@ -477,6 +498,8 @@ export default class GameUI extends Laya.Scene {
             playerId:utl.id,
             frame:{ x, y, z, rx, ry, rz, sx, sy }
         });
+       
+        
         // frameTimes.push({ x, y, z, rx, ry, rz, sx, sy })
     }
     downSpeed() {

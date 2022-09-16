@@ -22,7 +22,7 @@ class Player {
       }
    }
    addFrame(obj){
-      this.frame.push(obj)
+      this.frame=[obj]
    }
 }
 module.exports = Player

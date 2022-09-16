@@ -4,7 +4,7 @@ import Bullet from "../entity/bullet.js"
 
 let Event = Laya.Event;
 let result = {}
-
+// var io = require("../io.js");
 let websocket = null
 let timeFrame = new Map()
 
@@ -46,11 +46,12 @@ export const socketMain = () => {
 	// return
 	// utl.socket = io('ws://192.168.0.105:3000');
 	// utl.socket = io('ws://192.168.11.37:3000');
-	utl.socket = io('ws://192.168.0.106:3000');
+	utl.socket = io('ws://121.196.222.174:3000');
 	utl.socket.on('123456', (s) => {
 		if(s.list.length==0){
 			return
 		}
+		utl.frameAddIndex++
 		for(let obj of s.list){
 			if(utl.frameTimesMap.has(obj.id)){
 				utl.frameTimesMap.get(obj.id).push(...obj.list)

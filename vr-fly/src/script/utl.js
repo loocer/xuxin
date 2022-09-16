@@ -3,6 +3,7 @@ export default  {
     frameTimesMap:new Map(),
     playerId:'zzw',
     allBleed:100,
+    updateFlag:false,
     flyers:new Map(),
     pColor:{
         'p1':'#00ffff',

@@ -86,8 +86,8 @@ export default class newTwo {
     } else {
       tempy = (py - this.ty - this.theight / 2) / (this.theight / 2)
     }
-    // utl.tachSpeed.x = -tempy * 180
-    // utl.tachSpeed.y = -tempx * 90
+    utl.tachSpeed.x = -tempy * 180
+    utl.tachSpeed.y = -tempx * 90
     // if (utl.tachSpeed.x > 180) {
     //   utl.tachSpeed.x = 180
     // }
@@ -104,11 +104,11 @@ export default class newTwo {
     //   x:utl.tachSpeed.x,
     //   y:utl.tachSpeed.y
     // }
-    Laya.Tween.to(utl.tachSpeed, {
-      x: -tempy * 180,
-      y:-tempx * 90,
-      update: new Laya.Handler(this, null, [utl.tachSpeed])
-    }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
+    // Laya.Tween.to(utl.tachSpeed, {
+    //   x: -tempy * 180,
+    //   y:-tempx * 90,
+    //   update: new Laya.Handler(this, null, [utl.tachSpeed])
+    // }, 1000, Laya.Ease.linearNone, Laya.Handler.create(this, null, [utl.tachSpeed]), 0);
     // let pobj = {}
     // pobj.x1 = px //点击
     // pobj.x2 =this.tx + this.twidth/2

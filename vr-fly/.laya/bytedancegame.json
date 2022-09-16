@@ -69,9 +69,11 @@
     "useMinJsLibs": true,
     "es6toes5": false,
     "projectType": "js",
-    "pubTime": 1645259971154,
+    "pubTime": 1662506229408,
     "bytedanceInfo": {
-        "orientation": "landscape"
+        "orientation": "landscape",
+        "subpack": false,
+        "ispagesub": false
     },
-    "uesEnginePlugin": false
+    "bytedanceSubpack": []
 }
