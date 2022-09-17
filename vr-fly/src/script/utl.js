@@ -1,10 +1,14 @@
 export default  {
     id:Date.parse(new  Date())+'',
     frameTimesMap:new Map(),
+    frameGetIndex:0,
+    frameAddIndex:0,
     playerId:'zzw',
     allBleed:100,
-    updateFlag:false,
+    updateFlag:true,
+    stopFlag:true,
     flyers:new Map(),
+    updateDraw:null,
     pColor:{
         'p1':'#00ffff',
         'p2':'#0000ff'

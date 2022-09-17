@@ -59,8 +59,9 @@ export default class GameUI extends Laya.Scene {
         utl.newScene = this.newScene
         this.initTouch()
         // this.addMouseEvent();
+        this.log = '434'
         this.info = new Laya.Text();
-        this.info.text = 'kill num:'
+        this.info.text = this.log
         this.info.fontSize = 50;
         this.info.color = "#FFFFFF";
         this.info.size(Laya.stage.width, Laya.stage.height);
@@ -80,7 +81,7 @@ export default class GameUI extends Laya.Scene {
 
 
         Laya.timer.loop(30, this, this.flying);
-        Laya.timer.loop(30, this, this.update);
+        // Laya.timer.loop(30, this, this.update);
 
         // let map2 = utl.models.get('cube')
         // map2.getChildByName('on').active = false
@@ -219,7 +220,8 @@ export default class GameUI extends Laya.Scene {
         let list = utl.frameTimesMap.get(id)
         let pler = utl.flyers.get(id) 
 
-        if(utl.frameAddIndex+10<utl.frameGetIndex){
+        if(utl.frameAddIndex>10+utl.frameGetIndex){
+            utl.frameGetIndex=utl.frameAddIndex
             list = []
             return
         }
@@ -271,21 +273,26 @@ export default class GameUI extends Laya.Scene {
             // }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [frameObj]), 0);
         }
     }
+    contFrame(){
+        if(utl.stopFlag){
+            if(utl.frameAddIndex>utl.frameGetIndex+10){
+                utl.stopFlag = false
+            }
+        }else{
+            if(utl.frameAddIndex==utl.frameGetIndex){
+                utl.stopFlag = true
+            }
+        }
+       
+    }
     update() {
         
         let fs = utl.flyers
         let frams = utl.frameTimesMap
-
-        if(utl.frameAddIndex>utl.frameGetIndex+3){
-            utl.updateFlag = false
-        }
-        if(utl.updateFlag){
-            if(utl.frameAddIndex==utl.frameGetIndex+1){
-                utl.updateFlag = false
-            }
-        }
-        if(utl.frameAddIndex<=utl.frameGetIndex){
-            utl.updateFlag = true
+        this.log = utl.frameAddIndex-utl.frameGetIndex
+        utl.info.text = this.log
+        this.contFrame()
+        if(utl.stopFlag){
             return
         }
         utl.frameGetIndex++
@@ -417,7 +424,7 @@ export default class GameUI extends Laya.Scene {
         // }
         // this.info.text = flagod+','+touchCount
         this.flyUpdate()
-
+        this.update()
     }
     flyUpdate() {
         this.getTakeSpeed()

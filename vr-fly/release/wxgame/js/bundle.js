@@ -1,12 +1,15 @@
 (function () {
    'use strict';
-
+   var io = require("../io.js");
    var utl = {
        id:Date.parse(new  Date())+'',
        frameTimesMap:new Map(),
+       frameGetIndex:0,
+       frameAddIndex:0,
        playerId:'zzw',
        allBleed:100,
-       updateFlag:false,
+       updateFlag:true,
+       stopFlag:true,
        flyers:new Map(),
        pColor:{
            'p1':'#00ffff',
@@ -711,8 +714,8 @@
    	// // })
    	// return
    	// utl.socket = io('ws://192.168.0.105:3000');
-   	// utl.socket = io('ws://192.168.11.37:3000');
-   	utl.socket = io('ws://121.196.222.174:3000');
+   	// utl.socket = io('http://121.196.222.174:3000');
+   	utl.socket = io('https://hunchun828.top');
    	utl.socket.on('123456', (s) => {
    		if(s.list.length==0){
    			return
@@ -995,21 +998,25 @@
                // }, 300, Laya.Ease.linearNone, Laya.Handler.create(this, null, [frameObj]), 0);
            }
        }
+       contFrame(){
+           if(utl.stopFlag){
+               if(utl.frameAddIndex>utl.frameGetIndex+5){
+                   utl.stopFlag = false;
+               }
+           }else{
+               if(utl.frameAddIndex==utl.frameGetIndex){
+                   utl.stopFlag = true;
+               }
+           }
+          
+       }
        update() {
            
            let fs = utl.flyers;
            let frams = utl.frameTimesMap;
 
-           if(utl.frameAddIndex>utl.frameGetIndex+3){
-               utl.updateFlag = false;
-           }
-           if(utl.updateFlag){
-               if(utl.frameAddIndex==utl.frameGetIndex+1){
-                   utl.updateFlag = false;
-               }
-           }
-           if(utl.frameAddIndex<=utl.frameGetIndex){
-               utl.updateFlag = true;
+           this.contFrame();
+           if(utl.stopFlag){
                return
            }
            utl.frameGetIndex++;
@@ -1696,11 +1703,11 @@
            // ['pler','res/LayaScene_fly/Conventional/pler.lh'],
            // ['kui','res/LayaScene_fly/Conventional/kui.lh'],
            // ['plane','res/LayaScene_fly/Conventional/dimian.lh'],
-   		['light','http://121.196.222.174/img/LayaScene_fly/Conventional/light.lh'],
-           ['town','http://121.196.222.174/img/LayaScene_fly/Conventional/town.lh'],
-           ['pler','http://121.196.222.174/img/LayaScene_fly/Conventional/pler.lh'],
-           ['kui','http://121.196.222.174/img/LayaScene_fly/Conventional/kui.lh'],
-           ['plane','http://121.196.222.174/img/LayaScene_fly/Conventional/dimian.lh'],
+   		['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
+           ['town','https://hunchun828.top/img/LayaScene_fly/Conventional/town.lh'],
+           ['pler','https://hunchun828.top/img/LayaScene_fly/Conventional/pler.lh'],
+           ['kui','https://hunchun828.top/img/LayaScene_fly/Conventional/kui.lh'],
+           ['plane','https://hunchun828.top/img/LayaScene_fly/Conventional/dimian.lh'],
    	],
        [
    		// ['light','http://121.196.222.174/img/LayaScene_fly/Conventional/light.lh'],
@@ -1709,11 +1716,11 @@
            // ['kui','http://121.196.222.174/img/LayaScene_fly/Conventional/kui.lh'],
            // ['plane','http://121.196.222.174/img/LayaScene_fly/Conventional/dimian.lh'],
 
-           ['light','res/LayaScene_fly/Conventional/light.lh'],
-           ['town','res/LayaScene_fly/Conventional/town.lh'],
-           ['pler','res/LayaScene_fly/Conventional/pler.lh'],
-           ['kui','res/LayaScene_fly/Conventional/kui.lh'],
-           ['plane','res/LayaScene_fly/Conventional/dimian.lh'],
+           ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
+           ['town','https://hunchun828.top/img/LayaScene_fly/Conventional/town.lh'],
+           ['pler','https://hunchun828.top/img/LayaScene_fly/Conventional/pler.lh'],
+           ['kui','https://hunchun828.top/img/LayaScene_fly/Conventional/kui.lh'],
+           ['plane','https://hunchun828.top/img/LayaScene_fly/Conventional/dimian.lh'],
    	]
    ];
 

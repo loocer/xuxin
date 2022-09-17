@@ -44,10 +44,10 @@ export const socketMain = () => {
 
 	// // })
 	// return
-	// utl.socket = io('ws://192.168.0.105:3000');
+	utl.socket = io('ws://192.168.0.104:3000');
 	// utl.socket = io('http://121.196.222.174:3000');
-	utl.socket = io('https://hunchun828.top');
-	utl.socket.on('123456', (s) => {
+	// utl.socket = io('https://hunchun828.top');
+	utl.socket.on(utl.id, (s) => {
 		if(s.list.length==0){
 			return
 		}

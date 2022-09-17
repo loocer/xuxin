@@ -15,7 +15,7 @@ class Room {
    update() {
       
    }
-   receive(msg) { //{userId:0,heros:[],coordinate:{x,y,z}}
+   receive(msg,io) { //{playerId:0}}
       let {players} = this
       if(players.has(msg.playerId)){
          let p = players.get(msg.playerId)
@@ -24,45 +24,22 @@ class Room {
          let p = this.addPlayer(msg.playerId)
          p.addFrame(msg.frame)
       }
+      this.pushMsg(msg.playerId,io)
    }
    work(io){
-      setInterval(()=>{
-         this.pushMsg(io)
-     },30)
+   //    setInterval(()=>{
+   //       this.pushMsg(io)
+   //   },30)
    }
-   pushMsg(io) {
-      // let glist =[]
-      // for(let graid of this.graph.grid){
-      //    for(let objd of graid){
-      //       if(objd.weight==0){
-      //          glist.push({
-      //             x:objd.x,
-      //             y:objd.y,
-      //          })
-      //       }
-      //       // objd.weight=1
-      //    }
-      // }
+   pushMsg(id,io) {
+     
       let list = []
       for (let obj of this.players.values()) {
          list.push(obj.getPushMsg())
       }
-     
-      
-      io.emit(this.id, {
+      io.emit(id, {
          list
       });
-     
-      // io.emit('123456-observer', {
-      //    glist
-      // });
-      // for(let obj of this.moveGroups){
-      //    io.emit(obj.id, {
-      //       heros:obj.heros,
-      //       target:obj.target
-      //    });
-      // }
-      // this.moveGroups = []
    }
 }
 module.exports = Room
