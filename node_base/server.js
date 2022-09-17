@@ -56,8 +56,8 @@ const httpsServer = https.createServer(credentials, app);
 const io = require('socket.io')(httpsServer);
 const port = process.env.PORT || 3001;
 
-app.get('/828index', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/828index/index.html');
 });
 socketManner(io)
 // io.on('connection', (socket) => {
