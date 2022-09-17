@@ -3,7 +3,6 @@ let Main = require('./main')
 const https = require('https');
 const fs = require('fs');
 const app = require('express')();
-const httpProxy = require('http-proxy');
 
 // const privateKey = fs.readFileSync('./6360482_xuxin.love.key');
 // const certificate = fs.readFileSync('./6360482_xuxin.love.pem');
