@@ -45,8 +45,8 @@ export const socketMain = () => {
 	// // })
 	// return
 	// utl.socket = io('ws://192.168.0.105:3000');
-	utl.socket = io('ws://121.196.222.174:3000');
-	// utl.socket = io('wss://hunchun828.top');
+	// utl.socket = io('http://121.196.222.174:3000');
+	utl.socket = io('http://hunchun828.top/wss');
 	utl.socket.on('123456', (s) => {
 		if(s.list.length==0){
 			return
