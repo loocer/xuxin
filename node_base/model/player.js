@@ -14,8 +14,7 @@ class Player {
       // }else{
       //    list = this.frame.splice(0,10);
       // }
-      let list = [...this.frame]
-      this.frame = []
+      let list =  this.frame
       return {
          list,
          id:this.id

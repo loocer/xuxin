@@ -1,7 +1,7 @@
 {
   "description": "项目配置文件。",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "es6": false,
     "enhance": false,
     "postcss": true,
@@ -35,7 +35,7 @@
     "minifyWXSS": true
   },
   "compileType": "game",
-  "libVersion": "2.20.2",
+  "libVersion": "game",
   "appid": "wx04d43b1abdf1117a",
   "projectname": "layaWXTest",
   "condition": {

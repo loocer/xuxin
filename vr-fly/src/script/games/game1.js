@@ -63,7 +63,7 @@ export default class GameUI extends Laya.Scene {
         this.info = new Laya.Text();
         this.info.text = this.log
         this.info.fontSize = 50;
-        this.info.color = "#FFFFFF";
+        this.info.color = "#00ff7e";
         this.info.size(Laya.stage.width, Laya.stage.height);
         this.info.pos(50, 50)
         Laya.stage.addChild(this.info);
@@ -220,7 +220,7 @@ export default class GameUI extends Laya.Scene {
         let list = utl.frameTimesMap.get(id)
         let pler = utl.flyers.get(id) 
 
-        if(utl.frameAddIndex>10+utl.frameGetIndex){
+        if(utl.frameAddIndex>20+utl.frameGetIndex){
             utl.frameGetIndex=utl.frameAddIndex
             list = []
             return
@@ -275,11 +275,11 @@ export default class GameUI extends Laya.Scene {
     }
     contFrame(){
         if(utl.stopFlag){
-            if(utl.frameAddIndex>utl.frameGetIndex+10){
+            if(utl.frameAddIndex>utl.frameGetIndex+2){
                 utl.stopFlag = false
             }
         }else{
-            if(utl.frameAddIndex==utl.frameGetIndex){
+            if(utl.frameAddIndex<utl.frameGetIndex){
                 utl.stopFlag = true
             }
         }

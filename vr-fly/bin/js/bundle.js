@@ -714,9 +714,9 @@
 
    	// // })
    	// return
-   	utl.socket = io('ws://192.168.0.104:3000');
+   	// utl.socket = io('ws://192.168.0.104:3000');
    	// utl.socket = io('http://121.196.222.174:3000');
-   	// utl.socket = io('https://hunchun828.top');
+   	utl.socket = io('https://hunchun828.top');
    	utl.socket.on(utl.id, (s) => {
    		if(s.list.length==0){
    			return
@@ -791,7 +791,7 @@
            this.info = new Laya.Text();
            this.info.text = this.log;
            this.info.fontSize = 50;
-           this.info.color = "#FFFFFF";
+           this.info.color = "#00ff7e";
            this.info.size(Laya.stage.width, Laya.stage.height);
            this.info.pos(50, 50);
            Laya.stage.addChild(this.info);
@@ -948,7 +948,7 @@
            let list = utl.frameTimesMap.get(id);
            let pler = utl.flyers.get(id); 
 
-           if(utl.frameAddIndex>10+utl.frameGetIndex){
+           if(utl.frameAddIndex>20+utl.frameGetIndex){
                utl.frameGetIndex=utl.frameAddIndex;
                list = [];
                return
@@ -1003,11 +1003,11 @@
        }
        contFrame(){
            if(utl.stopFlag){
-               if(utl.frameAddIndex>utl.frameGetIndex+10){
+               if(utl.frameAddIndex>utl.frameGetIndex+2){
                    utl.stopFlag = false;
                }
            }else{
-               if(utl.frameAddIndex==utl.frameGetIndex){
+               if(utl.frameAddIndex<utl.frameGetIndex){
                    utl.stopFlag = true;
                }
            }
