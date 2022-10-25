@@ -1,27 +1,23 @@
-class Player {
-   constructor(room,id) {
-      this.id = id;
-      this.state = true
-      this.room = room
-      this.indexRyId = 0//当前推送的id
-      this.frame = []
-      this.killNum = 0
-   }
-   getPushMsg() {
-      // let list = []
-      // if(this.frame.length<10){
-      //    list = this.frame
-      // }else{
-      //    list = this.frame.splice(0,10);
-      // }
-      let list =  this.frame
-      return {
-         list,
-         id:this.id
-      }
-   }
-   addFrame(obj){
-      this.frame=[obj]
-   }
+let People = require('./people')
+class Player extends People {
+	constructor(room, id) {
+		super(id)
+		this.room = room
+		this.indexRyId = 0 //当前推送的id
+		this.killNum = 0
+		
+	}
+	getPushMsg() {
+		return {
+			x:this.x,
+			y:this.y,
+			id: this.id,
+			status:this.status
+		}
+	}
+	addFrame(obj) {
+		this.moveX = obj.x
+		this.moveY = obj.y
+	}
 }
 module.exports = Player
