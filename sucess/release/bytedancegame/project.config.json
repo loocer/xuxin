@@ -1,0 +1,20 @@
+{
+    "setting": {
+        "urlCheck": false,
+        "es6": false,
+        "newFeature": false,
+        "postcss": false,
+        "mockUpdate": false,
+        "minified": false,
+        "nodeModules": false,
+        "scripts": false,
+        "mockLogin": false
+    },
+    "appid": "tt94bae2070b902103",
+    "projectname": "layaByteDanceTest",
+    "condition": {
+        "game": {
+            "current": -1
+        }
+    }
+}
