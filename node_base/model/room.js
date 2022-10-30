@@ -11,7 +11,7 @@ class Room {
 		this.players.set(id, player)
 		return player
 	}
-	update() {
+	update(io) {
 		let list = []
 		for (let obj of this.players.values()) {
 			obj.update()
@@ -37,7 +37,7 @@ class Room {
 		}, 30)
 	}
 	pushMsg(list, io) {
-		io.emit(id, {
+		io.emit(this.id, {
 			list
 		});
 	}

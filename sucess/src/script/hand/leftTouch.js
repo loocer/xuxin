@@ -86,8 +86,16 @@ export default class newTwo {
     } else {
       tempy = (py - this.ty - this.theight / 2) / (this.theight / 2)
     }
-    utl.tachSpeed.x = -tempy * 180
-    utl.tachSpeed.y = -tempx * 90
+    let y = -tempy/10
+    let x = -tempx/10
+    // utl.testPs.x += x
+    // utl.testPs.y += y
+    // utl.frames.push([{ id:utl.id,x:utl.testPs.x, y:utl.testPs.y }])
+     utl.socket.emit('123456',{
+             playerId:utl.id,
+             frame:{ x, y}
+         });
+
     // if (utl.tachSpeed.x > 180) {
     //   utl.tachSpeed.x = 180
     // }

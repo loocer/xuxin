@@ -1,5 +1,14 @@
 export default  {
     id:Date.parse(new  Date())+'',
+    entitys:new Map(),
+    frames:[],
+    testPs:{
+        x:0,
+        y:0
+    },
+
+
+
     frameTimesMap:new Map(),
     frameGetIndex:0,
     frameAddIndex:0,
@@ -7,12 +16,8 @@ export default  {
     allBleed:100,
     updateFlag:true,
     stopFlag:true,
-    flyers:new Map(),
-    moveBox:new Laya.Vector3(0, 0, 0),
-    moveMain:new Laya.Vector3(0, 0, 0),
 
     firs:new Set(),//子弹
-    entitys:new Set(),
     firBgs:new Set(),
     boxSpeed:0.001,//飞机速度
     firSpeed:new Laya.Vector3(0,0,0),//子弹速度

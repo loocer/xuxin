@@ -7,18 +7,14 @@ import utl from "../utl.js"
 import speedTouch from "../hand/speedTouch.js"
 import newTor from "../hand/leftTouch.js"
 import fire from "../hand/fire.js"
-import rightTouch from "../hand/rightTouch.js"
-import leftRote from "../hand/leftRote.js"
-import rightRote from "../hand/rightRote.js"
 import Bullet from "../entity/bullet.js"
 import Bullet1 from "../entity/bullet1.js"
 import Enemy from "../entity/enemy.js"
 import Enemy1 from "../entity/enemy1.js"
-import { socketMain } from "../net/index"
+import { socketMain } from "./net/index"
 // import {getServiceAddress} from "../net/index"
-let temp = 0, spled = { x: 0, y: 0, z: 0 }, dfew = 0
-let flagod = false
-let fireFlag = false
+let updateFlag = true
+
 let touchs = [
     ['speedTouch', { flag: false, Tclass: speedTouch }],
     ['newTor', { flag: false, Tclass: newTor }],
@@ -27,18 +23,8 @@ let touchs = [
     // ['leftRote', { flag: false, Tclass: leftRote }],
     // ['rightRote', { flag: false, Tclass: rightRote }]
 ]
-window.dfg = -60
-let flag = true
 
-// function updateMove(obj) {
-//     utl.box.transform.translate(new Laya.Vector3(utl.speedMove / 5, 0, 0), true)
-// }
-function updateMove(value) {
-    utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = value.x
-    utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerX = value.sx
-    utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = value.sy
-}
-let frameTimes = []
+
 export default class GameUI extends Laya.Scene {
     constructor() {
         super();
@@ -57,7 +43,7 @@ export default class GameUI extends Laya.Scene {
         this.townPosition = new Laya.Vector3(0, 40, 0)
         this.outPos = new Laya.Vector3();
         this.onW = new Laya.Vector3(0, 0, 0)
-        // socketMain()
+        socketMain()
 
         utl.newScene = this.newScene
         this.initTouch()
@@ -72,7 +58,6 @@ export default class GameUI extends Laya.Scene {
         Laya.stage.addChild(this.info);
         utl.info = this.info
         this.drawUi()
-        temp = this
 
         // this.newScene.addChild(utl.models.get('light'));  
         var directionLight = this.newScene.addChild(new Laya.DirectionLight());
@@ -112,10 +97,14 @@ export default class GameUI extends Laya.Scene {
 
 
 
-        this.pler = utl.models.get('pler').clone()
+        this.pler = utl.models.get('Plane').clone()
         utl.main = this.pler
         this.newScene.addChild(this.pler);
-        this.creatEntity()
+
+        // this.pler = utl.models.get('hero').clone()
+        // utl.main = this.pler
+        // this.newScene.addChild(this.pler);
+        // this.creatEntity()
         console.log(utl.models)
 
     }
@@ -428,8 +417,10 @@ export default class GameUI extends Laya.Scene {
                 obj[1].object.scaleSmall(-1000, -1000)//时间归零
                 obj[1].flag = false
             }
-            utl.tachSpeed.x = 0
-            utl.tachSpeed.y = 0
+            utl.socket.emit('123456',{
+                playerId:utl.id,
+                frame:{ x:0, y:0}
+            });
         }
         // if(this.newScene.input.getTouch(0)!=0){
         //     utl.takeSpeed.x = utl.tachSpeed.x
@@ -454,76 +445,45 @@ export default class GameUI extends Laya.Scene {
         // }
 
         // this.info.text = flagod+','+touchCount
-        this.flyUpdate()
+        this.findUpdata()
 
     }
-    flyUpdate() {
-        // this.sp.graphics.drawRect(0, 0, 300, 300, "#00000066");
-        let qiu = this.pler.getChildByName('main')
-        let ball = this.pler.getChildByName('ball')
-        let box = qiu.getChildByName('box')
-        this.onW.x = box.transform.position.x
-        this.onW.y = box.transform.position.y
-        this.onW.z = box.transform.position.z
-
-
-        qiu.transform.rotate(new Laya.Vector3(utl.boxSpeed, 0, 0), true)
-        qiu.transform.rotate(new Laya.Vector3(0, utl.takeSpeed.y * Math.PI / 180 / 100, 0), true)
-        // qiu.transform.rotate(new Laya.Vector3( 0,utl.takeSpeed.y * Math.PI / 180 / 100,0 ), true)
-        box.transform.translate(new Laya.Vector3(0, utl.takeSpeed.x / 80000, 0), true)
-        // utl.firSpeed = Laya.Vector3.scalarLength({x:this.onW.x-box.transform.position.x,y:this.onW.y-box.transform.position.y,z:this.onW.z-box.transform.position.z})
-        // utl.firSpeed.x= this.onW.x-box.transform.position.x
-        // utl.firSpeed.y= this.onW.y-box.transform.position.y
-        // utl.firSpeed.z= this.onW.z-box.transform.position.z
-        let leng = Laya.Vector3.scalarLength(box.transform.position)
-        if (leng < 36.1) {
-            box.transform.translate(new Laya.Vector3(0, -utl.takeSpeed.x / 80000, 0), true)
+    createBox(frame){
+        let mastetr = utl.models.get('hero').clone()
+        utl.entitys.set(frame.id,mastetr)
+        this.newScene.addChild(mastetr);
+        let plerPosition = new Laya.Vector3(frame.x, frame.y, frame.z)
+        mastetr.transform.position = plerPosition
+    }
+    flyUpdate(frames) {
+        for(let frame of frames){
+            if(utl.entitys.has(frame.id)){
+                let obj = utl.entitys.get(frame.id)
+                let plerPosition = new Laya.Vector3(frame.x, 2, frame.y)
+                obj.transform.position = plerPosition
+            }else{
+                this.createBox(frame)
+            }
+            
         }
-
-        box.getChildByName('fly').transform.localRotationEulerX = -utl.takeSpeed.x / 10
-        box.getChildByName('fly').transform.localRotationEulerZ = -utl.takeSpeed.y / 2
-
-        // let bu1 = this.pler.getChildByName('main').getChildByName('box').getChildByName('fly').getChildByName('bu')
-        // bu1.transform.localRotationEulerX = utl.takeSpeed.x / 10 + Math.abs(utl.takeSpeed.y) /5
-
-        utl.firSpeed = box.getChildByName('fly').transform.localRotationEulerX
-
-        // let bu = this.pler.getChildByName('main').getChildByName('box').getChildByName('fly').getChildByName('bu')
-
-        // bu.transform.localRotationEulerX = -utl.fireTake.y / 5 - 10
-        // bu.transform.localRotationEulerY = -utl.fireTake.x / 5 - 10
-        // let leng = Laya.Vector3.scalarLength(box.transform.position)
-        // if(leng<36){
-        //     box.getChildByName('c1').fieldOfView = 23;
-        // }else{
-        //     box.getChildByName('c1').fieldOfView = 40;
-        // }
-        box.getChildByName('c1').clearColor = new Laya.Vector4(0, 0, 0, 1);
-        box.getChildByName('c1').fieldOfView = 30;
-        for (let fir of utl.firs) {
-            fir.toTiome()
-        }
-        for (let entity of utl.entitys) {
-            entity.toTiome()
-        }
-        for(let fir of  utl.firBgs){
-            fir.toTiome()
-        }
-        // console.log()
-        this.downSpeed()
-        this.findUpdata()
-        this.onFire()
-        return
-
     }
     findUpdata() {
-        let qiu = this.pler.getChildByName('main')
-        let box = qiu.getChildByName('box')
-        let car = box.getChildByName('c1')
-        let tat = box.getChildByName('tat')
+        if(utl.frames.length==0){
+            updateFlag = false
+            return
+        }
+        if(!updateFlag){
+            if(utl.frames.length<3){
+                return
+            }else{
+                updateFlag = true
+            }
+        }
+        let time = utl.frames.shift()
+        this.flyUpdate(time.list)
 
-        car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
-        utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
+        // car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
+        // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
     }
     fireUpdate() {
         for (let fir of utl.firs) {

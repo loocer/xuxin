@@ -13,9 +13,11 @@ export const loadFile =  [
 	],
     [
         // ['light','https://hunchun828.top/img/LayaScene_start/Conventional/light.lh'],
-        ['pler','https://hunchun828.top/img/LayaScene_start/Conventional/ground.lh'],
-        ['bullet','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
-        // ['pler','res/LayaScene_start/Conventional/ground.lh'],
+        // ['Plane','https://hunchun828.top/img/LayaScene_start/Conventional/Plane.lh'],
+        // ['bullet','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
+        // ['monster','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
+        ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
+        ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
         // ['bullet','res/LayaScene_start/Conventional/bullet.lh'],
         
         // ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],

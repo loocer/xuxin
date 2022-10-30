@@ -5,7 +5,7 @@ class Player extends People {
 		this.room = room
 		this.indexRyId = 0 //当前推送的id
 		this.killNum = 0
-		
+		this.type=1//1人
 	}
 	getPushMsg() {
 		return {
@@ -18,6 +18,10 @@ class Player extends People {
 	addFrame(obj) {
 		this.moveX = obj.x
 		this.moveY = obj.y
+	}
+	move(){
+		this.x += this.moveX
+		this.y += this.moveY
 	}
 }
 module.exports = Player
