@@ -1873,8 +1873,8 @@
            // ['Plane','https://hunchun828.top/img/LayaScene_start/Conventional/Plane.lh'],
            // ['bullet','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
            // ['monster','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
-           ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
-           ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
+           ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
+           ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
            // ['bullet','res/LayaScene_start/Conventional/bullet.lh'],
            
            // ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
@@ -3751,8 +3751,8 @@
 
 
    const socketMain$1 = () => {
-   	// utl.socket = io('https://hunchun828.top');
-   	utl.socket = io('http://192.168.0.101:3000');
+   	utl.socket = io('https://hunchun828.top');
+   	// utl.socket = io('http://192.168.0.101:3000');
    	utl.socket.on('123456', (s) => {
    		utl.frames.push(s);
    	});
@@ -3822,7 +3822,7 @@
 
 
 
-           Laya.timer.loop(50, this, this.flying);
+           Laya.timer.loop(30, this, this.flying);
            // Laya.timer.loop(100, this, this.onFire);
            // Laya.timer.loop(30, this, this.fireUpdate);
 
@@ -4235,6 +4235,10 @@
            }
            let time = utl.frames.shift();
            this.flyUpdate(time.list);
+           if(utl.frames.length>20){
+               utl.frames = [];
+           }
+           
 
            // car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
            // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)

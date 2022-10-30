@@ -68,7 +68,7 @@ export default class GameUI extends Laya.Scene {
 
 
 
-        Laya.timer.loop(50, this, this.flying);
+        Laya.timer.loop(30, this, this.flying);
         // Laya.timer.loop(100, this, this.onFire);
         // Laya.timer.loop(30, this, this.fireUpdate);
 
@@ -481,6 +481,10 @@ export default class GameUI extends Laya.Scene {
         }
         let time = utl.frames.shift()
         this.flyUpdate(time.list)
+        if(utl.frames.length>20){
+            utl.frames = []
+        }
+        
 
         // car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
         // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
