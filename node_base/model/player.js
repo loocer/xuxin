@@ -1,7 +1,8 @@
 let People = require('./people')
 class Player extends People {
 	constructor(room, id) {
-		super(id)
+		super()
+		this.id = id
 		this.room = room
 		this.indexRyId = 0 //当前推送的id
 		this.killNum = 0
@@ -11,6 +12,7 @@ class Player extends People {
 		return {
 			x:this.x,
 			y:this.y,
+			type:this.type,
 			id: this.id,
 			status:this.status
 		}
@@ -22,6 +24,9 @@ class Player extends People {
 	move(){
 		this.x += this.moveX
 		this.y += this.moveY
+	}
+	update(){
+		this.move()
 	}
 }
 module.exports = Player

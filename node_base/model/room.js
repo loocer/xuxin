@@ -1,11 +1,18 @@
 let Player = require('./player')
+let House = require('./house')
 let boxs = require('../tools/rooms')
 class Room {
 	constructor() {
 		this.players = new Map()
+		this.bugs = new Map()
+		this.houses = new Map()
 		this.id = '123456';
+		this.init()
 	}
-
+	init(){
+		let house = new House(this,{x:0,y:2})
+		this.houses.set(house.id, house)
+	}
 	addPlayer(id) {
 		let player = new Player(this, id)
 		this.players.set(id, player)
@@ -16,6 +23,14 @@ class Room {
 		for (let obj of this.players.values()) {
 			obj.update()
 			list.push(obj.getPushMsg())
+		}
+		for (let bug of this.bugs.values()) {
+			bug.update()
+			list.push(bug.getPushMsg())
+		}
+		for (let hu of this.houses.values()) {
+			hu.update()
+			list.push(hu.getPushMsg())
 		}
 		this.pushMsg(list,io)
 	}

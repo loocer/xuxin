@@ -1,6 +1,5 @@
 class People {
-	constructor(id) {
-		this.id = id;
+	constructor() {
 		this.bleed = 10
 		this.state = true
 		this.x = 0
@@ -8,8 +7,6 @@ class People {
 		this.moveX = 0
 		this.moveY = 0
 	}
-	update(){
-		this.move()
-	}
+	
 }
 module.exports = People

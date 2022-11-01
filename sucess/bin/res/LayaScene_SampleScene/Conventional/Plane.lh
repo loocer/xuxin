@@ -89,8 +89,7 @@
 					"castShadow":true,
 					"materials":[
 						{
-							"type":"Laya.BlinnPhongMaterial",
-							"path":"Assets/New Material 3.lmat"
+							"path":"Assets/Materials/concrete_floor_worn_001.lmat"
 						}
 					]
 				},
@@ -118,53 +117,6 @@
 						"isTrigger":false
 					}
 				],
-				"child":[]
-			},
-			{
-				"type":"Camera",
-				"instanceID":3,
-				"props":{
-					"name":"Camera",
-					"active":true,
-					"isStatic":false,
-					"layer":0,
-					"position":[
-						0,
-						29,
-						0
-					],
-					"rotation":[
-						0,
-						0.7071068,
-						0.7071068,
-						0
-					],
-					"scale":[
-						0.001666667,
-						0.001666667,
-						1
-					],
-					"clearFlag":1,
-					"orthographic":false,
-					"orthographicVerticalSize":10,
-					"fieldOfView":60,
-					"enableHDR":true,
-					"nearPlane":0.3,
-					"farPlane":1000,
-					"viewport":[
-						0,
-						0,
-						1,
-						1
-					],
-					"clearColor":[
-						0.1921569,
-						0.3019608,
-						0.4745098,
-						0
-					]
-				},
-				"components":[],
 				"child":[]
 			}
 		]

@@ -13,6 +13,7 @@ export default class newTwo {
     this.twidth = 450
     this.theight = 450
     this.ty = Laya.stage.height - 600;
+    this.out = new Laya.Vector3(0, 0,0)
   }
   draw(loadingElse) {
     let leftHand = loadingElse.get('contrl')
@@ -86,8 +87,9 @@ export default class newTwo {
     } else {
       tempy = (py - this.ty - this.theight / 2) / (this.theight / 2)
     }
-    let y = -tempy/10
-    let x = -tempx/10
+    Laya.Vector3.normalize(new Laya.Vector3(tempx, tempy,0),this.out)
+    let y =-this.out.y/10
+    let x = -this.out.x/10
     // utl.testPs.x += x
     // utl.testPs.y += y
     // utl.frames.push([{ id:utl.id,x:utl.testPs.x, y:utl.testPs.y }])

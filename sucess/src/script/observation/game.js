@@ -33,7 +33,6 @@ export default class GameUI extends Laya.Scene {
         this.fucntkTemp = 0
         this.temprx = 0
         this.tempry = 0
-        this.temprz = 0
         this.spled = 0
         this.spledy = 0
         this.loadScene("test/weightObservation.scene");
@@ -100,7 +99,11 @@ export default class GameUI extends Laya.Scene {
         this.pler = utl.models.get('Plane').clone()
         utl.main = this.pler
         this.newScene.addChild(this.pler);
+        
 
+        this.camera = utl.models.get('camera').clone()
+        utl.camera = this.camera
+        this.newScene.addChild(this.camera);
         // this.pler = utl.models.get('hero').clone()
         // utl.main = this.pler
         // this.newScene.addChild(this.pler);
@@ -449,10 +452,19 @@ export default class GameUI extends Laya.Scene {
 
     }
     createBox(frame){
-        let mastetr = utl.models.get('hero').clone()
+        let mastetr = null
+        if(frame.type==1){
+            mastetr = utl.models.get('hero').clone()
+        }
+        if(frame.type==2){
+            mastetr = utl.models.get('diren').clone()
+        }
+        if(frame.type==3){
+            mastetr = utl.models.get('house').clone()
+        }
         utl.entitys.set(frame.id,mastetr)
         this.newScene.addChild(mastetr);
-        let plerPosition = new Laya.Vector3(frame.x, frame.y, frame.z)
+        let plerPosition = new Laya.Vector3(frame.x, 2, frame.y)
         mastetr.transform.position = plerPosition
     }
     flyUpdate(frames) {
@@ -460,6 +472,10 @@ export default class GameUI extends Laya.Scene {
             if(utl.entitys.has(frame.id)){
                 let obj = utl.entitys.get(frame.id)
                 let plerPosition = new Laya.Vector3(frame.x, 2, frame.y)
+                if(frame.id==utl.id){
+                    this.temprx = frame.x -  obj.transform.position.x
+                    this.tempry = frame.y -  obj.transform.position.z
+                }
                 obj.transform.position = plerPosition
             }else{
                 this.createBox(frame)
@@ -473,7 +489,7 @@ export default class GameUI extends Laya.Scene {
             return
         }
         if(!updateFlag){
-            if(utl.frames.length<3){
+            if(utl.frames.length<2){
                 return
             }else{
                 updateFlag = true
@@ -484,10 +500,30 @@ export default class GameUI extends Laya.Scene {
         if(utl.frames.length>20){
             utl.frames = []
         }
-        
+        if(utl.entitys.has(utl.id)){
+            let obj = utl.entitys.get(utl.id)
 
-        // car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
+            this.camera.viewport.project(obj.transform.position, this.camera.projectionViewMatrix, this.outPos);
+            this.moveCarma()
+        // console.log(this.outPos)
+        }
+        
         // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
+    }
+    moveCarma(){
+        let out = this.outPos
+        if(out.x>Laya.stage.width/4*3){
+            this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true )
+        }
+        if(out.x<Laya.stage.width/4){
+            this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true )
+        }
+        if(out.y>Laya.stage.height/4*3){
+            this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true )
+        }
+        if(out.y<Laya.stage.height/4){
+            this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true )
+        }
     }
     fireUpdate() {
         for (let fir of utl.firs) {

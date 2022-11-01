@@ -145,6 +145,7 @@
        this.twidth = 450;
        this.theight = 450;
        this.ty = Laya.stage.height - 600;
+       this.out = new Laya.Vector3(0, 0,0);
      }
      draw(loadingElse) {
        let leftHand = loadingElse.get('contrl');
@@ -218,8 +219,9 @@
        } else {
          tempy = (py - this.ty - this.theight / 2) / (this.theight / 2);
        }
-       let y = -tempy/10;
-       let x = -tempx/10;
+       Laya.Vector3.normalize(new Laya.Vector3(tempx, tempy,0),this.out);
+       let y =-this.out.y/10;
+       let x = -this.out.x/10;
        // utl.testPs.x += x
        // utl.testPs.y += y
        // utl.frames.push([{ id:utl.id,x:utl.testPs.x, y:utl.testPs.y }])
@@ -1869,13 +1871,14 @@
            ['plane','https://hunchun828.top/img/LayaScene_fly/Conventional/dimian.lh'],
    	],
        [
-           // ['light','https://hunchun828.top/img/LayaScene_start/Conventional/light.lh'],
-           // ['Plane','https://hunchun828.top/img/LayaScene_start/Conventional/Plane.lh'],
-           // ['bullet','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
-           // ['monster','https://hunchun828.top/img/LayaScene_start/Conventional/bullet.lh'],
-           ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
-           ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
-           // ['bullet','res/LayaScene_start/Conventional/bullet.lh'],
+           // ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
+           // ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
+           // ['camera','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Camera.lh'],
+           ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
+           ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
+           ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
+           ['diren','res/LayaScene_SampleScene/Conventional/diren.lh'],
+           ['house','res/LayaScene_SampleScene/Conventional/house.lh'],
            
            // ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
            // ['town','https://hunchun828.top/img/LayaScene_fly/Conventional/town.lh'],
@@ -3751,8 +3754,8 @@
 
 
    const socketMain$1 = () => {
-   	utl.socket = io('https://hunchun828.top');
-   	// utl.socket = io('http://192.168.0.101:3000');
+   	// utl.socket = io('https://hunchun828.top');
+   	utl.socket = io('http://192.168.0.101:3000');
    	utl.socket.on('123456', (s) => {
    		utl.frames.push(s);
    	});
@@ -3787,7 +3790,6 @@
            this.fucntkTemp = 0;
            this.temprx = 0;
            this.tempry = 0;
-           this.temprz = 0;
            this.spled = 0;
            this.spledy = 0;
            this.loadScene("test/weightObservation.scene");
@@ -3854,7 +3856,11 @@
            this.pler = utl.models.get('Plane').clone();
            utl.main = this.pler;
            this.newScene.addChild(this.pler);
+           
 
+           this.camera = utl.models.get('camera').clone();
+           utl.camera = this.camera;
+           this.newScene.addChild(this.camera);
            // this.pler = utl.models.get('hero').clone()
            // utl.main = this.pler
            // this.newScene.addChild(this.pler);
@@ -4203,10 +4209,19 @@
 
        }
        createBox(frame){
-           let mastetr = utl.models.get('hero').clone();
+           let mastetr = null;
+           if(frame.type==1){
+               mastetr = utl.models.get('hero').clone();
+           }
+           if(frame.type==2){
+               mastetr = utl.models.get('diren').clone();
+           }
+           if(frame.type==3){
+               mastetr = utl.models.get('house').clone();
+           }
            utl.entitys.set(frame.id,mastetr);
            this.newScene.addChild(mastetr);
-           let plerPosition = new Laya.Vector3(frame.x, frame.y, frame.z);
+           let plerPosition = new Laya.Vector3(frame.x, 2, frame.y);
            mastetr.transform.position = plerPosition;
        }
        flyUpdate(frames) {
@@ -4214,6 +4229,10 @@
                if(utl.entitys.has(frame.id)){
                    let obj = utl.entitys.get(frame.id);
                    let plerPosition = new Laya.Vector3(frame.x, 2, frame.y);
+                   if(frame.id==utl.id){
+                       this.temprx = frame.x -  obj.transform.position.x;
+                       this.tempry = frame.y -  obj.transform.position.z;
+                   }
                    obj.transform.position = plerPosition;
                }else{
                    this.createBox(frame);
@@ -4227,7 +4246,7 @@
                return
            }
            if(!updateFlag){
-               if(utl.frames.length<3){
+               if(utl.frames.length<2){
                    return
                }else{
                    updateFlag = true;
@@ -4238,10 +4257,30 @@
            if(utl.frames.length>20){
                utl.frames = [];
            }
-           
+           if(utl.entitys.has(utl.id)){
+               let obj = utl.entitys.get(utl.id);
 
-           // car.viewport.project(tat.transform.position, car.projectionViewMatrix, this.outPos);
+               this.camera.viewport.project(obj.transform.position, this.camera.projectionViewMatrix, this.outPos);
+               this.moveCarma();
+           // console.log(this.outPos)
+           }
+           
            // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
+       }
+       moveCarma(){
+           let out = this.outPos;
+           if(out.x>Laya.stage.width/4*3){
+               this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true );
+           }
+           if(out.x<Laya.stage.width/4){
+               this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true );
+           }
+           if(out.y>Laya.stage.height/4*3){
+               this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true );
+           }
+           if(out.y<Laya.stage.height/4){
+               this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true );
+           }
        }
        fireUpdate() {
            for (let fir of utl.firs) {
