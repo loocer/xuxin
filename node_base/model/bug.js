@@ -56,7 +56,7 @@ class Bug extends People {
 	findPeople(){
 		let p = this.house.room.players
 		let ptem = 100
-		let ps = p[0][1]
+		let ps = [...p][0][1]
 		for (let mapObj of p) {
 			let obj = mapObj[1]
 			let lth = (obj.x-this.x)*(obj.x-this.x)+(obj.y-this.y)*(obj.y-this.y)
