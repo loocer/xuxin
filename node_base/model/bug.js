@@ -61,6 +61,7 @@ class Bug extends People {
 			let obj = mapObj[1]
 			let lth = (obj.x-this.x)*(obj.x-this.x)+(obj.y-this.y)*(obj.y-this.y)
 			if(lth>ptem){
+				ptem = lth
 				ps = obj
 			}
 		}

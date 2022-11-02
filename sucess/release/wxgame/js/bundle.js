@@ -1,6 +1,6 @@
 (function () {
    'use strict';
-   var io = require('../io.js')
+var io=require('../io.js')
    var utl = {
        id:Date.parse(new  Date())+'',
        entitys:new Map(),
@@ -145,6 +145,7 @@
        this.twidth = 450;
        this.theight = 450;
        this.ty = Laya.stage.height - 600;
+       this.out = new Laya.Vector3(0, 0,0);
      }
      draw(loadingElse) {
        let leftHand = loadingElse.get('contrl');
@@ -218,8 +219,9 @@
        } else {
          tempy = (py - this.ty - this.theight / 2) / (this.theight / 2);
        }
-       let y = -tempy/10;
-       let x = -tempx/10;
+       Laya.Vector3.normalize(new Laya.Vector3(tempx, tempy,0),this.out);
+       let y =-this.out.y/10;
+       let x = -this.out.x/10;
        // utl.testPs.x += x
        // utl.testPs.y += y
        // utl.frames.push([{ id:utl.id,x:utl.testPs.x, y:utl.testPs.y }])
@@ -1869,12 +1871,18 @@
            ['plane','https://hunchun828.top/img/LayaScene_fly/Conventional/dimian.lh'],
    	],
        [
+           
            ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
            ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
            ['camera','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Camera.lh'],
+           ['diren','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/diren.lh'],
+           ['house','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/house.lh'],
+
            // ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
            // ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
            // ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
+           // ['diren','res/LayaScene_SampleScene/Conventional/diren.lh'],
+           // ['house','res/LayaScene_SampleScene/Conventional/house.lh'],
            
            // ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
            // ['town','https://hunchun828.top/img/LayaScene_fly/Conventional/town.lh'],
@@ -4205,10 +4213,19 @@
 
        }
        createBox(frame){
-           let mastetr = utl.models.get('hero').clone();
+           let mastetr = null;
+           if(frame.type==1){
+               mastetr = utl.models.get('hero').clone();
+           }
+           if(frame.type==2){
+               mastetr = utl.models.get('diren').clone();
+           }
+           if(frame.type==3){
+               mastetr = utl.models.get('house').clone();
+           }
            utl.entitys.set(frame.id,mastetr);
            this.newScene.addChild(mastetr);
-           let plerPosition = new Laya.Vector3(frame.x, frame.y, frame.z);
+           let plerPosition = new Laya.Vector3(frame.x, 2, frame.y);
            mastetr.transform.position = plerPosition;
        }
        flyUpdate(frames) {
@@ -4233,7 +4250,7 @@
                return
            }
            if(!updateFlag){
-               if(utl.frames.length<3){
+               if(utl.frames.length<2){
                    return
                }else{
                    updateFlag = true;

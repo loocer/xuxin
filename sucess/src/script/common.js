@@ -12,14 +12,18 @@ export const loadFile =  [
         ['plane','https://hunchun828.top/img/LayaScene_fly/Conventional/dimian.lh'],
 	],
     [
-        // ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
-        // ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
-        // ['camera','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Camera.lh'],
-        ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
-        ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
-        ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
-        ['diren','res/LayaScene_SampleScene/Conventional/diren.lh'],
-        ['house','res/LayaScene_SampleScene/Conventional/house.lh'],
+        
+        ['Plane','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Plane.lh'],
+        ['hero','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/hero.lh'],
+        ['camera','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/Camera.lh'],
+        ['diren','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/diren.lh'],
+        ['house','https://hunchun828.top/img/LayaScene_SampleScene/Conventional/house.lh'],
+
+        // ['Plane','res/LayaScene_SampleScene/Conventional/Plane.lh'],
+        // ['hero','res/LayaScene_SampleScene/Conventional/hero.lh'],
+        // ['camera','res/LayaScene_SampleScene/Conventional/Camera.lh'],
+        // ['diren','res/LayaScene_SampleScene/Conventional/diren.lh'],
+        // ['house','res/LayaScene_SampleScene/Conventional/house.lh'],
         
         // ['light','https://hunchun828.top/img/LayaScene_fly/Conventional/light.lh'],
         // ['town','https://hunchun828.top/img/LayaScene_fly/Conventional/town.lh'],
