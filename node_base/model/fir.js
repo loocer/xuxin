@@ -9,6 +9,7 @@ class Fire {
     this.y = obj.y
     this.moveX = obj.move.x*3
     this.moveY = obj.move.y*3
+    this.time=0
   }
   getPushMsg() {
     return {
@@ -20,12 +21,16 @@ class Fire {
     }
   }
   update() {
+    this.time++
     if(!this.status){
       this.room.fires.delete(this.id)
       return
     }
     this.check()
     this.move()
+    if(this.time==100){
+      this.room.fires.delete(this.id)
+    }
   }
   check() {
     for (let bug of this.room.bugs.values()) {
