@@ -2,16 +2,16 @@
 	"version":"LAYAHIERARCHY:02",
 	"data":{
 		"type":"MeshSprite3D",
-		"instanceID":8,
+		"instanceID":9,
 		"props":{
 			"name":"diren",
 			"active":true,
 			"isStatic":false,
 			"layer":0,
 			"position":[
-				-1,
+				0,
 				2,
-				1
+				0
 			],
 			"rotation":[
 				0,
@@ -58,7 +58,7 @@
 		"child":[
 			{
 				"type":"MeshSprite3D",
-				"instanceID":9,
+				"instanceID":10,
 				"props":{
 					"name":"Cube",
 					"active":true,

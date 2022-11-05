@@ -42,6 +42,9 @@ export default class GameUI extends Laya.Scene {
         this.townPosition = new Laya.Vector3(0, 40, 0)
         this.outPos = new Laya.Vector3();
         this.onW = new Laya.Vector3(0, 0, 0)
+        this.moveTemp = {
+            x:0,y:0
+        }
         socketMain()
 
         utl.newScene = this.newScene
@@ -99,7 +102,7 @@ export default class GameUI extends Laya.Scene {
         this.pler = utl.models.get('Plane').clone()
         utl.main = this.pler
         this.newScene.addChild(this.pler);
-        
+
 
         this.camera = utl.models.get('camera').clone()
         utl.camera = this.camera
@@ -196,19 +199,7 @@ export default class GameUI extends Laya.Scene {
             touch[1].object = new touch[1].Tclass()
         }
     }
-    // onFire() {
-    //     if (utl.fireOnOff) {
-    //         utl.msType = 'FIRE'
-    //         // let ship = utl.box.getChildByName('shipmain')
-    //         // let shipcar = ship.getChildByName('ship')
-    //         // let aum =utl.bullet.clone();
 
-    //         // // let ball =new Laya.MeshSprite3D(Laya.PrimitiveMesh.createBox(1, 1,1));
-    //         // let script = aum.addComponent(Bullet);
-    //         // this.newScene.addChild(aum)
-    //     }
-
-    // }
     updateOneFlay() {
         //  let list = utl.frameTimesMap.get(id)
         //  let pler = utl.flyers.get(id) 
@@ -303,7 +294,7 @@ export default class GameUI extends Laya.Scene {
             utl.pler.getChildByName('shipmain').getChildByName('ship').transform.localRotationEulerY = time.sy
             // utl.pler.getChildByName('shipmain').getChildByName('g1').transform.localRotationEulerX = time.sx/2
 
-     18310825053
+            18310825053
             // let frameObj = {
             //     x: nowx,
             //     sx,
@@ -323,50 +314,15 @@ export default class GameUI extends Laya.Scene {
             this.pler.addChild(entity)
             entity.addComponent(Enemy);
             let fly = entity.getChildByName('box').getChildByName('fly').getChildByName('fly')
-            fly.addComponent(Enemy1); 
+            fly.addComponent(Enemy1);
         }
     }
-    onFire() {
-        if (utl.fireTf) {
+    // onFire() {
+    //     if (utl.fireTf) {
 
-            //     let bullet1 = utl.models.get('bullet').clone()
-            //     this.newScene.addChild(bullet1)
-            //     let bullet2 = utl.models.get('bullet').clone()
-            //     this.newScene.addChild(bullet2)
-            //     let bu1 = this.pler.getChildByName('main').getChildByName('box').getChildByName('fly').getChildByName('bu1')
-            //     let bu2 = this.pler.getChildByName('main').getChildByName('box').getChildByName('fly').getChildByName('bu2')
+    //     }
 
-            //     let { x, y, z } = bu1.transform.position
-            //     let ro = bu1.transform.rotationEuler
-
-            //     bullet1.transform.position = new Laya.Vector3(x, y, z)
-            //     bullet1.transform.rotationEuler = new Laya.Vector3(ro.x, ro.y, ro.z)
-
-            //     let p1 = bu2.transform.position
-            //     let ro1 = bu2.transform.rotationEuler
-            //     bullet2.transform.position = new Laya.Vector3(p1.x, p1.y, p1.z)
-            //     bullet2.transform.rotationEuler = new Laya.Vector3(ro1.x, ro1.y, ro1.z)
-            //     bullet1.addComponent(Bullet);
-            //     bullet2.addComponent(Bullet);
-            let bullet = this.pler.getChildByName('zidan').clone()
-            this.pler.addChild(bullet)
-
-            let qiu = this.pler.getChildByName('main')
-            let localPosition = qiu.getChildByName('box').transform.localPosition
-            let lo1 = bullet.getChildByName('box')
-            lo1.transform.localPosition = new Laya.Vector3(localPosition.x, localPosition.y, localPosition.z)
-
-            let x = qiu.transform.rotationEuler.x
-            let y = qiu.transform.rotationEuler.y
-            let z = qiu.transform.rotationEuler.z
-            bullet.transform.rotationEuler = new Laya.Vector3(x, y, z)
-            bullet.addComponent(Bullet);
-            let Cube = bullet.getChildByName('box').getChildByName('fir')
-            Cube.addComponent(Bullet1);
-        }
-
-
-    }
+    // }
     flying() {
         for (let obj of touchs) {
             obj[1].flag = false
@@ -420,10 +376,9 @@ export default class GameUI extends Laya.Scene {
                 obj[1].object.scaleSmall(-1000, -1000)//时间归零
                 obj[1].flag = false
             }
-            utl.socket.emit('123456',{
-                playerId:utl.id,
-                frame:{ x:0, y:0}
-            });
+            utl.move = {
+                x:0, y:0, rote:0
+            }
         }
         // if(this.newScene.input.getTouch(0)!=0){
         //     utl.takeSpeed.x = utl.tachSpeed.x
@@ -448,81 +403,109 @@ export default class GameUI extends Laya.Scene {
         // }
 
         // this.info.text = flagod+','+touchCount
+        // this.onFire()
         this.findUpdata()
-
+        let {
+            x, y, rote
+        } = utl.move
+        if(this.moveTemp.x==x&&this.moveTemp.y==y&&x==0&&y==0){
+            return
+        }else{
+            utl.socket.emit('123456', {
+                playerId: utl.id,
+                frame: { x, y, rote,fireTf:utl.fireTf}
+            });
+            this.moveTemp = {
+                x, y, rote
+            }
+        }
+        
+       
     }
-    createBox(frame){
+    createBox(frame) {
         let mastetr = null
-        if(frame.type==1){
+        if (frame.type == 1) {
             mastetr = utl.models.get('hero').clone()
         }
-        if(frame.type==2){
+        if (frame.type == 2) {
             mastetr = utl.models.get('diren').clone()
         }
-        if(frame.type==3){
+        if (frame.type == 3) {
             mastetr = utl.models.get('house').clone()
         }
-        utl.entitys.set(frame.id,mastetr)
+        if(frame.type == 4){
+            mastetr = utl.models.get('fire3d').clone()
+        }
+        utl.entitys.set(frame.id, mastetr)
         this.newScene.addChild(mastetr);
         let plerPosition = new Laya.Vector3(frame.x, 2, frame.y)
         mastetr.transform.position = plerPosition
+        mastetr.isFuck = true
     }
     flyUpdate(frames) {
-        for(let frame of frames){
-            if(utl.entitys.has(frame.id)){
+        for (let frame of frames) {
+            if (utl.entitys.has(frame.id)) {
                 let obj = utl.entitys.get(frame.id)
+                obj.isFuck = true
                 let plerPosition = new Laya.Vector3(frame.x, 2, frame.y)
-                if(frame.id==utl.id){
-                    this.temprx = frame.x -  obj.transform.position.x
-                    this.tempry = frame.y -  obj.transform.position.z
+                if (frame.id == utl.id) {
+                    this.temprx = frame.x - obj.transform.position.x
+                    this.tempry = frame.y - obj.transform.position.z
                 }
                 obj.transform.position = plerPosition
-            }else{
+            } else {
                 this.createBox(frame)
             }
-            
+
         }
+        for (let eng of utl.entitys.values()) {
+            if(!eng.isFuck){
+                eng.destroy();
+            }else{
+                eng.isFuck = false
+            }
+		}
     }
     findUpdata() {
-        if(utl.frames.length==0){
+        if (utl.frames.length == 0) {
             updateFlag = false
             return
         }
-        if(!updateFlag){
-            if(utl.frames.length<2){
+        if (!updateFlag) {
+            if (utl.frames.length < 2) {
                 return
-            }else{
+            } else {
                 updateFlag = true
             }
         }
         let time = utl.frames.shift()
         this.flyUpdate(time.list)
-        if(utl.frames.length>20){
+        if (utl.frames.length > 20) {
             utl.frames = []
         }
-        if(utl.entitys.has(utl.id)){
+        if (utl.entitys.has(utl.id)) {
             let obj = utl.entitys.get(utl.id)
 
             this.camera.viewport.project(obj.transform.position, this.camera.projectionViewMatrix, this.outPos);
             this.moveCarma()
-        // console.log(this.outPos)
+            // console.log(this.outPos)
         }
-        
+
         // utl.findImg.pos(this.outPos.x / Laya.stage.clientScaleX - 30, this.outPos.y / Laya.stage.clientScaleY - 30)
     }
-    moveCarma(){
+    moveCarma() {
         let out = this.outPos
-        if(out.x>Laya.stage.width/4*3){
-            this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true )
+        if (out.x > Laya.stage.width / 4 * 3) {
+            this.camera.transform.translate(new Laya.Vector3(-this.temprx, 0, 0), true)
         }
-        if(out.x<Laya.stage.width/4){
-            this.camera.transform.translate(new Laya.Vector3(-this.temprx,0,0),true )
+        if (out.x < Laya.stage.width / 4) {
+            this.camera.transform.translate(new Laya.Vector3(-this.temprx, 0, 0), true)
         }
-        if(out.y>Laya.stage.height/4*3){
-            this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true )
+        if (out.y > Laya.stage.height / 4 * 3) {
+            this.camera.transform.translate(new Laya.Vector3(0, this.tempry, 0), true)
         }
-        if(out.y<Laya.stage.height/4){
-            this.camera.transform.translate(new Laya.Vector3(0,this.tempry,0),true )
+        if (out.y < Laya.stage.height / 4) {
+            this.camera.transform.translate(new Laya.Vector3(0, this.tempry, 0), true)
         }
     }
     fireUpdate() {

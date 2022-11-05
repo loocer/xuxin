@@ -9,8 +9,8 @@
 			"isStatic":false,
 			"layer":0,
 			"position":[
-				-1,
-				0,
+				-6,
+				3,
 				1
 			],
 			"rotation":[
@@ -48,7 +48,7 @@
 					],
 					"scale":[
 						1,
-						1,
+						0.5,
 						1
 					],
 					"meshPath":"Library/unity default resources-Cube.lm",
@@ -85,11 +85,73 @@
 						"isTrigger":false
 					}
 				],
-				"child":[]
+				"child":[
+					{
+						"type":"MeshSprite3D",
+						"instanceID":5,
+						"props":{
+							"name":"Cube",
+							"active":true,
+							"isStatic":false,
+							"layer":0,
+							"position":[
+								0,
+								0,
+								0.5
+							],
+							"rotation":[
+								0,
+								0,
+								0,
+								-1
+							],
+							"scale":[
+								0.41832,
+								2,
+								1
+							],
+							"meshPath":"Library/unity default resources-Cube.lm",
+							"enableRender":true,
+							"receiveShadows":true,
+							"castShadow":true,
+							"materials":[
+								{
+									"type":"Laya.BlinnPhongMaterial",
+									"path":"Resources/unity_builtin_extra.lmat"
+								}
+							]
+						},
+						"components":[
+							{
+								"type":"PhysicsCollider",
+								"restitution":0,
+								"friction":0.5,
+								"rollingFriction":0,
+								"shapes":[
+									{
+										"type":"BoxColliderShape",
+										"center":[
+											0,
+											0,
+											0
+										],
+										"size":[
+											1,
+											1,
+											1
+										]
+									}
+								],
+								"isTrigger":false
+							}
+						],
+						"child":[]
+					}
+				]
 			},
 			{
 				"type":"MeshSprite3D",
-				"instanceID":5,
+				"instanceID":6,
 				"props":{
 					"name":"off",
 					"active":true,
@@ -97,7 +159,7 @@
 					"layer":0,
 					"position":[
 						0,
-						0,
+						0.5,
 						0
 					],
 					"rotation":[
@@ -108,7 +170,7 @@
 					],
 					"scale":[
 						1,
-						1,
+						0.5,
 						1
 					],
 					"meshPath":"Library/unity default resources-Cube.lm",
@@ -146,68 +208,69 @@
 						"isTrigger":false
 					}
 				],
-				"child":[]
-			},
-			{
-				"type":"MeshSprite3D",
-				"instanceID":6,
-				"props":{
-					"name":"Cube",
-					"active":true,
-					"isStatic":false,
-					"layer":0,
-					"position":[
-						0,
-						0,
-						0.5
-					],
-					"rotation":[
-						0,
-						0,
-						0,
-						-1
-					],
-					"scale":[
-						0.41832,
-						1,
-						1
-					],
-					"meshPath":"Library/unity default resources-Cube.lm",
-					"enableRender":true,
-					"receiveShadows":true,
-					"castShadow":true,
-					"materials":[
-						{
-							"type":"Laya.BlinnPhongMaterial",
-							"path":"Resources/unity_builtin_extra.lmat"
-						}
-					]
-				},
-				"components":[
+				"child":[
 					{
-						"type":"PhysicsCollider",
-						"restitution":0,
-						"friction":0.5,
-						"rollingFriction":0,
-						"shapes":[
+						"type":"MeshSprite3D",
+						"instanceID":7,
+						"props":{
+							"name":"Cube",
+							"active":true,
+							"isStatic":false,
+							"layer":0,
+							"position":[
+								0,
+								-1,
+								0.5
+							],
+							"rotation":[
+								0,
+								0,
+								0,
+								-1
+							],
+							"scale":[
+								0.41832,
+								2,
+								1
+							],
+							"meshPath":"Library/unity default resources-Cube.lm",
+							"enableRender":true,
+							"receiveShadows":true,
+							"castShadow":true,
+							"materials":[
+								{
+									"type":"Laya.BlinnPhongMaterial",
+									"path":"Resources/unity_builtin_extra.lmat"
+								}
+							]
+						},
+						"components":[
 							{
-								"type":"BoxColliderShape",
-								"center":[
-									0,
-									0,
-									0
+								"type":"PhysicsCollider",
+								"restitution":0,
+								"friction":0.5,
+								"rollingFriction":0,
+								"shapes":[
+									{
+										"type":"BoxColliderShape",
+										"center":[
+											0,
+											0,
+											0
+										],
+										"size":[
+											1,
+											1,
+											1
+										]
+									}
 								],
-								"size":[
-									1,
-									1,
-									1
-								]
+								"isTrigger":false
 							}
 						],
-						"isTrigger":false
+						"child":[]
 					}
-				],
-				"child":[]
+				]
 			}
 		]
 	}

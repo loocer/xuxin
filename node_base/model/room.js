@@ -6,6 +6,7 @@ class Room {
 		this.players = new Map()
 		this.bugs = new Map()
 		this.houses = new Map()
+		this.fires = new Map()
 		this.id = '123456';
 		this.init()
 	}
@@ -32,6 +33,11 @@ class Room {
 			hu.update()
 			list.push(hu.getPushMsg())
 		}
+		for (let fire of this.fires.values()) {
+			fire.update()
+			list.push(fire.getPushMsg())
+		}
+		
 		this.pushMsg(list,io)
 	}
 	receive(msg, io) { //{playerId:0}}

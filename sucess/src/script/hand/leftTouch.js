@@ -87,16 +87,14 @@ export default class newTwo {
     } else {
       tempy = (py - this.ty - this.theight / 2) / (this.theight / 2)
     }
+    let rote = this.getRoteImg(pobj)
     Laya.Vector3.normalize(new Laya.Vector3(tempx, tempy,0),this.out)
     let y =-this.out.y/10
     let x = -this.out.x/10
-    // utl.testPs.x += x
-    // utl.testPs.y += y
-    // utl.frames.push([{ id:utl.id,x:utl.testPs.x, y:utl.testPs.y }])
-     utl.socket.emit('123456',{
-             playerId:utl.id,
-             frame:{ x, y}
-         });
+    utl.move = {
+      x,y,rote
+    }
+    
 
     // if (utl.tachSpeed.x > 180) {
     //   utl.tachSpeed.x = 180

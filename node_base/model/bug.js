@@ -10,6 +10,7 @@ class Bug extends People {
 		this.killNum = 0
 		this.type=2//2chongzi
 		this.status=1
+		this.r = .5
 		this.moveX = .1
 		this.moveY = .1
 		this.time = 0
@@ -37,7 +38,9 @@ class Bug extends People {
 			}
 			
 		}
-		
+		if(this.house.room.players.size==0){
+			return
+		}
 		if(this.time%10==0){
 			let p = this.findPeople()
 			let x = p.x - this.x

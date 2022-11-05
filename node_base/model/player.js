@@ -1,4 +1,5 @@
 let People = require('./people')
+let Fire = require('./fir')
 class Player extends People {
 	constructor(room, id) {
 		super()
@@ -6,6 +7,8 @@ class Player extends People {
 		this.room = room
 		this.indexRyId = 0 //当前推送的id
 		this.killNum = 0
+		this.firMove = {x:0,y:0}
+		this.fireTf = false
 		this.type=1//1人
 	}
 	getPushMsg() {
@@ -20,6 +23,13 @@ class Player extends People {
 	addFrame(obj) {
 		this.moveX = obj.x
 		this.moveY = obj.y
+		if(obj.fireTf){
+			this.onFire(obj)
+		}
+	}
+	onFire(move){
+		let fir = new Fire(this.room,{x:this.x,y:this.y,move})
+		this.room.fires.set(fir.id,fir)
 	}
 	move(){
 		this.x += this.moveX
